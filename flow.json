@@ -1,0 +1,33 @@
+{
+  "emulators": {
+    "default": {
+      "port": 3569,
+      "serviceAccount": "emulator-account"
+    }
+  },
+  "contracts": {
+    "CrossChainMessage": "./contracts/CrossChainMessage.cdc",
+    "CrossChain": "./contracts/CrossChain.cdc",
+    "Greeting": "./contracts/Greeting.cdc"
+  },
+  "networks": {
+    "emulator": "127.0.0.1:3569",
+    "mainnet": "access.mainnet.nodes.onflow.org:9000",
+    "testnet": "access.devnet.nodes.onflow.org:9000"
+  },
+  "accounts": {
+    "emulator-account": {
+      "address": "f8d6e0586b0a20c7",
+      "key": "efe24d3e3b5652c0d056e52b7fe592fef8e94dba26e1dfd945c7f66958731e19"
+    }
+  },
+  "deployments": {
+    "emulator": {
+      "emulator-account": [
+        "CrossChainMessage",
+        "CrossChain",
+        "Greeting"
+      ]
+    }
+  }
+}

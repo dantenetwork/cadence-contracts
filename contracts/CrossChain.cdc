@@ -1,4 +1,4 @@
-import CrossChainMessage from 0x01;
+import CrossChainMessage from 0xf8d6e0586b0a20c7;
 pub contract CrossChain {
     // Define message
     pub struct Message{
@@ -31,6 +31,8 @@ pub contract CrossChain {
         self.fromChain = "FLOW";
     }
 
+    pub event showMessage(id: Int, fromChain:String, toChain: String, sender: String, contractName: String, actionName: String, data: String);
+
     
     pub fun sendMessage(address: Address, toChain: String, contractName: String, actionName: String): Bool{
         // access account 
@@ -41,6 +43,8 @@ pub contract CrossChain {
         // append cross chain message into record
         let message = Message(id: self.messageRecord.length, fromChain:self.fromChain, toChain: toChain, sender: sender.address.toString(), contractName: contractName, actionName: actionName, data:messageReference.msg);
         self.messageRecord.append(message);
+
+        emit showMessage(id: self.messageRecord.length, fromChain:self.fromChain, toChain: toChain, sender: sender.address.toString(), contractName: contractName, actionName: actionName, data:messageReference.msg);
         return true;
     }
 

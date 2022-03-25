@@ -1,5 +1,5 @@
-import Greeting from 0x03
-import CrossChain from 0x02
+import Greeting from 0xf8d6e0586b0a20c7
+import CrossChain from 0xf8d6e0586b0a20c7
 
 transaction {
 
