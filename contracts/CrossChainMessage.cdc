@@ -8,6 +8,7 @@ pub contract CrossChainMessage{
         pub fun get(): String;
     }
 
+    // Define Message for sender contract
     pub resource Message: MessageInterface{
         pub var msg: String;
 

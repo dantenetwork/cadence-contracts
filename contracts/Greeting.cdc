@@ -3,6 +3,14 @@ import CrossChain from 0x02
 
 pub contract Greeting {
 
+    pub let contractName: String; // contract name of destination chain
+    pub let actionName: String; // action name of contract
+
+    init(){
+      self.contractName="EthereumContractName";
+      self.actionName = "EthereumActionName";
+    }
+
     pub fun sendMessage(messageInfo: String): Bool{
       // create cross chain message resource
       let res <-CrossChainMessage.createMessage();
@@ -13,7 +21,7 @@ pub contract Greeting {
       self.account.link<&{CrossChainMessage.MessageInterface}>(/public/crossChainMessage, target: /storage/crossChainMessage);
 
       // send message to CrossChain contract
-      let ret = CrossChain.sendMessage(address: self.account.address);
+      let ret = CrossChain.sendMessage(address: self.account.address, toChain: "Ethereum", contractName:self.contractName, actionName: self.actionName);
 
       // destroy cross chain message resource
       let resource <- self.account.load<@CrossChainMessage.Message>(from: /storage/crossChainMessage);

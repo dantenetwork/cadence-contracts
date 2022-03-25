@@ -11,6 +11,8 @@ transaction {
 
   execute {
     log(Greeting.sendMessage(messageInfo:"Hello ".concat(self.signer.address.toString())));
-    log(CrossChain.queryLastMessage());
+    log(CrossChain.queryMessageByIndex(index:0));
+    log(CrossChain.queryLastMessage());    
+    log(CrossChain.queryMessageCount());
   }
 }
