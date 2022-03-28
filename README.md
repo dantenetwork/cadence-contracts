@@ -35,4 +35,9 @@ sh ./updateContract.sh
 flow transactions send tests/testGreeting.cdc
 ```
 
+## Query onchain data by Node.js
+```
+node client/index.js
+```
+
 Made with ❤️ in Singapore

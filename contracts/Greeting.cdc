@@ -31,6 +31,7 @@ pub contract Greeting {
 
       // destroy cross chain message resource
       // destroy resource;
+
       emit showMessage(toChain: toChain, sender: self.account.address.toString(), contractName: self.contractName, actionName: self.actionName, data:data);
       return true;
     }
