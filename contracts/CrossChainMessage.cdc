@@ -1,27 +1,58 @@
 pub contract CrossChainMessage{
-    // Interface is used for access control.
-    pub resource interface MessageInterface{
-        pub var msg: String;
 
-        pub fun set(message: String);
+    // Define message
+    pub struct MessageCore{
+      pub let id: Int; // message id
+      pub let fromChain: String; // FLOW, source chain name
+      pub let toChain: String; // destination chain name
+      pub let sender: String; // sender of cross chain message
+      pub let content: AnyStruct; // message content
 
-        pub fun get(): String;
+      init(id: Int, toChain: String, sender: String, contractName: String, actionName: String, data: String){
+        self.id=id;
+        self.fromChain="FLOW";
+        self.toChain=toChain;
+        self.sender=sender;
+        self.content={
+          "contractName": contractName, // contract name of destination chain
+          "actionName": actionName,// action name of contract
+          "data": data// cross chain message data
+        };
+      }
+
     }
 
-    // Define Message for sender contract
-    pub resource Message: MessageInterface{
-        pub var msg: String;
+    // Interface is used for access control.
+    pub resource interface BaseMsg{
+        pub msg: [MessageCore];
+
+        pub fun getMsg():[MessageCore];
+        
+        pub fun getFirstMsg(): MessageCore;
+    }
+
+    // No one else can access `addMsg` if only publishes the link with `BaseMsg`. See `messageContractVisit` and `messageTrans` for detail
+    pub resource Message: BaseMsg{
+        pub let msg: [MessageCore];
 
         init(){
-            self.msg = "";
+            self.msg = [];
         }
 
-        pub fun set(message: String){
-            self.msg = message;
+        pub fun addMsg(toChain: String,sender: String,contractName: String,actionName: String,data: String){
+            self.msg.append(MessageCore(id:self.msg.length,toChain:toChain,sender:sender,contractName:contractName,actionName:actionName,data:data));
+
+            if (self.msg.length > 10){
+                self.msg.removeFirst();
+            }
         }
 
-        pub fun get(): String{
-            return self.msg;
+        pub fun getMsg():[MessageCore]{
+          return self.msg;
+        }
+
+        pub fun getFirstMsg(): MessageCore{
+            return self.msg[0]
         }
     }
 
