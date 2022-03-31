@@ -1,4 +1,4 @@
-import CrossChainMessage from 0xf8d6e0586b0a20c7;
+import SentMessageContract from 0xf8d6e0586b0a20c7;
 import CrossChain from 0xf8d6e0586b0a20c7;
 
 pub contract Greeting {
@@ -11,19 +11,18 @@ pub contract Greeting {
       self.actionName = "EthereumActionName";
 
       // create cross chain message resource
-      let res <-CrossChainMessage.createSentMessage();
+      let res <-SentMessageContract.createSentMessage();
 
       // save message as resource
       self.account.save(<-res, to: /storage/crossChainSentMessage);
-      self.account.link<&{CrossChainMessage.BaseMsg}>(/public/crossChainSentMessage, target: /storage/crossChainSentMessage);
+      self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/crossChainSentMessage, target: /storage/crossChainSentMessage);
     }
 
     pub event showSentMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
 
     pub fun sendCrossChainMessage(toChain: String,data: String): Bool{
-      // load resource from storage
-      //let resource <- self.account.borrow<@CrossChainMessage.Message>(from: /storage/crossChainMessage);
-      let msgRef = self.account.borrow<&CrossChainMessage.SentMessage>(from: /storage/crossChainSentMessage);
+      // borrow resource from storage
+      let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
       msgRef!.addMsg(toChain: toChain, sender:self.account.address.toString(), contractName:self.contractName, actionName:self.actionName, data:data);
 
       // send message to CrossChain contract
@@ -36,8 +35,8 @@ pub contract Greeting {
       return true;
     }
 
-    pub fun queryCrossChainSentMessage(): [CrossChainMessage.MessageCore]{
-      let msgRef = self.account.borrow<&CrossChainMessage.SentMessage>(from: /storage/crossChainSentMessage);
+    pub fun queryCrossChainSentMessage(): [SentMessageContract.SentMessageCore]{
+      let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
       return msgRef!.getMsg();
     }
 
