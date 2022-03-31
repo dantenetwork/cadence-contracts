@@ -53,7 +53,7 @@ pub contract ReceivedMessageContract{
 
         pub fun addMsg(messageId: Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String){
           let receivedMessageCore = ReceivedMessageCore(id:messageId, fromChain:fromChain, sender:sender, contractName:contractName, actionName:actionName, data:data);
-          if(self.msg[messageId] == nil){
+          if(self.msg.length < messageId + 1){
             // message id not exists
             let receivedMessageArray = ReceivedMessageArray(receivedMessageCore:receivedMessageCore);
             self.msg.append(receivedMessageArray);
@@ -79,3 +79,4 @@ pub contract ReceivedMessageContract{
       return <- create ReceivedMessage();
     }
 }
+

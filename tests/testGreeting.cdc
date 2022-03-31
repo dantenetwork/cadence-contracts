@@ -10,8 +10,18 @@ transaction {
   }
 
   execute {
-    log(Greeting.sendCrossChainMessage(toChain:"NEAR", data:"Hello ".concat(self.signer.address.toString())));
+    let testContractName = "NearContractName";
+    let testActionName = "NearActionName";
+  
+    // Send cross chain message
+    log(Greeting.sendCrossChainMessage(toChain:"NEAR", contractName:testContractName , actionName:testActionName, data:"Hello ".concat(self.signer.address.toString())));
     log(Greeting.queryCrossChainSentMessage());
+
+    // Received cross chain message
+    log(Greeting.receiveCrossChainMessage(messageId:1, fromChain:"NEAR", contractName:testContractName , actionName:testActionName, data:"Hello ".concat(self.signer.address.toString())));
+    log(Greeting.queryCrossChainSentMessage());
+    
+    // Query registers
     log(Greeting.register());
     log(CrossChain.queryRegisters());
   }
