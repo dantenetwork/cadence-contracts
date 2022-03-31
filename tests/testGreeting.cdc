@@ -10,8 +10,8 @@ transaction {
   }
 
   execute {
-    log(Greeting.addCrossChainMessage(toChain:"NEAR", data:"Hello ".concat(self.signer.address.toString())));
-    log(Greeting.queryCrossChainMessage());
+    log(Greeting.sendCrossChainMessage(toChain:"NEAR", data:"Hello ".concat(self.signer.address.toString())));
+    log(Greeting.queryCrossChainSentMessage());
     log(Greeting.register());
     log(CrossChain.queryRegisters());
   }

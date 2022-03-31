@@ -11,19 +11,19 @@ pub contract Greeting {
       self.actionName = "EthereumActionName";
 
       // create cross chain message resource
-      let res <-CrossChainMessage.createMessage();
+      let res <-CrossChainMessage.createSentMessage();
 
       // save message as resource
-      self.account.save(<-res, to: /storage/crossChainMessage);
-      self.account.link<&{CrossChainMessage.BaseMsg}>(/public/crossChainMessage, target: /storage/crossChainMessage);
+      self.account.save(<-res, to: /storage/crossChainSentMessage);
+      self.account.link<&{CrossChainMessage.BaseMsg}>(/public/crossChainSentMessage, target: /storage/crossChainSentMessage);
     }
 
-    pub event showMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
+    pub event showSentMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
 
-    pub fun addCrossChainMessage(toChain: String,data: String): Bool{
+    pub fun sendCrossChainMessage(toChain: String,data: String): Bool{
       // load resource from storage
       //let resource <- self.account.borrow<@CrossChainMessage.Message>(from: /storage/crossChainMessage);
-      let msgRef = self.account.borrow<&CrossChainMessage.Message>(from: /storage/crossChainMessage);
+      let msgRef = self.account.borrow<&CrossChainMessage.SentMessage>(from: /storage/crossChainSentMessage);
       msgRef!.addMsg(toChain: toChain, sender:self.account.address.toString(), contractName:self.contractName, actionName:self.actionName, data:data);
 
       // send message to CrossChain contract
@@ -32,12 +32,12 @@ pub contract Greeting {
       // destroy cross chain message resource
       // destroy resource;
 
-      emit showMessage(toChain: toChain, sender: self.account.address.toString(), contractName: self.contractName, actionName: self.actionName, data:data);
+      emit showSentMessage(toChain: toChain, sender: self.account.address.toString(), contractName: self.contractName, actionName: self.actionName, data:data);
       return true;
     }
 
-    pub fun queryCrossChainMessage(): [CrossChainMessage.MessageCore]{
-      let msgRef = self.account.borrow<&CrossChainMessage.Message>(from: /storage/crossChainMessage);
+    pub fun queryCrossChainSentMessage(): [CrossChainMessage.MessageCore]{
+      let msgRef = self.account.borrow<&CrossChainMessage.SentMessage>(from: /storage/crossChainSentMessage);
       return msgRef!.getMsg();
     }
 

@@ -32,7 +32,7 @@ pub contract CrossChainMessage{
     }
 
     // No one else can access `addMsg` if only publishes the link with `BaseMsg`. See `messageContractVisit` and `messageTrans` for detail
-    pub resource Message: BaseMsg{
+    pub resource SentMessage: BaseMsg{
         pub let msg: [MessageCore];
 
         init(){
@@ -56,7 +56,7 @@ pub contract CrossChainMessage{
         }
     }
 
-    pub fun createMessage(): @Message{
-        return <- create Message()
+    pub fun createSentMessage(): @SentMessage{
+        return <- create SentMessage()
     }
 }
