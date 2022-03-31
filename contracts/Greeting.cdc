@@ -1,32 +1,66 @@
-import CrossChainMessage from 0xf8d6e0586b0a20c7
-import CrossChain from 0xf8d6e0586b0a20c7
+import SentMessageContract from 0xf8d6e0586b0a20c7;
+import ReceivedMessageContract from 0xf8d6e0586b0a20c7;
+import CrossChain from 0xf8d6e0586b0a20c7;
 
 pub contract Greeting {
 
-    pub let contractName: String; // contract name of destination chain
-    pub let actionName: String; // action name of contract
+    init(){  
+      // create cross chain sent message resource
+      let sentMessageResource <-SentMessageContract.createSentMessage();
+      // save message as resource
+      self.account.save(<-sentMessageResource, to: /storage/crossChainSentMessage);
+      self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/crossChainSentMessage, target: /storage/crossChainSentMessage);
 
-    init(){
-      self.contractName="EthereumContractName";
-      self.actionName = "EthereumActionName";
+
+      // create cross chain reveived message resource
+      let receivedMessageResource <-ReceivedMessageContract.createReceivedMessage();
+      // save message as resource
+      self.account.save(<-receivedMessageResource, to: /storage/crossChainReceivedMessage);
+      self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/crossChainReceivedMessage, target: /storage/crossChainReceivedMessage);
     }
 
-    pub fun sendMessage(messageInfo: String): Bool{
-      // create cross chain message resource
-      let res <-CrossChainMessage.createMessage();
-      res.set(message: messageInfo);
+    pub event showSentMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
+    pub event showReceviedMessage(messageId:Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String);
 
-      // save message as resource
-      self.account.save(<-res, to: /storage/crossChainMessage);
-      self.account.link<&{CrossChainMessage.MessageInterface}>(/public/crossChainMessage, target: /storage/crossChainMessage);
-
-      // send message to CrossChain contract
-      let ret = CrossChain.sendMessage(address: self.account.address, toChain: "Ethereum", contractName:self.contractName, actionName: self.actionName);
+    pub fun sendCrossChainMessage(toChain: String, contractName: String, actionName: String, data: String): Bool{
+      // borrow resource from storage
+      let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
+      msgRef!.addMsg(toChain: toChain, sender:self.account.address.toString(), contractName:contractName, actionName:actionName, data:data);
 
       // destroy cross chain message resource
-      let resource <- self.account.load<@CrossChainMessage.Message>(from: /storage/crossChainMessage);
-      destroy resource;
+      // destroy resource;
 
-      return ret;
+      // print log
+      emit showSentMessage(toChain: toChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data:data);
+      return true;
+    }
+
+    // Query cross chain sent messages
+    pub fun queryCrossChainSentMessage(): [SentMessageContract.SentMessageCore]{
+      let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
+      return msgRef!.getMsg();
+    }
+
+    // Received message from other chains
+    pub fun receiveCrossChainMessage(messageId: Int, fromChain: String, contractName: String, actionName: String, data: String): Bool{
+      // borrow resource from storage
+      let msgRef = self.account.borrow<&ReceivedMessageContract.ReceivedMessage>(from: /storage/crossChainReceivedMessage);
+
+      // add message into received messages
+      msgRef!.addMsg(messageId: messageId, fromChain: fromChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data: data);
+
+      // print log
+      emit showReceviedMessage(messageId: messageId, fromChain: fromChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data:data);
+      return true;
+    }
+
+    // Query cross chain recevied messages
+    pub fun queryCrossChainReceivedMessage():[ReceivedMessageContract.ReceivedMessageArray]{
+      let msgRef = self.account.borrow<&ReceivedMessageContract.ReceivedMessage>(from: /storage/crossChainReceivedMessage);
+      return msgRef!.getMsg();
+    }
+
+    pub fun register():Bool{
+      return CrossChain.register(address: self.account.address);
     }
 }
