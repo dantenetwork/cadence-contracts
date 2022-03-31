@@ -22,6 +22,13 @@ pub contract Greeting {
     pub event showSentMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
     pub event showReceviedMessage(messageId:Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String);
 
+    /**
+      * Send cross chain message
+      * @param toChain - destination chain
+      * @param contractName - contract name of destination chain
+      * @param actionName - action name of destination contract
+      * @param data - contract execute data
+      */
     pub fun sendCrossChainMessage(toChain: String, contractName: String, actionName: String, data: String): Bool{
       // borrow resource from storage
       let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
@@ -35,13 +42,22 @@ pub contract Greeting {
       return true;
     }
 
-    // Query cross chain sent messages
+    /**
+      * Query cross chain sent messages
+      */
     pub fun queryCrossChainSentMessage(): [SentMessageContract.SentMessageCore]{
       let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
       return msgRef!.getMsg();
     }
 
-    // Received message from other chains
+    /**
+      * Received message from other chains
+      * @param messageId - message id
+      * @param fromChain - source chain
+      * @param contractName - contract name of source chain
+      * @param actionName - action name of source contract
+      * @param data - contract execute data
+      */
     pub fun receiveCrossChainMessage(messageId: Int, fromChain: String, contractName: String, actionName: String, data: String): Bool{
       // borrow resource from storage
       let msgRef = self.account.borrow<&ReceivedMessageContract.ReceivedMessage>(from: /storage/crossChainReceivedMessage);
@@ -54,12 +70,17 @@ pub contract Greeting {
       return true;
     }
 
-    // Query cross chain recevied messages
+    /**
+      * Query cross chain recevied messages
+      */
     pub fun queryCrossChainReceivedMessage():[ReceivedMessageContract.ReceivedMessageArray]{
       let msgRef = self.account.borrow<&ReceivedMessageContract.ReceivedMessage>(from: /storage/crossChainReceivedMessage);
       return msgRef!.getMsg();
     }
 
+    /**
+      * Register current contract into cross chain contract
+      */
     pub fun register():Bool{
       return CrossChain.register(address: self.account.address);
     }
