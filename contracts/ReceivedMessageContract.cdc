@@ -65,12 +65,19 @@ pub contract ReceivedMessageContract{
           }
         }
 
+        // get all messages
         pub fun getMsg():[ReceivedMessageArray]{
           return self.msg;
         }
 
+        // get first message
         pub fun getFirstMsg(): ReceivedMessageArray{
             return self.msg[0];
+        }
+
+        // get message length
+        pub fun getLength(): Int{
+          return self.msg.length;
         }
     }
 
