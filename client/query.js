@@ -1,7 +1,6 @@
-const fcl = require("@onflow/fcl");
+import fcl from "@onflow/fcl";
 
 fcl.config().put("accessNode.api", "http://127.0.0.1:8080");
-
 
 (async function () {
 
@@ -42,6 +41,7 @@ fcl.config().put("accessNode.api", "http://127.0.0.1:8080");
   for (let i in receivedMessages) {
     console.log(receivedMessages[i]);
   }
+
 
   console.log("//////////////////////////////////////////////////////");
   console.log("///////////////// Query Registers ////////////////////");

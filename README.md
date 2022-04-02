@@ -5,7 +5,8 @@ Smart contracts that provide some of the basic functions of the dante cross chai
 
 This repository contains examples of contracts that are useful when deploying, managing, and/or using an DANTE network. They are provided for reference purposes:
 
-   * [CrossChainMessage](./contracts/CrossChainMessage)
+   * [SentMessageContract](./contracts/SentMessageContract)
+   * [ReceivedMessageContract](./contracts/ReceivedMessageContract)
    * [CrossChain](./contracts/CrossChain)
    * [Greeting](./contracts/Greeting)
 
@@ -34,6 +35,7 @@ sh ./updateContract.sh
 # Test greeting contract
 flow transactions send tests/testGreeting.cdc
 ```
+
 
 ## Query onchain data by Node.js
 ```

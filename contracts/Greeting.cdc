@@ -71,11 +71,16 @@ pub contract Greeting {
     }
 
     /**
-      * Query cross chain recevied messages
+      * Query all cross chain recevied messages
       */
     pub fun queryCrossChainReceivedMessage():[ReceivedMessageContract.ReceivedMessageArray]{
       let msgRef = self.account.borrow<&ReceivedMessageContract.ReceivedMessage>(from: /storage/crossChainReceivedMessage);
       return msgRef!.getMsg();
+    }
+
+    pub fun getReceivedMessageLength(): Int{
+      let msgRef = self.account.borrow<&ReceivedMessageContract.ReceivedMessage>(from: /storage/crossChainReceivedMessage);
+      return msgRef!.getLength();
     }
 
     /**

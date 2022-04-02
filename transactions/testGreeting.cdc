@@ -18,7 +18,7 @@ transaction {
     log(Greeting.queryCrossChainSentMessage());
 
     // Received cross chain message
-    log(Greeting.receiveCrossChainMessage(messageId:1, fromChain:"NEAR", contractName:testContractName , actionName:testActionName, data:"Hello ".concat(self.signer.address.toString())));
+    log(Greeting.receiveCrossChainMessage(messageId:0, fromChain:"NEAR", contractName:testContractName , actionName:testActionName, data:"Hello ".concat(self.signer.address.toString())));
     log(Greeting.queryCrossChainSentMessage());
     
     // Query registers

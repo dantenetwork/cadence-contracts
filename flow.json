@@ -19,6 +19,7 @@
   "accounts": {
     "emulator-account": {
       "address": "f8d6e0586b0a20c7",
+      "publicKey": "9d6108b38a331ef354333e83355dda809148b2bc9e78be4638acddb29d0b84f10c7542b2364786317da2e881df6dfaad5ff04d8928852babde44c34e96a824fd",
       "key": "efe24d3e3b5652c0d056e52b7fe592fef8e94dba26e1dfd945c7f66958731e19"
     }
   },
