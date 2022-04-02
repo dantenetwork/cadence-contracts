@@ -1,6 +1,6 @@
-import fs from 'fs'
-import path from 'path'
-import FlowService from './flow.mjs'
+import fs from 'fs';
+import path from 'path';
+import FlowService from './flow.mjs';
 
 const flowService = new FlowService(
   'f8d6e0586b0a20c7',
@@ -15,10 +15,10 @@ async function run() {
         process.cwd(),
         './transactions/testGreeting.cdc'
       ),
-      "utf8"
+      'utf8'
     );
 
-  const authorization = flowService.authorizeMinter();
+  const authorization = flowService.authorizationFunction();
 
   await flowService.sendTx({
     transaction,

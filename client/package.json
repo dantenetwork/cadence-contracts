@@ -12,6 +12,8 @@
   "dependencies": {
     "@onflow/fcl": "^0.0.78",
     "@onflow/transport-grpc": "^0.0.2",
-    "@onflow/types": "^0.0.6"
+    "@onflow/types": "^0.0.6",
+    "elliptic": "^6.5.4",
+    "sha3": "^2.1.4"
   }
 }

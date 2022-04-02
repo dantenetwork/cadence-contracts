@@ -33,13 +33,12 @@ sh ./updateContract.sh
 ## Test
 ```
 # Test greeting contract
-flow transactions send tests/testGreeting.cdc
+node client/index.mjs
 ```
-
 
 ## Query onchain data by Node.js
 ```
-node client/index.js
+node client/query.js
 ```
 
 Made with ❤️ in Singapore

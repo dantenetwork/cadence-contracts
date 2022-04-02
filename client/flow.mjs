@@ -1,34 +1,35 @@
-import fcl from "@onflow/fcl";
+import fcl from '@onflow/fcl';
 
-import elliptic from "elliptic";
+import elliptic from 'elliptic';
 
-import { SHA3 } from "sha3";
+import { SHA3 } from 'sha3';
 
-const ec = new elliptic.ec("p256");
+const ec = new elliptic.ec('p256');
 
 fcl.config()
-  .put("accessNode.api", 'http://localhost:8080') // Configure FCL's Alchemy Access Node
+  .put('accessNode.api', 'http://localhost:8080') // Configure FCL's Alchemy Access Node
 
 class FlowService {
   constructor(
-    minterFlowAddress,
-    minterPrivateKeyHex,
-    minterAccountIndex
+    signerFlowAddress, // signer address 
+    signerPrivateKeyHex, // signer private key
+    signerAccountIndex // singer key index
   ) {
-    this.minterFlowAddress = minterFlowAddress
-    this.minterPrivateKeyHex = minterPrivateKeyHex
-    this.minterAccountIndex = minterAccountIndex
+    this.signerFlowAddress = signerFlowAddress;
+    this.signerPrivateKeyHex = signerPrivateKeyHex;
+    this.signerAccountIndex = signerAccountIndex;
   }
 
-  authorizeMinter = () => {
-    console.log('Get:', this.minterFlowAddress)
+  // An authorization function must produce the information of the user that is going to sign and a signing function to use the information to produce a signature.
+  authorizationFunction = () => {
+    console.log('Get:', this.signerFlowAddress)
     return async (account = {}) => {
-      const user = await this.getAccount(this.minterFlowAddress);
-
-      const key = user.keys[this.minterAccountIndex];
+      // Query signer info
+      const user = await this.getAccount(this.signerFlowAddress);
+      const key = user.keys[this.signerAccountIndex];
 
       const sign = this.signWithKey;
-      const pk = this.minterPrivateKeyHex;
+      const pk = this.signerPrivateKeyHex;
 
       return {
         ...account,
@@ -52,17 +53,17 @@ class FlowService {
   };
 
   signWithKey = (privateKey, msg) => {
-    const key = ec.keyFromPrivate(Buffer.from(privateKey, "hex"));
+    const key = ec.keyFromPrivate(Buffer.from(privateKey, 'hex'));
     const sig = key.sign(this.hashMsg(msg));
     const n = 32;
-    const r = sig.r.toArrayLike(Buffer, "be", n);
-    const s = sig.s.toArrayLike(Buffer, "be", n);
-    return Buffer.concat([r, s]).toString("hex");
+    const r = sig.r.toArrayLike(Buffer, 'be', n);
+    const s = sig.s.toArrayLike(Buffer, 'be', n);
+    return Buffer.concat([r, s]).toString('hex');
   };
 
   hashMsg = (msg) => {
     const sha = new SHA3(256);
-    sha.update(Buffer.from(msg, "hex"));
+    sha.update(Buffer.from(msg, 'hex'));
     return sha.digest();
   };
 
