@@ -9,7 +9,7 @@
     "SentMessageContract": "./contracts/SentMessageContract.cdc",
     "ReceivedMessageContract": "./contracts/ReceivedMessageContract.cdc",
     "CrossChain": "./contracts/CrossChain.cdc",
-    "Greeting": "./contracts/Greeting.cdc"
+    "Greeting": "./examples/Greeting.cdc"
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
