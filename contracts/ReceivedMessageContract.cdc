@@ -53,6 +53,14 @@ pub contract ReceivedMessageContract{
           self.message = [];
         }
 
+        /**
+          * add cross chain message to ReceivedMessageVault
+          * @param messageId - message id
+          * @param fromChain - source chain
+          * @param contractName - contract name of source chain
+          * @param actionName - action name of source contract
+          * @param data - contract execute data
+          */
         pub fun addMessage(messageId: Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String){
           let receivedMessageCore = ReceivedMessageCore(id:messageId, fromChain:fromChain, sender:sender, contractName:contractName, actionName:actionName, data:data);
           if(self.message.length < messageId + 1){
@@ -67,12 +75,17 @@ pub contract ReceivedMessageContract{
           }
         }
 
-        // get message by id
+        /**
+          * Query recevied cross chain messages by message id
+          * @param messageId - message id
+          */
         pub fun getMessageById(messageId: Int):ReceivedMessageArray{
           return self.message[messageId];
         }
 
-        // get message length
+        /**
+          * Query count of recevied cross chain messages
+          */
         pub fun getLength(): Int{
           return self.message.length;
         }

@@ -25,12 +25,14 @@ pub contract SentMessageContract{
     pub resource interface SentMessageInterface{
         pub message: [SentMessageCore];
 
+        pub fun addMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
+
         pub fun getAllMessages():[SentMessageCore];
         
         pub fun getMessageById(mesasageId: Int): SentMessageCore;
     }
 
-    // No one else can access `addMsg` if only publishes the link with `SentMessageInterface`. See `messageContractVisit` and `messageTrans` for detail
+    // Define sent message vault
     pub resource SentMessageVault: SentMessageInterface{
         pub let message: [SentMessageCore];
 
@@ -38,7 +40,15 @@ pub contract SentMessageContract{
             self.message = [];
         }
 
-        pub fun addMsg(toChain: String, sender: String, contractName: String, actionName: String, data: String){
+        /**
+          * add cross chain message to SentMessageVault
+          * @param toChain - destination chain
+          * @param sender - message sender
+          * @param contractName - contract name of destination chain
+          * @param actionName - action name of destination contract
+          * @param data - contract execute data
+          */
+        pub fun addMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String){
             self.message.append(SentMessageCore(id: self.message.length, toChain: toChain, sender: sender, contractName: contractName, actionName: actionName, data: data));
 
             if (self.message.length > 10){
@@ -46,10 +56,17 @@ pub contract SentMessageContract{
             }
         }
 
+        /**
+          * Query sent cross chain messages
+          */
         pub fun getAllMessages(): [SentMessageCore]{
           return self.message;
         }
 
+        /**
+          * Query sent cross chain messages by id
+          * @param messageId - message id
+          */
         pub fun getMessageById(mesasageId: Int): SentMessageCore{
             return self.message[mesasageId];
         }

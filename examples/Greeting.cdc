@@ -32,10 +32,7 @@ pub contract Greeting {
     pub fun sendCrossChainMessage(toChain: String, contractName: String, actionName: String, data: String): Bool{
       // borrow resource from storage
       let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
-      messageReference!.addMsg(toChain: toChain, sender:self.account.address.toString(), contractName:contractName, actionName:actionName, data:data);
-
-      // destroy cross chain message resource
-      // destroy resource;
+      messageReference!.addMessage(toChain: toChain, sender:self.account.address.toString(), contractName:contractName, actionName:actionName, data:data);
 
       // print log
       emit showSentMessage(toChain: toChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data:data);
@@ -52,6 +49,7 @@ pub contract Greeting {
 
     /**
       * Query sent cross chain messages by id
+      * @param messageId - message id
       */
     pub fun querySentMessageById(mesasageId: Int): SentMessageContract.SentMessageCore{
       let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
