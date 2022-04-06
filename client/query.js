@@ -34,7 +34,7 @@ fcl.config().put('accessNode.api', 'http://127.0.0.1:8080');
 
         pub fun main(): ReceivedMessageContract.ReceivedMessageArray{
           let length =  Greeting.getReceivedMessageVaultLength();
-          return Greeting.queryReceivedMessageVaultById(index: length - 1);
+          return Greeting.queryReceivedMessageVaultById(messageId: length - 1);
         }
       `,
   });

@@ -23,35 +23,35 @@ pub contract SentMessageContract{
 
     // Interface is used for access control.
     pub resource interface SentMessageInterface{
-        pub msg: [SentMessageCore];
+        pub message: [SentMessageCore];
 
-        pub fun getMsg():[SentMessageCore];
+        pub fun getAllMessages():[SentMessageCore];
         
-        pub fun getFirstMsg(): SentMessageCore;
+        pub fun getMessageById(mesasageId: Int): SentMessageCore;
     }
 
     // No one else can access `addMsg` if only publishes the link with `SentMessageInterface`. See `messageContractVisit` and `messageTrans` for detail
     pub resource SentMessageVault: SentMessageInterface{
-        pub let msg: [SentMessageCore];
+        pub let message: [SentMessageCore];
 
         init(){
-            self.msg = [];
+            self.message = [];
         }
 
         pub fun addMsg(toChain: String, sender: String, contractName: String, actionName: String, data: String){
-            self.msg.append(SentMessageCore(id:self.msg.length, toChain:toChain, sender:sender, contractName:contractName, actionName:actionName, data:data));
+            self.message.append(SentMessageCore(id: self.message.length, toChain: toChain, sender: sender, contractName: contractName, actionName: actionName, data: data));
 
-            if (self.msg.length > 10){
-                self.msg.removeFirst();
+            if (self.message.length > 10){
+                self.message.removeFirst();
             }
         }
 
-        pub fun getMsg():[SentMessageCore]{
-          return self.msg;
+        pub fun getAllMessages(): [SentMessageCore]{
+          return self.message;
         }
 
-        pub fun getFirstMsg(): SentMessageCore{
-            return self.msg[0];
+        pub fun getMessageById(mesasageId: Int): SentMessageCore{
+            return self.message[mesasageId];
         }
     }
 
