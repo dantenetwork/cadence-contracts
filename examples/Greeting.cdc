@@ -6,17 +6,17 @@ pub contract Greeting {
 
     init(){  
       // create cross chain sent message resource
-      let sentMessageResource <-SentMessageContract.createSentMessage();
+      let sentMessageVault <-SentMessageContract.createSentMessageVault();
       // save message as resource
-      self.account.save(<-sentMessageResource, to: /storage/crossChainSentMessage);
-      self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/crossChainSentMessage, target: /storage/crossChainSentMessage);
+      self.account.save(<-sentMessageVault, to: /storage/sentMessageVault);
+      self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/sentMessageVault, target: /storage/sentMessageVault);
 
 
       // create cross chain reveived message resource
-      let receivedMessageResource <-ReceivedMessageContract.createReceivedMessage();
+      let receivedMessageVault <-ReceivedMessageContract.createReceivedMessageVault();
       // save message as resource
-      self.account.save(<-receivedMessageResource, to: /storage/crossChainReceivedMessage);
-      self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/crossChainReceivedMessage, target: /storage/crossChainReceivedMessage);
+      self.account.save(<-receivedMessageVault, to: /storage/receivedMessageVault);
+      self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault, target: /storage/receivedMessageVault);
     }
 
     pub event showSentMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
@@ -31,11 +31,8 @@ pub contract Greeting {
       */
     pub fun sendCrossChainMessage(toChain: String, contractName: String, actionName: String, data: String): Bool{
       // borrow resource from storage
-      let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
-      msgRef!.addMsg(toChain: toChain, sender:self.account.address.toString(), contractName:contractName, actionName:actionName, data:data);
-
-      // destroy cross chain message resource
-      // destroy resource;
+      let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
+      messageReference!.addMessage(toChain: toChain, sender:self.account.address.toString(), contractName:contractName, actionName:actionName, data:data);
 
       // print log
       emit showSentMessage(toChain: toChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data:data);
@@ -43,11 +40,20 @@ pub contract Greeting {
     }
 
     /**
-      * Query cross chain sent messages
+      * Query sent cross chain messages
       */
-    pub fun queryCrossChainSentMessage(): [SentMessageContract.SentMessageCore]{
-      let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
-      return msgRef!.getMsg();
+    pub fun querySentMessageVault(): [SentMessageContract.SentMessageCore]{
+      let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
+      return messageReference!.getAllMessages();
+    }
+
+    /**
+      * Query sent cross chain messages by id
+      * @param messageId - message id
+      */
+    pub fun querySentMessageById(mesasageId: Int): SentMessageContract.SentMessageCore{
+      let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
+      return messageReference!.getMessageById(mesasageId: mesasageId);
     }
 
     /**
@@ -60,10 +66,10 @@ pub contract Greeting {
       */
     pub fun receiveCrossChainMessage(messageId: Int, fromChain: String, contractName: String, actionName: String, data: String): Bool{
       // borrow resource from storage
-      let msgRef = self.account.borrow<&ReceivedMessageContract.ReceivedMessage>(from: /storage/crossChainReceivedMessage);
+      let messageReference = self.account.borrow<&ReceivedMessageContract.ReceivedMessageVault>(from: /storage/receivedMessageVault);
 
       // add message into received messages
-      msgRef!.addMsg(messageId: messageId, fromChain: fromChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data: data);
+      messageReference!.addMessage(messageId: messageId, fromChain: fromChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data: data);
 
       // print log
       emit showReceviedMessage(messageId: messageId, fromChain: fromChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data:data);
@@ -71,16 +77,20 @@ pub contract Greeting {
     }
 
     /**
-      * Query all cross chain recevied messages
+      * Query recevied cross chain messages by message id
+      * @param messageId - message id
       */
-    pub fun queryCrossChainReceivedMessage():[ReceivedMessageContract.ReceivedMessageArray]{
-      let msgRef = self.account.borrow<&ReceivedMessageContract.ReceivedMessage>(from: /storage/crossChainReceivedMessage);
-      return msgRef!.getMsg();
+    pub fun queryReceivedMessageVaultById(messageId: Int):ReceivedMessageContract.ReceivedMessageArray{
+      let messageReference = self.account.borrow<&ReceivedMessageContract.ReceivedMessageVault>(from: /storage/receivedMessageVault);
+      return messageReference!.getMessageById(messageId: messageId);
     }
 
-    pub fun getReceivedMessageLength(): Int{
-      let msgRef = self.account.borrow<&ReceivedMessageContract.ReceivedMessage>(from: /storage/crossChainReceivedMessage);
-      return msgRef!.getLength();
+    /**
+      * Query count of recevied cross chain messages
+      */
+    pub fun getReceivedMessageVaultLength(): Int{
+      let messageReference = self.account.borrow<&ReceivedMessageContract.ReceivedMessageVault>(from: /storage/receivedMessageVault);
+      return messageReference!.getLength();
     }
 
     /**

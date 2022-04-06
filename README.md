@@ -8,7 +8,7 @@ This repository contains examples of contracts that are useful when deploying, m
    * [SentMessageContract](./contracts/SentMessageContract)
    * [ReceivedMessageContract](./contracts/ReceivedMessageContract)
    * [CrossChain](./contracts/CrossChain)
-   * [Greeting](./contracts/Greeting)
+   * [Greeting](./examples/Greeting)
 
 
 ## Install
@@ -30,10 +30,9 @@ flow project deploy
 sh ./updateContract.sh
 ```
 
-## Test
+## Test greeting contract
 ```
-# Test greeting contract
-node client/index.mjs
+node client/testGreeting.mjs
 ```
 
 ## Query onchain data by Node.js

@@ -23,67 +23,77 @@ pub contract ReceivedMessageContract{
 
      // Interface is used for access control.
     pub resource interface ReceivedMessageInterface{
-        pub msg: [ReceivedMessageArray];
+        pub message: [ReceivedMessageArray];
 
-        pub fun getMsg():[ReceivedMessageArray];
-        
-        pub fun getFirstMsg(): ReceivedMessageArray;
+        pub fun addMessage(messageId: Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String);
+
+        pub fun getMessageById(messageId: Int):ReceivedMessageArray;
+
+        pub fun getLength(): Int;
     }
 
-    // Define receive message core
+    // Define received message array
     pub struct ReceivedMessageArray{
-      pub let msg: [ReceivedMessageCore];
+      pub let message: [ReceivedMessageCore];
 
       init(receivedMessageCore: ReceivedMessageCore){
-        self.msg = [receivedMessageCore];
+        self.message = [receivedMessageCore];
       }
 
       pub fun append(receivedMessageCore: ReceivedMessageCore){
-        self.msg.append(receivedMessageCore);
+        self.message.append(receivedMessageCore);
       }
     }
 
-    // No one else can access `addMsg` if only publishes the link with `SentMessageInterface`. See `messageContractVisit` and `messageTrans` for detail
-    pub resource ReceivedMessage: ReceivedMessageInterface{
-        pub let msg: [ReceivedMessageArray];
+    // define resource to stores received cross chain message 
+    pub resource ReceivedMessageVault: ReceivedMessageInterface{
+        pub let message: [ReceivedMessageArray];
 
         init(){
-          self.msg = [];
+          self.message = [];
         }
 
-        pub fun addMsg(messageId: Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String){
+        /**
+          * add cross chain message to ReceivedMessageVault
+          * @param messageId - message id
+          * @param fromChain - source chain
+          * @param contractName - contract name of source chain
+          * @param actionName - action name of source contract
+          * @param data - contract execute data
+          */
+        pub fun addMessage(messageId: Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String){
           let receivedMessageCore = ReceivedMessageCore(id:messageId, fromChain:fromChain, sender:sender, contractName:contractName, actionName:actionName, data:data);
-          if(self.msg.length < messageId + 1){
+          if(self.message.length < messageId + 1){
             // message id not exists
             let receivedMessageArray = ReceivedMessageArray(receivedMessageCore:receivedMessageCore);
-            self.msg.append(receivedMessageArray);
+            self.message.append(receivedMessageArray);
           }else{
             // message id exists
-            var receivedMessageArray = self.msg[messageId];
+            var receivedMessageArray = self.message[messageId];
             receivedMessageArray.append(receivedMessageCore:receivedMessageCore);
-            self.msg[messageId] = receivedMessageArray;
+            self.message[messageId] = receivedMessageArray;
           }
         }
 
-        // get all messages
-        pub fun getMsg():[ReceivedMessageArray]{
-          return self.msg;
+        /**
+          * Query recevied cross chain messages by message id
+          * @param messageId - message id
+          */
+        pub fun getMessageById(messageId: Int):ReceivedMessageArray{
+          return self.message[messageId];
         }
 
-        // get first message
-        pub fun getFirstMsg(): ReceivedMessageArray{
-            return self.msg[0];
-        }
-
-        // get message length
+        /**
+          * Query count of recevied cross chain messages
+          */
         pub fun getLength(): Int{
-          return self.msg.length;
+          return self.message.length;
         }
     }
 
     // Create recource to store received message
-    pub fun createReceivedMessage():@ReceivedMessage{
-      return <- create ReceivedMessage();
+    pub fun createReceivedMessageVault():@ReceivedMessageVault{
+      return <- create ReceivedMessageVault();
     }
 }
 

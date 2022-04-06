@@ -23,40 +23,57 @@ pub contract SentMessageContract{
 
     // Interface is used for access control.
     pub resource interface SentMessageInterface{
-        pub msg: [SentMessageCore];
+        pub message: [SentMessageCore];
 
-        pub fun getMsg():[SentMessageCore];
+        pub fun addMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
+
+        pub fun getAllMessages():[SentMessageCore];
         
-        pub fun getFirstMsg(): SentMessageCore;
+        pub fun getMessageById(mesasageId: Int): SentMessageCore;
     }
 
-    // No one else can access `addMsg` if only publishes the link with `SentMessageInterface`. See `messageContractVisit` and `messageTrans` for detail
-    pub resource SentMessage: SentMessageInterface{
-        pub let msg: [SentMessageCore];
+    // Define sent message vault
+    pub resource SentMessageVault: SentMessageInterface{
+        pub let message: [SentMessageCore];
 
         init(){
-            self.msg = [];
+            self.message = [];
         }
 
-        pub fun addMsg(toChain: String, sender: String, contractName: String, actionName: String, data: String){
-            self.msg.append(SentMessageCore(id:self.msg.length, toChain:toChain, sender:sender, contractName:contractName, actionName:actionName, data:data));
+        /**
+          * add cross chain message to SentMessageVault
+          * @param toChain - destination chain
+          * @param sender - message sender
+          * @param contractName - contract name of destination chain
+          * @param actionName - action name of destination contract
+          * @param data - contract execute data
+          */
+        pub fun addMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String){
+            self.message.append(SentMessageCore(id: self.message.length, toChain: toChain, sender: sender, contractName: contractName, actionName: actionName, data: data));
 
-            if (self.msg.length > 10){
-                self.msg.removeFirst();
+            if (self.message.length > 10){
+                self.message.removeFirst();
             }
         }
 
-        pub fun getMsg():[SentMessageCore]{
-          return self.msg;
+        /**
+          * Query sent cross chain messages
+          */
+        pub fun getAllMessages(): [SentMessageCore]{
+          return self.message;
         }
 
-        pub fun getFirstMsg(): SentMessageCore{
-            return self.msg[0];
+        /**
+          * Query sent cross chain messages by id
+          * @param messageId - message id
+          */
+        pub fun getMessageById(mesasageId: Int): SentMessageCore{
+            return self.message[mesasageId];
         }
     }
 
     // Create recource to store sent message
-    pub fun createSentMessage(): @SentMessage{
-        return <- create SentMessage();
+    pub fun createSentMessageVault(): @SentMessageVault{
+        return <- create SentMessageVault();
     }
 }
