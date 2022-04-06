@@ -26,22 +26,20 @@ fcl.config().put('accessNode.api', 'http://127.0.0.1:8080');
   console.log('///////////// Query Received Messages ////////////////');
   console.log('//////////////////////////////////////////////////////');
 
-  const receivedMessages = await fcl.query({
+  const lastReceivedMessages = await fcl.query({
     cadence: `
         import ReceivedMessageContract from 0xf8d6e0586b0a20c7
         import CrossChain from 0xf8d6e0586b0a20c7
         import Greeting from 0xf8d6e0586b0a20c7
 
-        pub fun main(): [ReceivedMessageContract.ReceivedMessageArray]{
-          return Greeting.queryCrossChainReceivedMessage();
+        pub fun main(): ReceivedMessageContract.ReceivedMessageArray{
+          let length =  Greeting.getReceivedMessageVaultLength();
+          return Greeting.queryReceivedMessageVaultById(index: length - 1);
         }
       `,
   });
 
-  for (let i in receivedMessages) {
-    console.log(receivedMessages[i]);
-  }
-
+  console.log(lastReceivedMessages);
 
   console.log('//////////////////////////////////////////////////////');
   console.log('///////////////// Query Registers ////////////////////');

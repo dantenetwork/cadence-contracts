@@ -25,12 +25,10 @@ pub contract ReceivedMessageContract{
     pub resource interface ReceivedMessageInterface{
         pub msg: [ReceivedMessageArray];
 
-        pub fun getMsg():[ReceivedMessageArray];
-        
-        pub fun getFirstMsg(): ReceivedMessageArray;
+        pub fun addMsg(messageId: Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String);
     }
 
-    // Define receive message core
+    // Define received message array
     pub struct ReceivedMessageArray{
       pub let msg: [ReceivedMessageCore];
 
@@ -43,8 +41,7 @@ pub contract ReceivedMessageContract{
       }
     }
 
-    // No one else can access `addMsg` if only publishes the link with `SentMessageInterface`. See `messageContractVisit` and `messageTrans` for detail
-    pub resource ReceivedMessage: ReceivedMessageInterface{
+    pub resource ReceivedMessageVault: ReceivedMessageInterface{
         pub let msg: [ReceivedMessageArray];
 
         init(){
@@ -66,13 +63,8 @@ pub contract ReceivedMessageContract{
         }
 
         // get all messages
-        pub fun getMsg():[ReceivedMessageArray]{
-          return self.msg;
-        }
-
-        // get first message
-        pub fun getFirstMsg(): ReceivedMessageArray{
-            return self.msg[0];
+        pub fun getMsg(messageId: Int):ReceivedMessageArray{
+          return self.msg[index];
         }
 
         // get message length
@@ -82,8 +74,8 @@ pub contract ReceivedMessageContract{
     }
 
     // Create recource to store received message
-    pub fun createReceivedMessage():@ReceivedMessage{
-      return <- create ReceivedMessage();
+    pub fun createReceivedMessageVault():@ReceivedMessageVault{
+      return <- create ReceivedMessageVault();
     }
 }
 
