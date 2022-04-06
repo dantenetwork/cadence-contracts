@@ -42,7 +42,7 @@ class FlowService {
             keyId: Number(key.index),
             signature: sign(pk, signable.message),
           };
-        },
+        }
       };
     };
   };
@@ -72,7 +72,7 @@ class FlowService {
     args,
     proposer,
     authorizations,
-    payer,
+    payer
   }) => {
     const response = await fcl.send([
       fcl.transaction`
@@ -82,7 +82,7 @@ class FlowService {
       fcl.proposer(proposer),
       fcl.authorizations(authorizations),
       fcl.payer(payer),
-      fcl.limit(9999),
+      fcl.limit(9999)
     ]);
     console.log('Tx Sent:', response)
     return await fcl.tx(response).onceSealed();

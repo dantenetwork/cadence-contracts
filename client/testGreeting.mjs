@@ -13,7 +13,7 @@ async function run() {
     .readFileSync(
       path.join(
         process.cwd(),
-        './transactions/testGreeting.cdc'
+        './transactions/TestGreeting.cdc'
       ),
       'utf8'
     );
