@@ -31,7 +31,7 @@ pub contract SentMessageContract{
     }
 
     // No one else can access `addMsg` if only publishes the link with `SentMessageInterface`. See `messageContractVisit` and `messageTrans` for detail
-    pub resource SentMessage: SentMessageInterface{
+    pub resource SentMessageVault: SentMessageInterface{
         pub let msg: [SentMessageCore];
 
         init(){
@@ -56,7 +56,7 @@ pub contract SentMessageContract{
     }
 
     // Create recource to store sent message
-    pub fun createSentMessage(): @SentMessage{
-        return <- create SentMessage();
+    pub fun createSentMessageVault(): @SentMessageVault{
+        return <- create SentMessageVault();
     }
 }

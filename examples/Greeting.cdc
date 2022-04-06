@@ -6,10 +6,10 @@ pub contract Greeting {
 
     init(){  
       // create cross chain sent message resource
-      let sentMessageResource <-SentMessageContract.createSentMessage();
+      let sentMessageVault <-SentMessageContract.createSentMessageVault();
       // save message as resource
-      self.account.save(<-sentMessageResource, to: /storage/crossChainSentMessage);
-      self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/crossChainSentMessage, target: /storage/crossChainSentMessage);
+      self.account.save(<-sentMessageVault, to: /storage/sentMessageVault);
+      self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/sentMessageVault, target: /storage/sentMessageVault);
 
 
       // create cross chain reveived message resource
@@ -31,7 +31,7 @@ pub contract Greeting {
       */
     pub fun sendCrossChainMessage(toChain: String, contractName: String, actionName: String, data: String): Bool{
       // borrow resource from storage
-      let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
+      let msgRef = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
       msgRef!.addMsg(toChain: toChain, sender:self.account.address.toString(), contractName:contractName, actionName:actionName, data:data);
 
       // destroy cross chain message resource
@@ -45,8 +45,8 @@ pub contract Greeting {
     /**
       * Query cross chain sent messages
       */
-    pub fun queryCrossChainSentMessage(): [SentMessageContract.SentMessageCore]{
-      let msgRef = self.account.borrow<&SentMessageContract.SentMessage>(from: /storage/crossChainSentMessage);
+    pub fun querySentMessageVault(): [SentMessageContract.SentMessageCore]{
+      let msgRef = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
       return msgRef!.getMsg();
     }
 

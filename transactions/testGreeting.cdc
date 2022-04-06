@@ -15,11 +15,11 @@ transaction {
   
     // Send cross chain message
     log(Greeting.sendCrossChainMessage(toChain:"NEAR", contractName:testContractName , actionName:testActionName, data:"Hello ".concat(self.signer.address.toString())));
-    log(Greeting.queryCrossChainSentMessage());
+    log(Greeting.querySentMessageVault());
 
     // Received cross chain message
     log(Greeting.receiveCrossChainMessage(messageId:0, fromChain:"NEAR", contractName:testContractName , actionName:testActionName, data:"Hello ".concat(self.signer.address.toString())));
-    log(Greeting.queryCrossChainSentMessage());
+    log(Greeting.querySentMessageVault());
     
     // Query registers
     log(Greeting.register());
