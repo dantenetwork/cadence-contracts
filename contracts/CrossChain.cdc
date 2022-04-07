@@ -1,33 +1,79 @@
 
 pub contract CrossChain {
-    pub var Registers:[Address]; // stores all contracts' address
+    pub var RegisteredContracts:[Address]; // stores all contracts' address
+    pub var Validators:[Address]; // stores all validators' address
 
     // init cross chain
     init(){
-        self.Registers = [];
+        self.RegisteredContracts = [];
+        self.Validators = [];
     }
 
-    pub event showRegisters(registers: [Address]);
-
     /**
-      * Register current contract into cross chain contract
+      * Register contract's address into cross chain contract
       * @param address - address of contract
       */
-    pub fun register(address: Address): Bool{
-        // append cross chain contract's address into Registers
-        if(self.Registers.contains(address)){
+    pub fun registerContract(address: Address): Bool{
+        // append contract's address into RegisteredContracts
+        if(self.RegisteredContracts.contains(address)){
             return false;
         }
-        self.Registers.append(address);
-
-        emit showRegisters(registers: self.Registers);
+        self.RegisteredContracts.append(address);
         return true;
     }
 
     /**
       * Query registered contract list
       */
-    pub fun queryRegisters(): [Address]{
-      return self.Registers;
+    pub fun queryRegisteredContracts(): [Address]{
+      return self.RegisteredContracts;
+    }
+
+    /**
+      * Register validator's address into cross chain contract
+      * @param address - address of contract
+      */
+    pub fun registerValidator(address: Address): Bool{
+        // append validator's address into Validators
+        if(self.Validators.contains(address)){
+            return false;
+        }
+        self.Validators.append(address);
+        return true;
+    }
+
+    /**
+      * Query validator list
+      */
+    pub fun queryValidators(): [Address]{
+      return self.Validators;
+    }
+
+    /**
+      * Called from cross-chain node for re-selecting nodes for this time stage
+      */
+    pub fun selectValidators(){
+      // TODO
+    }
+
+    /**
+      * Called from `messageVerify` to get the credibilities of validators to take weighted aggregation verification of messages
+      */
+    pub fun getValidatorCredibility(){
+      // TODO
+    }
+
+    /**
+      * Called from `messageVerify`. Update validator credibility by node behaviors after message verification.
+      */
+    pub fun updateValidatorCredibility(){
+      // TODO
+    }
+
+    /**
+      * Set the value of the credibility of the newly added validator
+      */
+    pub fun setInitialCredibility(initValue: Int){
+      // TODO
     }
 }

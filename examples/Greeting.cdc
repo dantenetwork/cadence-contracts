@@ -88,15 +88,15 @@ pub contract Greeting {
     /**
       * Query count of recevied cross chain messages
       */
-    pub fun getReceivedMessageVaultLength(): Int{
+    pub fun getReceivedMessageVaultCount(): Int{
       let messageReference = self.account.borrow<&ReceivedMessageContract.ReceivedMessageVault>(from: /storage/receivedMessageVault);
-      return messageReference!.getLength();
+      return messageReference!.getMessageCount();
     }
 
     /**
       * Register current contract into cross chain contract
       */
     pub fun register():Bool{
-      return CrossChain.register(address: self.account.address);
+      return CrossChain.registerContract(address: self.account.address);
     }
 }
