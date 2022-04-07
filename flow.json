@@ -9,7 +9,8 @@
     "SentMessageContract": "./contracts/SentMessageContract.cdc",
     "ReceivedMessageContract": "./contracts/ReceivedMessageContract.cdc",
     "CrossChain": "./contracts/CrossChain.cdc",
-    "Greeting": "./examples/Greeting.cdc"
+    "Greeting": "./examples/Greeting.cdc",
+    "ExampleNFT": "./examples/ExampleNFT.cdc"
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
@@ -29,7 +30,8 @@
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",
-        "Greeting"
+        "Greeting",
+        "ExampleNFT"
       ]
     }
   }
