@@ -88,9 +88,9 @@ pub contract Greeting {
     /**
       * Query count of recevied cross chain messages
       */
-    pub fun getReceivedMessageVaultLength(): Int{
+    pub fun getReceivedMessageVaultCount(): Int{
       let messageReference = self.account.borrow<&ReceivedMessageContract.ReceivedMessageVault>(from: /storage/receivedMessageVault);
-      return messageReference!.getLength();
+      return messageReference!.getMessageCount();
     }
 
     /**
