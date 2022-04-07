@@ -51,7 +51,7 @@ fcl.config().put('accessNode.api', 'http://127.0.0.1:8080');
         import Greeting from 0xf8d6e0586b0a20c7
 
         pub fun main(): [Address]{
-          return CrossChain.queryRegisters();
+          return CrossChain.queryRegisteredContracts();
         }
       `,
   });
