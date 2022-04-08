@@ -1,19 +1,24 @@
 import fs from 'fs';
 import path from 'path';
 import FlowService from './flow.mjs';
+import config from 'config';
+
+const address = config.get('address');
+const privateKey = config.get('privateKey');
+const keyId = config.get('keyId');
 
 const flowService = new FlowService(
-  'f8d6e0586b0a20c7',
-  'efe24d3e3b5652c0d056e52b7fe592fef8e94dba26e1dfd945c7f66958731e19',
-  0
-)
+  address,
+  privateKey,
+  keyId
+);
 
 async function run() {
   const transaction = fs
     .readFileSync(
       path.join(
         process.cwd(),
-        './transactions/TestGreeting.cdc'
+        './transactions/testGreeting.cdc'
       ),
       'utf8'
     );
