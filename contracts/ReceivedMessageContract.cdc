@@ -22,11 +22,11 @@ pub contract ReceivedMessageContract{
 
         // hash message info
         var originData: [UInt8] = id.toBigEndianBytes();
-        originData = originData.concat(fromChain.decodeHex());
-        originData = originData.concat(sender.decodeHex());
-        originData = originData.concat(contractName.decodeHex());
-        originData = originData.concat(actionName.decodeHex());
-        originData = originData.concat(data.decodeHex());
+        originData = originData.concat(fromChain.utf8);
+        originData = originData.concat(sender.utf8);
+        originData = originData.concat(contractName.utf8);
+        originData = originData.concat(actionName.utf8);
+        originData = originData.concat(data.utf8);
         let digest = HashAlgorithm.SHA2_256.hash(originData);
         self.messageHash = String.encodeHex(digest);
       }
