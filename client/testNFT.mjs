@@ -1,12 +1,19 @@
 import fs from 'fs';
 import path from 'path';
 import FlowService from './flow.mjs';
+import fcl from "@onflow/fcl";
+import types from "@onflow/types";
+import config from 'config';
+
+const address = config.get('address');
+const privateKey = config.get('privateKey');
+const keyId = config.get('keyId');
 
 const flowService = new FlowService(
-  'f8d6e0586b0a20c7',
-  'efe24d3e3b5652c0d056e52b7fe592fef8e94dba26e1dfd945c7f66958731e19',
-  0
-)
+  address,
+  privateKey,
+  keyId
+);
 
 async function setupAccount() {
   // setup account
@@ -41,9 +48,19 @@ async function mintNFT() {
 
   const authorization = flowService.authorizationFunction();
 
+  const NFTName = 'NFT Name';
+  const NFTDescription = 'NFT Description';
+  const NFTThumbnail = 'NFT Thumbnail';
+  console.log(111);
+
   await flowService.sendTx({
     transaction,
-    args: [],
+    args: [
+      fcl.arg(address, types.Address),
+      fcl.arg(NFTName, types.String),
+      fcl.arg(NFTDescription, types.String),
+      fcl.arg(NFTThumbnail, types.String)
+    ],
     proposer: authorization,
     authorizations: [authorization],
     payer: authorization

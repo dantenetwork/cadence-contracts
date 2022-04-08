@@ -10,6 +10,8 @@
     "ReceivedMessageContract": "./contracts/ReceivedMessageContract.cdc",
     "CrossChain": "./contracts/CrossChain.cdc",
     "Greeting": "./examples/Greeting.cdc",
+    "MetadataViews": "./examples/MetadataViews.cdc",
+    "NonFungibleToken": "./examples/NonFungibleToken.cdc",
     "ExampleNFT": "./examples/ExampleNFT.cdc"
   },
   "networks": {
@@ -31,6 +33,8 @@
         "ReceivedMessageContract",
         "CrossChain",
         "Greeting",
+        "MetadataViews",
+        "NonFungibleToken",
         "ExampleNFT"
       ]
     }

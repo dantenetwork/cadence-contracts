@@ -1,30 +1,43 @@
-import fcl from '@onflow/fcl';
+import fs from 'fs';
+import path from 'path';
+import FlowService from './flow.mjs';
+import fcl from "@onflow/fcl";
+import types from "@onflow/types";
+import config from 'config';
 
-fcl.config().put('accessNode.api', 'http://127.0.0.1:8080');
+const address = config.get('address');
+const privateKey = config.get('privateKey');
+const keyId = config.get('keyId');
 
-(async function () {
-  const nftInfo = await fcl.query({
-    cadence: `
-      import ExampleNFT from 0xf8d6e0586b0a20c7
+const flowService = new FlowService(
+  address,
+  privateKey,
+  keyId
+);
 
-      // Print the NFTs owned by account 0xf8d6e0586b0a20c7.
-      pub fun main(): [UInt64] {
-          // Get the public account object for account 0xf8d6e0586b0a20c7
-          let nftOwner = getAccount(0xf8d6e0586b0a20c7)
-      
-          // Find the public Receiver capability for their Collection
-          let capability = nftOwner.getCapability<&{ExampleNFT.NFTReceiver}>(ExampleNFT.CollectionPublicPath)
-      
-          // borrow a reference from the capability
-          let receiverRef = capability.borrow()
-                  ?? panic("Could not borrow receiver reference")
-      
-          // Log the NFTs that they own as an array of IDs
-          return receiverRef.getIDs();
-      }    
-      `,
+async function query() {
+
+  const address = '0xf8d6e0586b0a20c7';
+
+  const script = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      './transactions/nft/GetMetaData.cdc'
+    ),
+    'utf8'
+  );
+
+  const id = 0;
+
+  const result = await flowService.executeScript({
+    script: script,
+    args: [
+      fcl.arg(address, types.Address),
+      fcl.arg(id, types.UInt64)
+    ]
   });
+  console.log(result);
+};
 
-  console.log(nftInfo);
-}());
+await query();
 

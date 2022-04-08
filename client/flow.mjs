@@ -84,20 +84,21 @@ class FlowService {
       fcl.payer(payer),
       fcl.limit(9999)
     ]);
-    console.log('Tx Sent:', response)
+    console.log('Tx Sent:', response);
     return await fcl.tx(response).onceSealed();
   };
 
-  async executeScript({ script, args }) {
+  executeScript = async ({ script, args }) => {
+    console.log(args);
     const response = await fcl.send([fcl.script`${script}`, fcl.args(args)]);
     return await fcl.decode(response);
-  }
+  };
 
-  async getLatestBlockHeight() {
+  getLatestBlockHeight = async () => {
     const block = await fcl.send([fcl.getBlock(true)]);
     const decoded = await fcl.decode(block);
     return decoded.height;
-  }
+  };
 }
 
 export default FlowService

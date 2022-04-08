@@ -1,34 +1,39 @@
-import ExampleNFT from 0xf8d6e0586b0a20c7
+import NonFungibleToken from 0xf8d6e0586b0a20c7;
+import ExampleNFT from 0xf8d6e0586b0a20c7;
 
-// This transaction allows the Minter account to mint an NFT
-// and deposit it into its collection.
+// This script uses the NFTMinter resource to mint a new NFT
+// It must be run with the account that has the minter resource
+// stored in /storage/NFTMinter
 
-transaction {
+transaction(
+    recipient: Address,
+    name: String,
+    description: String,
+    thumbnail: String
+) {
 
-    // The reference to the collection that will be receiving the NFT
-    let receiverRef: &{ExampleNFT.NFTReceiver}
+    // local variable for storing the minter reference
+    let minter: &ExampleNFT.NFTMinter;
 
-    // The reference to the Minter resource stored in account storage
-    let minterRef: &ExampleNFT.NFTMinter
-
-    prepare(acct: AuthAccount) {
-        // Get the owner's collection capability and borrow a reference
-        self.receiverRef = acct.getCapability<&{ExampleNFT.NFTReceiver}>(ExampleNFT.CollectionPublicPath)
-            .borrow()
-            ?? panic("Could not borrow receiver reference")
-        
-        // Borrow a capability for the NFTMinter in storage
-        self.minterRef = acct.borrow<&ExampleNFT.NFTMinter>(from: ExampleNFT.MinterStoragePath)
-            ?? panic("could not borrow minter reference")
+    prepare(signer: AuthAccount) {
+        // borrow a reference to the NFTMinter resource in storage
+        self.minter = signer.borrow<&ExampleNFT.NFTMinter>(from: ExampleNFT.MinterStoragePath)
+            ?? panic("Could not borrow a reference to the NFT minter");
     }
 
     execute {
-        // Use the minter reference to mint an NFT, which deposits
-        // the NFT into the collection that is sent as a parameter.
-        let newNFT <- self.minterRef.mintNFT()
+        // Borrow the recipient's public NFT collection reference
+        let receiver = getAccount(recipient)
+            .getCapability(ExampleNFT.CollectionPublicPath)
+            .borrow<&{NonFungibleToken.CollectionPublic}>()
+            ?? panic("Could not get receiver reference to the NFT Collection");
 
-        self.receiverRef.deposit(token: <-newNFT)
-
-        log("NFT Minted and deposited to Account's Collection")
+        // Mint the NFT and deposit it to the recipient's collection
+        self.minter.mintNFT(
+            recipient: receiver,
+            name: name,
+            description: description,
+            thumbnail: thumbnail,
+        );
     }
 }
