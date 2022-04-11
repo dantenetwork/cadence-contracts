@@ -8,7 +8,6 @@ This repository contains examples of contracts that are useful when deploying, m
    * [SentMessageContract](./contracts/SentMessageContract.cdc)
    * [ReceivedMessageContract](./contracts/ReceivedMessageContract.cdc)
    * [CrossChain](./contracts/CrossChain.cdc)
-   * [Greeting](./examples/Greeting.cdc)
    * [ExampleNFT](./examples/ExampleNFT.cdc)
 
 
