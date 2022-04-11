@@ -55,25 +55,4 @@ pub contract CrossChain {
     pub fun selectValidators(){
       // TODO
     }
-
-    /**
-      * Called from `messageVerify` to get the credibilities of validators to take weighted aggregation verification of messages
-      */
-    pub fun getValidatorCredibility(){
-      // TODO
-    }
-
-    /**
-      * Called from `messageVerify`. Update validator credibility by node behaviors after message verification.
-      */
-    pub fun updateValidatorCredibility(){
-      // TODO
-    }
-
-    /**
-      * Set the value of the credibility of the newly added validator
-      */
-    pub fun setInitialCredibility(initValue: Int){
-      // TODO
-    }
 }

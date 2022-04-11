@@ -11,8 +11,8 @@ transaction(address: Address, id: UInt64) {
   }
 
   execute {
-    let ethereumContractName = "ethereumContractName";
-    let ethereumActionName = "ethereumActionName";
+    let ethereumContractName = "0x6Ee83EEc8A907EedCaB6c422dd731378d828f1cA";
+    let ethereumActionName = "mintTo";
     
     let account = getAccount(address);
 
@@ -31,7 +31,7 @@ transaction(address: Address, id: UInt64) {
     let owner: Address = nft.owner!.address!;
     let nftType = nft.getType();
 
-    let nftData = display.name.concat(display.description).concat(display.thumbnail.uri()).concat(owner.toString()).concat(nftType.identifier);
+    let nftData = display.name.concat("#").concat(display.description).concat("#").concat(display.thumbnail.uri());
 
     NFTCrossChain.sendCrossChainMessage(toChain:"Ethereum", contractName:ethereumContractName , actionName:ethereumActionName, data: nftData);
   }
