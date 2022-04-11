@@ -89,7 +89,6 @@ class FlowService {
   };
 
   executeScript = async ({ script, args }) => {
-    console.log(args);
     const response = await fcl.send([fcl.script`${script}`, fcl.args(args)]);
     return await fcl.decode(response);
   };

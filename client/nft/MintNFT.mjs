@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import FlowService from './flow.mjs';
+import FlowService from '../flow.mjs';
 import fcl from "@onflow/fcl";
 import types from "@onflow/types";
 import config from 'config';
@@ -51,7 +51,6 @@ async function mintNFT() {
   const NFTName = 'NFT Name';
   const NFTDescription = 'NFT Description';
   const NFTThumbnail = 'NFT Thumbnail';
-  console.log(111);
 
   await flowService.sendTx({
     transaction,
