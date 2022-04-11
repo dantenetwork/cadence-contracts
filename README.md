@@ -33,24 +33,21 @@ sh ./updateContract.sh
 
 ## Examples
 
-#### Greeting
-Test greeting contract
+#### NFT
 ```
-node client/testGreeting.mjs
-```
-Query onchain data by Node.js
-```
-node client/queryGreeting.js
+// Setup account & mint NFT 
+node client/nft/MintNFT.mjs
+
+// Query onchain data by Node.js
+node client/nft/queryNFT.js
 ```
 
-#### NFT
-Test greeting contract
 ```
-node client/testNFT.mjs
-```
-Query onchain data by Node.js
-```
-node client/queryNFT.js
+// Send cross chain message
+node client/nft/testSendMessage.mjs
+
+// Query cross chain message
+node client/nft/querySendMessage.mjs
 ```
 
 Made with ❤️ in Singapore

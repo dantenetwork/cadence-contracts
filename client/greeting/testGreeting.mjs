@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import FlowService from './flow.mjs';
+import FlowService from '../flow.mjs';
 import config from 'config';
 
 const address = config.get('address');
@@ -18,7 +18,7 @@ async function run() {
     .readFileSync(
       path.join(
         process.cwd(),
-        './transactions/testGreeting.cdc'
+        './transactions/greeting/TestCrossChain.cdc'
       ),
       'utf8'
     );
