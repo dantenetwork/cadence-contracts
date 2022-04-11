@@ -48,9 +48,9 @@ async function mintNFT() {
 
   const authorization = flowService.authorizationFunction();
 
-  const NFTName = 'NFT Name';
-  const NFTDescription = 'NFT Description';
-  const NFTThumbnail = 'NFT Thumbnail';
+  const NFTName = 'KingHonor';
+  const NFTDescription = 'KingHonor';
+  const NFTThumbnail = 'https://ipfs.io/ipfs/QmWp4XR61EJDxDNGrDwGTV1TVeRj7dJFZGgJqN4zgQPdY7?filename=1.jpg';
 
   await flowService.sendTx({
     transaction,

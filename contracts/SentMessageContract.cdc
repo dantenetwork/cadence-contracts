@@ -25,8 +25,6 @@ pub contract SentMessageContract{
     pub resource interface SentMessageInterface{
         pub message: [SentMessageCore];
 
-        pub fun addMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
-
         pub fun getAllMessages():[SentMessageCore];
         
         pub fun getMessageById(mesasageId: Int): SentMessageCore;
