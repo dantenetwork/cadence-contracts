@@ -48,9 +48,9 @@ async function mintNFT() {
 
   const authorization = flowService.authorizationFunction();
 
-  const NFTName = 'KingHonor';
-  const NFTDescription = 'KingHonor';
-  const NFTThumbnail = 'https://ipfs.io/ipfs/QmWp4XR61EJDxDNGrDwGTV1TVeRj7dJFZGgJqN4zgQPdY7?filename=1.jpg';
+  const NFTName = 'Flow Blockchain';
+  const NFTDescription = 'Flow Blockchain';
+  const NFTThumbnail = 'https://file.publish.vn/amberblocks/2021-10/flow-ecosystem-1635519453417.png';
 
   await flowService.sendTx({
     transaction,
