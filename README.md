@@ -49,4 +49,10 @@ node client/nft/testSendMessage.mjs
 node client/nft/querySendMessage.mjs
 ```
 
+## CrossChain
+```
+// Start sync node
+node client/crosschain/crossChainSync.js
+```
+
 Made with ❤️ in Singapore
