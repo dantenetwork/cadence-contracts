@@ -17,7 +17,7 @@ const flowService = new FlowService(
 
 async function query() {
 
-  const address = '0xf8d6e0586b0a20c7';
+  const address = '0x166d0e1b0499cde8';
 
   const script = fs.readFileSync(
     path.join(

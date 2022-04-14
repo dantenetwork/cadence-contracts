@@ -7,7 +7,7 @@ import { SHA3 } from 'sha3';
 const ec = new elliptic.ec('p256');
 
 fcl.config()
-  .put('accessNode.api', 'http://localhost:8080') // Configure FCL's Alchemy Access Node
+  .put('accessNode.api', 'http://access.devnet.nodes.onflow.org:8000') // Configure FCL's Alchemy Access Node
 
 class FlowService {
   constructor(

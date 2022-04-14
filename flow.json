@@ -5,6 +5,12 @@
       "serviceAccount": "emulator-account"
     }
   },
+  "testnet": {
+    "default": {
+      "port": 9000,
+      "serviceAccount": "testnet-acount"
+    }
+  },
   "contracts": {
     "SentMessageContract": "./contracts/SentMessageContract.cdc",
     "ReceivedMessageContract": "./contracts/ReceivedMessageContract.cdc",
@@ -21,14 +27,19 @@
   },
   "accounts": {
     "emulator-account": {
-      "address": "f8d6e0586b0a20c7",
-      "publicKey": "9d6108b38a331ef354333e83355dda809148b2bc9e78be4638acddb29d0b84f10c7542b2364786317da2e881df6dfaad5ff04d8928852babde44c34e96a824fd",
-      "key": "efe24d3e3b5652c0d056e52b7fe592fef8e94dba26e1dfd945c7f66958731e19"
+      "address": "166d0e1b0499cde8",
+      "publicKey": "bb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025",
+      "key": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc"
+    },
+    "testnet-account": {
+      "address": "166d0e1b0499cde8",
+      "publicKey": "bb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025",
+      "key": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc"
     }
   },
   "deployments": {
-    "emulator": {
-      "emulator-account": [
+    "testnet": {
+      "testnet-account": [
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",

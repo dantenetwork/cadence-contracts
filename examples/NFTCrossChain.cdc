@@ -1,6 +1,6 @@
-import SentMessageContract from 0xf8d6e0586b0a20c7;
-import ReceivedMessageContract from 0xf8d6e0586b0a20c7;
-import CrossChain from 0xf8d6e0586b0a20c7;
+import SentMessageContract from 0x166d0e1b0499cde8;
+import ReceivedMessageContract from 0x166d0e1b0499cde8;
+import CrossChain from 0x166d0e1b0499cde8;
 
 pub contract NFTCrossChain {
 
