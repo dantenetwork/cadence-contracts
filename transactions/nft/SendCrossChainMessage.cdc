@@ -11,7 +11,7 @@ transaction(address: Address, id: UInt64) {
   }
 
   execute {
-    let ethereumContractName = "0x6Ee83EEc8A907EedCaB6c422dd731378d828f1cA";
+    let ethereumContractName = "0x66e4877C17b2044033c436Ea064770fAB565372E";
     let ethereumActionName = "mintTo";
     
     let account = getAccount(address);
