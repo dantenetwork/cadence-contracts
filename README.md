@@ -35,7 +35,7 @@ sh ./updateContract.sh
 #### NFT
 ```
 // Setup account & mint NFT 
-node client/nft/MintNFT.mjs
+node client/nft/mintNFT.mjs
 
 // Query onchain data by Node.js
 node client/nft/queryNFT.js
