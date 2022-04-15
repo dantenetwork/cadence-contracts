@@ -5,20 +5,9 @@ import fcl from "@onflow/fcl";
 import types from "@onflow/types";
 import config from 'config';
 
-const address = config.get('address');
-const privateKey = config.get('privateKey');
-const keyId = config.get('keyId');
-
-const flowService = new FlowService(
-  address,
-  privateKey,
-  keyId
-);
+const flowService = new FlowService();
 
 async function query() {
-
-  const address = '0x166d0e1b0499cde8';
-
   const script = fs.readFileSync(
     path.join(
       process.cwd(),
@@ -32,7 +21,7 @@ async function query() {
   const result = await flowService.executeScript({
     script: script,
     args: [
-      fcl.arg(address, types.Address),
+      fcl.arg(flowService.getSignerAddress(), types.Address),
       fcl.arg(id, types.UInt64)
     ]
   });

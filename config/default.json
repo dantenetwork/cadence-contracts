@@ -1,5 +1,13 @@
 {
-  "address": "0x166d0e1b0499cde8",
-  "privateKey": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc",
-  "keyId": 0
+  "network": "testnet",
+  "emulator": {
+    "address": "0xf8d6e0586b0a20c7",
+    "privateKey": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc",
+    "keyId": 0
+  },
+  "testnet": {
+    "address": "0xf53ab0e16337800f",
+    "privateKey": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc",
+    "keyId": 0
+  }
 }

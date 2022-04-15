@@ -1,6 +1,6 @@
-import MetadataViews from 0x166d0e1b0499cde8;
-import ExampleNFT from 0x166d0e1b0499cde8;
-import NFTCrossChain from 0x166d0e1b0499cde8;
+import MetadataViews from 0xf8d6e0586b0a20c7;
+import ExampleNFT from 0xf8d6e0586b0a20c7;
+import NFTCrossChain from 0xf8d6e0586b0a20c7;
 
 transaction(address: Address, id: UInt64) {
 
@@ -11,8 +11,9 @@ transaction(address: Address, id: UInt64) {
   }
 
   execute {
-    let ethereumContractName = "0x66e4877C17b2044033c436Ea064770fAB565372E";
+    let ethereumContractName = "0x8DF6385BD000A6ac6b009Ab188ECA492EF656D3D";
     let ethereumActionName = "mintTo";
+    let receiver = "0xED911Ca21fDba9dB5f3B61b014B96A9Fab665Ff9";
     
     let account = getAccount(address);
 
@@ -31,8 +32,9 @@ transaction(address: Address, id: UInt64) {
     let owner: Address = nft.owner!.address!;
     let nftType = nft.getType();
 
-    let nftData = display.name.concat("#").concat(display.description).concat("#").concat(display.thumbnail.uri());
+    // let nftData = display.name.concat("#").concat(display.description).concat("#").concat(display.thumbnail.uri());
+    let messageData = receiver;
 
-    NFTCrossChain.sendCrossChainMessage(toChain:"Ethereum", contractName:ethereumContractName , actionName:ethereumActionName, data: nftData);
+    NFTCrossChain.sendCrossChainMessage(toChain:"Ethereum", contractName:ethereumContractName , actionName:ethereumActionName, data: messageData);
   }
 }

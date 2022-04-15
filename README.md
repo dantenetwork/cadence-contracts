@@ -32,7 +32,7 @@ sh ./updateContract.sh
 
 ## Examples
 
-#### NFT
+#### Mint NFT
 ```
 // Setup account & mint NFT 
 node client/nft/mintNFT.mjs
@@ -41,18 +41,21 @@ node client/nft/mintNFT.mjs
 node client/nft/queryNFT.js
 ```
 
+#### Send cross chain message
 ```
 // Send cross chain message
 node client/nft/testSendMessage.mjs
 
-// Query cross chain message
-node client/nft/querySendMessage.mjs
+// Query sent cross chain message
+node client/nft/querySentMessage.mjs
+
+// reset sent message vault
+node client/nft/resetSentMessageVault.mjs
 ```
 
-## CrossChain
+#### Check NFT on Opensea browser
 ```
-// Start sync node
-node client/crosschain/crossChainSync.js
+https://testnets.opensea.io/assets/danteflow
 ```
 
 Made with ❤️ in Singapore
