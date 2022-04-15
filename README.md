@@ -55,7 +55,7 @@ node client/nft/resetSentMessageVault.mjs
 
 #### Check NFT on Opensea browser
 ```
-https://testnets.opensea.io/assets/danteflow
+https://testnets.opensea.io/assets?search[query]=0x8DF6385BD000A6ac6b009Ab188ECA492EF656D3D&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore
