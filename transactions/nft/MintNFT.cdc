@@ -1,5 +1,5 @@
-import NonFungibleToken from 0x166d0e1b0499cde8;
-import ExampleNFT from 0x166d0e1b0499cde8;
+import NonFungibleToken from 0xf8d6e0586b0a20c7;
+import ExampleNFT from 0xf8d6e0586b0a20c7;
 
 // This script uses the NFTMinter resource to mint a new NFT
 // It must be run with the account that has the minter resource

@@ -1,23 +1,28 @@
 import fcl from '@onflow/fcl';
-
+import config from 'config';
 import elliptic from 'elliptic';
-
 import { SHA3 } from 'sha3';
 
 const ec = new elliptic.ec('p256');
 
 fcl.config()
-  .put('accessNode.api', 'http://access.devnet.nodes.onflow.org:8000') // Configure FCL's Alchemy Access Node
+  .put('accessNode.api', 'http://127.0.0.1:8080');
+
+if (config.get('network') == 'testnet') {
+  fcl.config()
+    .put('accessNode.api', 'http://access.devnet.nodes.onflow.org:8000');
+}
 
 class FlowService {
-  constructor(
-    signerFlowAddress, // signer address 
-    signerPrivateKeyHex, // signer private key
-    signerAccountIndex // singer key index
-  ) {
-    this.signerFlowAddress = signerFlowAddress;
-    this.signerPrivateKeyHex = signerPrivateKeyHex;
-    this.signerAccountIndex = signerAccountIndex;
+  constructor() {
+    let signer = config.get('emulator');
+
+    if (config.get('network') == 'testnet') {
+      signer = config.get('testnet');
+    }
+    this.signerFlowAddress = signer.address;// signer address 
+    this.signerPrivateKeyHex = signer.privateKey;// signer private key
+    this.signerAccountIndex = signer.keyId;// singer key index
   }
 
   // An authorization function must produce the information of the user that is going to sign and a signing function to use the information to produce a signature.
@@ -52,6 +57,10 @@ class FlowService {
     return account;
   };
 
+  getSignerAddress = () => {
+    return this.signerFlowAddress;
+  }
+
   signWithKey = (privateKey, msg) => {
     const key = ec.keyFromPrivate(Buffer.from(privateKey, 'hex'));
     const sig = key.sign(this.hashMsg(msg));
@@ -74,6 +83,9 @@ class FlowService {
     authorizations,
     payer
   }) => {
+    if (config.get('network') == 'testnet') {
+      transaction = transaction.replaceAll('0xf8d6e0586b0a20c7', '0xf53ab0e16337800f');
+    }
     const response = await fcl.send([
       fcl.transaction`
         ${transaction}
@@ -89,6 +101,9 @@ class FlowService {
   };
 
   executeScript = async ({ script, args }) => {
+    if (config.get('network') == 'testnet') {
+      script = script.replaceAll('0xf8d6e0586b0a20c7', '0xf53ab0e16337800f');
+    }
     const response = await fcl.send([fcl.script`${script}`, fcl.args(args)]);
     return await fcl.decode(response);
   };

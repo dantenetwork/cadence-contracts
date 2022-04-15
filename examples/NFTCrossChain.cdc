@@ -1,26 +1,38 @@
-import SentMessageContract from 0x166d0e1b0499cde8;
-import ReceivedMessageContract from 0x166d0e1b0499cde8;
-import CrossChain from 0x166d0e1b0499cde8;
+import SentMessageContract from 0xf53ab0e16337800f;
+import ReceivedMessageContract from 0xf53ab0e16337800f;
+import CrossChain from 0xf53ab0e16337800f;
 
 pub contract NFTCrossChain {
 
     init(){  
+      self.initSentMessageVault();
+      self.initReceivedMessageVault();
+    }
+
+    pub event showSentMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
+    pub event showReceviedMessage(messageId:Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String);
+
+    /**
+      * Init send cross chain message
+      */
+    pub fun initSentMessageVault(){
       // create cross chain sent message resource
       let sentMessageVault <-SentMessageContract.createSentMessageVault();
       // save message as resource
       self.account.save(<-sentMessageVault, to: /storage/sentMessageVault);
       self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/sentMessageVault, target: /storage/sentMessageVault);
+    }
 
-
+    /**
+      * Init received cross chain message
+      */
+    pub fun initReceivedMessageVault(){
       // create cross chain reveived message resource
       let receivedMessageVault <-ReceivedMessageContract.createReceivedMessageVault();
       // save message as resource
       self.account.save(<-receivedMessageVault, to: /storage/receivedMessageVault);
       self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault, target: /storage/receivedMessageVault);
     }
-
-    pub event showSentMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
-    pub event showReceviedMessage(messageId:Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String);
 
     /**
       * Send cross chain message
@@ -45,6 +57,17 @@ pub contract NFTCrossChain {
     pub fun querySentMessageVault(): [SentMessageContract.SentMessageCore]{
       let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
       return messageReference!.getAllMessages();
+    }
+
+    /**
+      * reset sent message vault
+      */
+    pub fun resetSentMessageVault(): Bool{
+      // destroy sent message vault
+      let sentMessageVault <- self.account.load<@SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
+      destroy sentMessageVault;
+      self.initSentMessageVault();
+      return true;
     }
 
     /**
