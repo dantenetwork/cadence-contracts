@@ -79,6 +79,12 @@ pub contract ReceivedMessageContract{
           * @param data - contract execute data
           */
         pub fun addMessage(messageId: Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String){
+          // TODO
+          /*
+            * the submitter of the message should be verified
+            * this can be done by the signature and public keys routers registered(`ReceivedMessageContract.registerRouter`)
+          */
+          
           let receivedMessageCore = ReceivedMessageCore(id:messageId, fromChain:fromChain, sender:sender, contractName:contractName, actionName:actionName, data:data);
           if(self.message.length < messageId + 1){
             // message id not exists
@@ -159,7 +165,23 @@ pub contract ReceivedMessageContract{
 
     // Create recource to store received message
     pub fun createReceivedMessageVault():@ReceivedMessageVault{
+      // TODO
+      /*
+        * record the resouces' `public/link`
+      */
       return <- create ReceivedMessageVault();
     }
+
+    /**
+      * the interface of the register for off-chain routers
+      * the common sign-verification mechanism or authority call-back submittion mechanis
+    **/
+    //  pub fun registerRouter(...){
+          // TODO
+    //  }
+
+    // pub fun unregisterRouter(...){
+
+    // }
 }
 
