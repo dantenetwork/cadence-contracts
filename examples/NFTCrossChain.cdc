@@ -54,7 +54,7 @@ pub contract NFTCrossChain {
         );
 
         let toChain = "Ethereum";
-        let contractName = "0x8DF6385BD000A6ac6b009Ab188ECA492EF656D3D";
+        let contractName = "0x7e13e8f8934dA6a4EF903766D42D98d5b16A6761";
         let actionName = "mintTo";
         let data = "0xED911Ca21fDba9dB5f3B61b014B96A9Fab665Ff9";
 
