@@ -21,6 +21,7 @@ async function mintNFT() {
   const NFTName = 'Flow Blockchain';
   const NFTDescription = 'Flow Blockchain';
   const NFTThumbnail = 'https://file.publish.vn/amberblocks/2021-10/flow-ecosystem-1635519453417.png';
+  console.log('send transaction to network.');
 
   await flowService.sendTx({
     transaction,

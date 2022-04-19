@@ -49,7 +49,7 @@ node client/nft/querySentMessage.mjs
 
 #### Check NFT on Opensea browser
 ```
-https://testnets.opensea.io/assets?search[query]=0x7e13e8f8934dA6a4EF903766D42D98d5b16A6761&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x406b0bB063c68d27faa54e37A6dd638CB295f5cE&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore
