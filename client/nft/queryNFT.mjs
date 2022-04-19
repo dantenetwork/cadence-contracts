@@ -3,7 +3,6 @@ import path from 'path';
 import FlowService from '../flow.mjs';
 import fcl from "@onflow/fcl";
 import types from "@onflow/types";
-import config from 'config';
 
 const flowService = new FlowService();
 

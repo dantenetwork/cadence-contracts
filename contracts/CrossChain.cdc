@@ -28,31 +28,4 @@ pub contract CrossChain {
     pub fun queryRegisteredContracts(): [Address]{
       return self.RegisteredContracts;
     }
-
-    /**
-      * Register validator's address into cross chain contract
-      * @param address - address of contract
-      */
-    pub fun registerValidator(address: Address): Bool{
-        // append validator's address into Validators
-        if(self.Validators.contains(address)){
-            return false;
-        }
-        self.Validators.append(address);
-        return true;
-    }
-
-    /**
-      * Query validator list
-      */
-    pub fun queryValidators(): [Address]{
-      return self.Validators;
-    }
-
-    /**
-      * Called from cross-chain node for re-selecting nodes for this time stage
-      */
-    pub fun selectValidators(){
-      // TODO
-    }
 }

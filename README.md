@@ -26,6 +26,9 @@ flow emulator
 # Deploy contracts
 flow project deploy
 
+# Deploy contracts to testnet
+flow project deploy --network testnet
+
 # Update contracts
 sh ./updateContract.sh
 ```
@@ -37,20 +40,11 @@ sh ./updateContract.sh
 // Setup account & mint NFT 
 node client/nft/mintNFT.mjs
 
-// Query onchain data by Node.js
-node client/nft/queryNFT.js
-```
+// Query NFT meda data by Node.js
+node client/nft/queryNFT.mjs
 
-#### Send cross chain message
-```
-// Send cross chain message
-node client/nft/testSendMessage.mjs
-
-// Query sent cross chain message
+// Query sent cross chain message By Node.js
 node client/nft/querySentMessage.mjs
-
-// reset sent message vault
-node client/nft/resetSentMessageVault.mjs
 ```
 
 #### Check NFT on Opensea browser

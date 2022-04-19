@@ -40,7 +40,7 @@ pub contract SentMessageContract{
             let pubAcct = getAccount(acceptorAddr);
             let linkPath = PublicPath(identifier: alink);
             // let linkPath = /public/acceptlink;
-            let acceptorLink = pubAcct.getCapability<&{SubmitAuthor.AcceptorFace}>(linkPath!);
+            let acceptorLink = pubAcct.getCapability<&{AcceptorFace}>(linkPath!);
             if let acceptorRef = acceptorLink.borrow(){
                 acceptorRef.AcceptContent(submitterAddr: oSubmitterAddr, link: slink);
             }else{
@@ -116,8 +116,6 @@ pub contract SentMessageContract{
           */
         access(contract) fun AcceptContent(submitterAddr: Address, link: String){
 
-            emit uuidEvent(type: "Acceptor", uuuuid: self.uuid);
-
             let pubAcct = getAccount(submitterAddr);
             let linkPath = PublicPath(identifier: link);
             // let linkPath = /public/submitlink;
@@ -191,12 +189,13 @@ pub contract SentMessageContract{
     // ***********
     pub fun QueryMessage(msgSender: Address, link: String): [SentMessageCore]{
       let pubLink = PublicPath(identifier: link);
-      let senderLink = getAccount(msgSender).getCapability<&{SentMessageInterface}>(pubLink!);
-      if let senderRef = senderLink.borrow(){
-          return senderRef.getAllMessages();
-      } else{
-          panic("invalid sender address or `link`!");
-      }
+      let senderRef = getAccount(msgSender).getCapability<&{SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+      return senderRef.getAllMessages();
+      // if let senderRef = senderLink.borrow(){
+      //     return senderRef.getAllMessages();
+      // } else{
+      //     panic("invalid sender address or `link`!");
+      // }
     }
 
     // interface todo:

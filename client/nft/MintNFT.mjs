@@ -31,7 +31,7 @@ async function mintNFT() {
       fcl.arg(NFTThumbnail, types.String)
     ],
     proposer: authorization,
-    authorizations: [authorization],
+    authorizations: [],
     payer: authorization
   });
 }

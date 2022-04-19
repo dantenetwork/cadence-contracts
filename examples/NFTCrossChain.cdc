@@ -1,21 +1,22 @@
 import SentMessageContract from 0xf53ab0e16337800f;
 import ReceivedMessageContract from 0xf53ab0e16337800f;
 import CrossChain from 0xf53ab0e16337800f;
+import ExampleNFT from 0xf53ab0e16337800f;
+import NonFungibleToken from 0xf53ab0e16337800f;
 
 pub contract NFTCrossChain {
 
     init(){  
       self.initSentMessageVault();
-      self.initReceivedMessageVault();
-    }
+     }
 
     pub event showSentMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
     pub event showReceviedMessage(messageId:Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String);
-
+ 
     /**
       * Init send cross chain message
       */
-    pub fun initSentMessageVault(){
+    priv fun initSentMessageVault(){
       // create cross chain sent message resource
       let sentMessageVault <-SentMessageContract.createSentMessageVault();
       // save message as resource
@@ -26,23 +27,40 @@ pub contract NFTCrossChain {
 
       // add message submitter
       let msgSubmitter <- SentMessageContract.createMessageSubmitter(); 
-      self.account.save(<-msgSubmitter, to: /storate/msgSubmitter);
-      self.account.link<&{SentMessageContract.SubmitterFace}>(/public/msgSubmitter, target: /storate/msgSubmitter);
-
-      // add Example NFT
-      // add mint interface(  access(account)  )
-      // send message in mint function
+      self.account.save(<-msgSubmitter, to: /storage/msgSubmitter);
+      self.account.link<&{SentMessageContract.SubmitterFace}>(/public/msgSubmitter, target: /storage/msgSubmitter);
     }
 
     /**
-      * Init received cross chain message
+      * Mint Example NFT
       */
-    pub fun initReceivedMessageVault(){
-      // create cross chain reveived message resource
-      let receivedMessageVault <-ReceivedMessageContract.createReceivedMessageVault();
-      // save message as resource
-      self.account.save(<-receivedMessageVault, to: /storage/receivedMessageVault);
-      self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault, target: /storage/receivedMessageVault);
+    access(account) fun mintNFT(recipient: Address,name: String,description: String,thumbnail: String):Bool{
+      // borrow a reference to the NFTMinter resource in storage
+        let minter = self.account.borrow<&ExampleNFT.NFTMinter>(from: ExampleNFT.MinterStoragePath)
+            ?? panic("Could not borrow a reference to the NFT minter");
+
+      // Borrow the recipient's public NFT collection reference
+        let receiver = getAccount(recipient)
+            .getCapability(ExampleNFT.CollectionPublicPath)
+            .borrow<&{NonFungibleToken.CollectionPublic}>()
+            ?? panic("Could not get receiver reference to the NFT Collection");
+
+        // Mint the NFT and deposit it to the recipient's collection
+        minter.mintNFT(
+            recipient: receiver,
+            name: name,
+            description: description,
+            thumbnail: thumbnail,
+        );
+
+        let toChain = "Ethereum";
+        let contractName = "0x8DF6385BD000A6ac6b009Ab188ECA492EF656D3D";
+        let actionName = "mintTo";
+        let data = "0xED911Ca21fDba9dB5f3B61b014B96A9Fab665Ff9";
+
+        let message = SentMessageContract.msgToSubmit(toChain: toChain, contractName: contractName, actionName: actionName, data: data);
+
+        return self.sendCrossChainMessage(toChain: message.toChain, contractName: message.contractName, actionName: message.actionName, data: message.data);
     }
 
     /**
@@ -57,7 +75,7 @@ pub contract NFTCrossChain {
       // let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
       // messageReference!.addMessage(toChain: toChain, sender:self.account.address.toString(), contractName:contractName, actionName:actionName, data:data);
 
-      let msgSubmitterRef = self.account.borrow<&{SentMessageContract.Submitter}>(from: /storage/msgSubmitter);
+      let msgSubmitterRef = self.account.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter);
       let msg = SentMessageContract.msgToSubmit(toChain: toChain, contractName: contractName, actionName: actionName, data: data);
       msgSubmitterRef!.submitWithAuth(msg, acceptorAddr: self.account.address, alink: "acceptorFace", oSubmitterAddr: self.account.address, slink: "msgSubmitter");
 
@@ -65,14 +83,6 @@ pub contract NFTCrossChain {
       emit showSentMessage(toChain: toChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data:data);
       return true;
     }
-
-    /**
-      * Query sent cross chain messages
-      */
-    // pub fun querySentMessageVault(): [SentMessageContract.SentMessageCore]{
-    //   let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
-    //   return messageReference!.getAllMessages();
-    // }
 
     /**
       * reset sent message vault
@@ -93,43 +103,6 @@ pub contract NFTCrossChain {
     pub fun querySentMessageById(mesasageId: Int): SentMessageContract.SentMessageCore{
       let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
       return messageReference!.getMessageById(mesasageId: mesasageId);
-    }
-
-    /**
-      * Received message from other chains
-      * @param messageId - message id
-      * @param fromChain - source chain
-      * @param contractName - contract name of source chain
-      * @param actionName - action name of source contract
-      * @param data - contract execute data
-      */
-    pub fun receiveCrossChainMessage(messageId: Int, fromChain: String, contractName: String, actionName: String, data: String): Bool{
-      // borrow resource from storage
-      let messageReference = self.account.borrow<&ReceivedMessageContract.ReceivedMessageVault>(from: /storage/receivedMessageVault);
-
-      // add message into received messages
-      messageReference!.addMessage(messageId: messageId, fromChain: fromChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data: data);
-
-      // print log
-      emit showReceviedMessage(messageId: messageId, fromChain: fromChain, sender: self.account.address.toString(), contractName: contractName, actionName: actionName, data:data);
-      return true;
-    }
-
-    /**
-      * Query recevied cross chain messages by message id
-      * @param messageId - message id
-      */
-    pub fun queryReceivedMessageVaultById(messageId: Int):ReceivedMessageContract.ReceivedMessageArray{
-      let messageReference = self.account.borrow<&ReceivedMessageContract.ReceivedMessageVault>(from: /storage/receivedMessageVault);
-      return messageReference!.getMessageById(messageId: messageId);
-    }
-
-    /**
-      * Query count of recevied cross chain messages
-      */
-    pub fun getReceivedMessageVaultCount(): Int{
-      let messageReference = self.account.borrow<&ReceivedMessageContract.ReceivedMessageVault>(from: /storage/receivedMessageVault);
-      return messageReference!.getMessageCount();
     }
 
     /**

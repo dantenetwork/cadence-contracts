@@ -166,22 +166,25 @@ pub contract ReceivedMessageContract{
     // Create recource to store received message
     pub fun createReceivedMessageVault():@ReceivedMessageVault{
       // TODO
-      /*
+      /**
         * record the resouces' `public/link`
-      */
+        */
       return <- create ReceivedMessageVault();
     }
 
-    /**
-      * the interface of the register for off-chain routers
-      * the common sign-verification mechanism or authority call-back submittion mechanis
-    **/
-    //  pub fun registerRouter(...){
+     /**
+       * The interface of the register for off-chain routers
+       * the common sign-verification mechanism or authority call-back submittion mechanis
+       */
+     pub fun registerRouter(){
           // TODO
-    //  }
+     }
 
-    // pub fun unregisterRouter(...){
+     /**
+       * The interface of the unregister for off-chain routers
+       */
+     pub fun unregisterRouter(){
 
-    // }
+     }
 }
 
