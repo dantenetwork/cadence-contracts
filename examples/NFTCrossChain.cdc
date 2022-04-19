@@ -34,7 +34,7 @@ pub contract NFTCrossChain {
     /**
       * Mint Example NFT
       */
-    access(account) fun mintNFT(recipient: Address,name: String,description: String,thumbnail: String):Bool{
+    pub fun mintNFT(recipient: Address,name: String,description: String,thumbnail: String):Bool{
       // borrow a reference to the NFTMinter resource in storage
         let minter = self.account.borrow<&ExampleNFT.NFTMinter>(from: ExampleNFT.MinterStoragePath)
             ?? panic("Could not borrow a reference to the NFT minter");
