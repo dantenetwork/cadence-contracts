@@ -31,29 +31,9 @@ async function mintNFT() {
       fcl.arg(NFTThumbnail, types.String)
     ],
     proposer: authorization,
-    authorizations: [],
+    authorizations: [authorization],
     payer: authorization
   });
 }
 
 await mintNFT();
-
-// await setupAccount();
-// async function setupAccount() {
-//   // setup account
-//   const transaction = fs.readFileSync(
-//     path.join(
-//       process.cwd(),
-//       './transactions/nft/SetupAccount.cdc'
-//     ),
-//     'utf8'
-//   );
-
-//   await flowService.sendTx({
-//     transaction,
-//     args: [],
-//     proposer: authorization,
-//     authorizations: [authorization],
-//     payer: authorization
-//   })
-// }
