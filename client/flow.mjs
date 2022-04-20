@@ -84,7 +84,7 @@ class FlowService {
     payer
   }) => {
     if (config.get('network') == 'testnet') {
-      transaction = transaction.replaceAll('0xf8d6e0586b0a20c7', '0xf53ab0e16337800f');
+      transaction = transaction.replaceAll('0xf8d6e0586b0a20c7', '0x54bdd2d47b3649c3');
     }
     const response = await fcl.send([
       fcl.transaction`
@@ -102,7 +102,7 @@ class FlowService {
 
   executeScript = async ({ script, args }) => {
     if (config.get('network') == 'testnet') {
-      script = script.replaceAll('0xf8d6e0586b0a20c7', '0xf53ab0e16337800f');
+      script = script.replaceAll('0xf8d6e0586b0a20c7', '0x54bdd2d47b3649c3');
     }
     const response = await fcl.send([fcl.script`${script}`, fcl.args(args)]);
     return await fcl.decode(response);

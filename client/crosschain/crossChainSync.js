@@ -12,7 +12,7 @@ const ethPrivateKey = '48beef7bacb7a61d88c8f6ff44c87a007a85e8178bfe96966962390a9
 let NFTRawData = fs.readFileSync('./client/crosschain/KingHonorNFTView.json');
 let NFTAbi = JSON.parse(NFTRawData).abi;
 
-let lastId = -1;
+let currentId = 1;
 
 async function sync() {
   const script = fs.readFileSync(
@@ -28,20 +28,21 @@ async function sync() {
     args: []
   });
 
-  const currentId = result.length - 1;
-  if (currentId > lastId) {
+  const lastId = result.length;
+  if (currentId < lastId) {
+    let currentMessage = result[currentId];
     console.log('Found new NFT :');
-    console.log(result[currentId]);
+    console.log(currentMessage);
     console.log();
     console.log();
 
-    let NFTContract = new web3.eth.Contract(NFTAbi, result[currentId].content.contractName);
+    let NFTContract = new web3.eth.Contract(NFTAbi, currentMessage.content.contractName);
     const ethereum = new Ethereum();
 
     console.log('Sync NFT to rinkeby testnet');
-    await ethereum.sendTransaction(NFTContract, result[currentId].content.actionName, ethPrivateKey, [result[currentId].content.data]);
+    await ethereum.sendTransaction(NFTContract, currentMessage.content.actionName, ethPrivateKey, [currentMessage.content.data]);
+    currentId = currentId + 1;
   }
-  lastId = currentId;
   console.log('sleep 3 seconds.');
   setTimeout(async () => {
     await sync();

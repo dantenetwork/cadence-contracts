@@ -38,7 +38,7 @@ transaction(
       );
 
       let toChain = "Ethereum";
-      let contractName = "0x406b0bB063c68d27faa54e37A6dd638CB295f5cE";
+      let contractName = "0xe524839f9CD9Eb9b3Cb166511Ba5179179ce65e8";
       let actionName = "mintTo";
       let data = "0xED911Ca21fDba9dB5f3B61b014B96A9Fab665Ff9";
 
