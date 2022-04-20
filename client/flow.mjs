@@ -27,7 +27,7 @@ class FlowService {
 
   // An authorization function must produce the information of the user that is going to sign and a signing function to use the information to produce a signature.
   authorizationFunction = () => {
-    console.log('Get:', this.signerFlowAddress)
+    console.log('Account:', this.signerFlowAddress)
     return async (account = {}) => {
       // Query signer info
       const user = await this.getAccount(this.signerFlowAddress);
@@ -96,8 +96,8 @@ class FlowService {
       fcl.payer(payer),
       fcl.limit(9999)
     ]);
-    console.log('Tx Sent:', response);
-    return await fcl.tx(response).onceSealed();
+
+    return response;    
   };
 
   executeScript = async ({ script, args }) => {
