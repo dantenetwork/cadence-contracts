@@ -39,7 +39,7 @@ sh ./updateContract.sh
 ```
 // Setup account & mint NFT 
 // Success when `Tx Sent: {...` is shown
-node client/nft/mintNFT.mjs
+node client/nft/MintNFT.mjs
 
 // Query NFT meda data by Node.js
 node client/nft/queryNFT.mjs
