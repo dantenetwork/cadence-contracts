@@ -38,7 +38,8 @@ sh ./updateContract.sh
 #### Mint NFT
 ```
 // Setup account & mint NFT 
-node client/nft/mintNFT.mjs
+// Success when `Tx Sent: {...` is shown
+node client/nft/MintNFT.mjs
 
 // Query NFT meda data by Node.js
 node client/nft/queryNFT.mjs
@@ -48,6 +49,9 @@ node client/nft/querySentMessage.mjs
 ```
 
 #### Check NFT on Opensea browser
+
+Wait for some time...You can see new NFT below:
+
 ```
 https://testnets.opensea.io/assets?search[query]=0x406b0bB063c68d27faa54e37A6dd638CB295f5cE&search[resultModel]=ASSETS
 ```
