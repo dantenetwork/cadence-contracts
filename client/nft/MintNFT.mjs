@@ -21,6 +21,13 @@ async function mintNFT() {
   const NFTName = 'Flow Blockchain';
   const NFTDescription = 'Flow Blockchain';
   const NFTThumbnail = 'https://file.publish.vn/amberblocks/2021-10/flow-ecosystem-1635519453417.png';
+  console.log();
+  console.log('New NFT Info: ');
+  console.log(NFTName);
+  console.log(NFTDescription);
+  console.log(NFTThumbnail);
+  console.log();
+
 
   var id = await queryNFTCount();
   id++;
@@ -43,7 +50,7 @@ async function mintNFT() {
 
 
   console.log('The new NFT has been minted and will be automatically synchronized to the rinkeby testnet in a few seconds.');
-  console.log('https://testnets.opensea.io/assets/0xe524839f9CD9Eb9b3Cb166511Ba5179179ce65e8/' + id);
+  console.log('https://testnets.opensea.io/assets/0x182654BEA6e59494A7D96270c39Fd84Ef7A8B516/' + id);
 
   console.log('Waiting for the transaction to be sealed.');
   await fcl.tx(response).onceSealed();
@@ -59,7 +66,7 @@ async function queryNFTCount() {
     'utf8'
   );
 
-  let result =  await flowService.executeScript({
+  let result = await flowService.executeScript({
     script: script,
     args: []
   });

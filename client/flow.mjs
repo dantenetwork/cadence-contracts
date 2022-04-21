@@ -84,7 +84,7 @@ class FlowService {
     payer
   }) => {
     if (config.get('network') == 'testnet') {
-      transaction = transaction.replaceAll('0xf8d6e0586b0a20c7', '0x54bdd2d47b3649c3');
+      transaction = transaction.replaceAll('0xf8d6e0586b0a20c7', '0x11399e45b4ca21a0');
     }
     const response = await fcl.send([
       fcl.transaction`
@@ -97,12 +97,12 @@ class FlowService {
       fcl.limit(9999)
     ]);
 
-    return response;    
+    return response;
   };
 
   executeScript = async ({ script, args }) => {
     if (config.get('network') == 'testnet') {
-      script = script.replaceAll('0xf8d6e0586b0a20c7', '0x54bdd2d47b3649c3');
+      script = script.replaceAll('0xf8d6e0586b0a20c7', '0x11399e45b4ca21a0');
     }
     const response = await fcl.send([fcl.script`${script}`, fcl.args(args)]);
     return await fcl.decode(response);

@@ -12,7 +12,7 @@ const ethPrivateKey = '48beef7bacb7a61d88c8f6ff44c87a007a85e8178bfe96966962390a9
 let NFTRawData = fs.readFileSync('./client/crosschain/KingHonorNFTView.json');
 let NFTAbi = JSON.parse(NFTRawData).abi;
 
-let currentId = 1;
+let currentId = 0;
 
 async function sync() {
   const script = fs.readFileSync(
@@ -40,7 +40,8 @@ async function sync() {
     const ethereum = new Ethereum();
 
     console.log('Sync NFT to rinkeby testnet');
-    await ethereum.sendTransaction(NFTContract, currentMessage.content.actionName, ethPrivateKey, [currentMessage.content.data]);
+    let ret = await ethereum.sendTransaction(NFTContract, currentMessage.content.actionName, ethPrivateKey, [currentMessage.content.data]);
+    console.log(ret);
     currentId = currentId + 1;
   }
   console.log('sleep 3 seconds.');

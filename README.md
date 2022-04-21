@@ -53,7 +53,7 @@ node client/nft/querySentMessage.mjs
 Wait for some time...You can see new NFT below:
 
 ```
-https://testnets.opensea.io/assets?search[query]=0xe524839f9CD9Eb9b3Cb166511Ba5179179ce65e8&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x182654BEA6e59494A7D96270c39Fd84Ef7A8B516&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore
