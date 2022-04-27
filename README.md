@@ -14,7 +14,7 @@ This repository contains examples of contracts that are useful when deploying, m
 ## Install
 * [Install the Flow CLI](https://docs.onflow.org/flow-cli/install/)
 
-## Important Note
+## Important note
 The private keys included in flow.json & default.json are used for test net debugging only. 
 
 ## Deploy contracts

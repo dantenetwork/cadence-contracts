@@ -50,7 +50,7 @@ async function mintNFT() {
 
 
   console.log('The new NFT has been minted and will be automatically synchronized to the rinkeby testnet in a few seconds.');
-  console.log('https://testnets.opensea.io/assets/0x182654BEA6e59494A7D96270c39Fd84Ef7A8B516/' + id);
+  console.log('https://testnets.opensea.io/assets/0x0DdD135645EC1C65b0595E7dad271F616926D5B2/' + id);
 
   console.log('Waiting for the transaction to be sealed.');
   await fcl.tx(response).onceSealed();
