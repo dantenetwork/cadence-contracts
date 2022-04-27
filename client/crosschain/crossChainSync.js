@@ -8,11 +8,13 @@ const flowService = new FlowService();
 
 // init ethereum contract
 const web3 = new Web3('https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161');
-const ethPrivateKey = '48beef7bacb7a61d88c8f6ff44c87a007a85e8178bfe96966962390a9f43c80b';
+// TODO add private key
+const ethPrivateKey = '';
+
 let NFTRawData = fs.readFileSync('./client/crosschain/KingHonorNFTView.json');
 let NFTAbi = JSON.parse(NFTRawData).abi;
 
-let currentId = 2;
+let currentId = 1;
 
 async function sync() {
   const script = fs.readFileSync(

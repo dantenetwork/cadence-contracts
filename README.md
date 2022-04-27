@@ -14,6 +14,8 @@ This repository contains examples of contracts that are useful when deploying, m
 ## Install
 * [Install the Flow CLI](https://docs.onflow.org/flow-cli/install/)
 
+## Important Note
+The private keys included in flow.json & default.json are used for test net debugging only. 
 
 ## Deploy contracts
 ```
@@ -53,7 +55,7 @@ node client/nft/querySentMessage.mjs
 Wait for some time...You can see new NFT below:
 
 ```
-https://testnets.opensea.io/assets?search[query]=0x182654BEA6e59494A7D96270c39Fd84Ef7A8B516&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x0DdD135645EC1C65b0595E7dad271F616926D5B2&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore

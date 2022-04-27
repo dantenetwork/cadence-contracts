@@ -1,5 +1,5 @@
-import SentMessageContract from 0x11399e45b4ca21a0;
-import CrossChain from 0x11399e45b4ca21a0;
+import SentMessageContract from 0xad195f2b3524404e;
+import CrossChain from 0xad195f2b3524404e;
 
 pub contract NFTCrossChain {
 

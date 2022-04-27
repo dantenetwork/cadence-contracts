@@ -2,8 +2,8 @@
 // It is not part of the official standard but it assumed to be
 // very similar to how many NFTs would implement the core functionality.
 
-import MetadataViews from 0x11399e45b4ca21a0;
-import NonFungibleToken from 0x11399e45b4ca21a0;
+import MetadataViews from 0xad195f2b3524404e;
+import NonFungibleToken from 0xad195f2b3524404e;
 
 pub contract ExampleNFT: NonFungibleToken {
 
