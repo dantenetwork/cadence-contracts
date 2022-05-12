@@ -131,9 +131,9 @@ pub contract SentMessageContract{
                                                     actionName: rst.actionName, 
                                                     data: rst.data));
                 
-                if (self.message.length > 10){
-                  self.message.removeFirst();
-                }
+                // if (self.message.length > 10){
+                //   self.message.removeFirst();
+                // }
 
             }else{
                 panic("Invalid submitter!");
