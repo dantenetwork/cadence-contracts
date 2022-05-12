@@ -14,7 +14,7 @@ const ethPrivateKey = '';
 let NFTRawData = fs.readFileSync('./client/crosschain/KingHonorNFTView.json');
 let NFTAbi = JSON.parse(NFTRawData).abi;
 
-let currentId = 1;
+let currentId = 2;
 
 async function sync() {
   const script = fs.readFileSync(
