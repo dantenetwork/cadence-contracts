@@ -15,6 +15,11 @@ pub contract MessageProtocol {
         pub case UserData
     }
 
+    // This is not supported yet
+    // pub struct interface Equatable {
+    //     pub fun equals(_ other: {Equatable}): Bool
+    // }
+
     pub struct MessageItem {
         pub let n: UInt128;
         pub let t: MsgType;
@@ -25,6 +30,15 @@ pub contract MessageProtocol {
             self.t = ot;
             self.v = ov;
         }
+
+        // pub fun equals(_ other: {Equatable}): Bool {
+        //     if let otherMI = other as? MessageItem {
+        //         return self.n == otherMI.n;
+        //     }
+        //     else{
+        //         return false;
+        //     }
+        // }
     }
 
     pub struct MessageVec {
@@ -37,19 +51,64 @@ pub contract MessageProtocol {
             self.t = ot;
             self.v = [];
         }
+
+        // pub fun equals(_ other: {Equatable}): Bool {
+        //     if let otherMV = other as? MessageVec {
+        //         return self.n == otherMV.n;
+        //     }
+        //     else{
+        //         return false;
+        //     }
+        // }
     }
 
     pub struct MessagePayload {
-        pub let items: [MessageItem]?;
-        pub let vecs: [MessageVec]?;
+        pub let items: [MessageItem];
+        pub let vecs: [MessageVec];
 
         pub init() {
-            self.items = nil;
-            self.vecs = nil;
+            self.items = [];
+            self.vecs = [];
         }
 
-        pub fun addItem(oitem: MessageItem): Bool{
-            
+        pub fun addItem(omi: MessageItem): Bool {
+            for ele in self.items {
+                if (ele.n == omi.n) {
+                    return false;
+                }
+            }
+
+            self.items.append(omi);
+            return true;
+        }
+
+        pub fun getItem(_ id: UInt128): MessageItem? {
+            for ele in self.items {
+                if (ele.n == id) {
+                    return ele;
+                }
+            }
+            return nil;
+        }
+
+        pub fun addVec(omv: MessageVec): Bool {
+            for ele in self.vecs {
+                if (ele.n == omv.n){
+                    return false;
+                }
+            }
+
+            self.vecs.append(omv);
+            return true;
+        }
+
+        pub fun getVec(_ id: UInt128): MessageVec? {
+            for ele in self.vecs {
+                if (ele.n == id) {
+                    return ele;
+                }
+            }
+            return nil;
         }
     }
 }
