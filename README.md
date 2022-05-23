@@ -1,5 +1,7 @@
 # Smart contracts for cadence
-Smart contracts that provide some of the basic functions of the dante cross chain service.
+Smart contracts that provide some of the basic functions of the dante protocol stack for Omnichains.
+
+Switch to the [demo-video](https://github.com/dantenetwork/cadence-contracts/tree/demo-video) branch to try a Demo.
 
 ## Version : 0.0.1
 

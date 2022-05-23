@@ -19,7 +19,7 @@ pub contract SentMessageContract{
         access(contract) fun getHookedContent(): msgToSubmit;
     }
 
-    // Submitter
+    // Submitter.
     pub resource Submitter: SubmitterFace{
         priv var hookedContent: msgToSubmit?;
         // in resource `Submitter`
