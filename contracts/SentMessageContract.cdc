@@ -1,13 +1,17 @@
+import MessageProtocol from 0xTheProtocolContractAddress
+
 pub contract SentMessageContract{
 
     pub struct msgToSubmit{
       pub let toChain: String;
+      pub let sqos: [MessageProtocol.SQoSItem];
       pub let contractName: String;
       pub let actionName: String;
-      pub let data: String;
+      pub let data: MessageProtocol.MessagePayload;
 
-      init(toChain: String, contractName: String, actionName: String, data: String){
+      init(toChain: String, sqos: [MessageProtocol.SQoSItem], contractName: String, actionName: String, data: MessageProtocol.MessagePayload){
           self.toChain = toChain;
+          self.sqos = sqos;
           self.contractName = contractName;
           self.actionName = actionName;
           self.data = data;
@@ -71,13 +75,19 @@ pub contract SentMessageContract{
       pub let fromChain: String; // FLOW, source chain name
       pub let toChain: String; // destination chain name
       pub let sender: String; // sender of cross chain message
-      pub let content: AnyStruct; // message content
+      pub let signer: String; // signer of the message call, the same as sender in Flow
+      pub let sqos: [MessageProtocol.SQoSItem];
+      pub let content: {String: AnyStruct}; // message content
 
-      init(id: Int, toChain: String, sender: String, contractName: String, actionName: String, data: String){
+      init(id: Int, toChain: String, sender: String, signer: String, 
+                    sqos: [MessageProtocol.SQoSItem], 
+                    contractName: String, actionName: String, data: MessageProtocol.MessagePayload){
         self.id = id;
         self.fromChain = "FLOW";
         self.toChain = toChain;
         self.sender = sender;
+        self.signer = signer;
+        self.sqos = sqos;
         self.content = {
           "contractName": contractName, // contract name of destination chain
           "actionName": actionName, // action name of contract
@@ -127,6 +137,8 @@ pub contract SentMessageContract{
                 self.message.append(SentMessageCore(id: self.message.length, 
                                                     toChain: rst.toChain, 
                                                     sender: submitterAddr.toString(), 
+                                                    signer: submitterAddr.toString(),
+                                                    sqos: rst.sqos,
                                                     contractName: rst.contractName, 
                                                     actionName: rst.actionName, 
                                                     data: rst.data));

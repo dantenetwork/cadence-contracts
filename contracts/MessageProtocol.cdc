@@ -114,14 +114,25 @@ pub contract MessageProtocol {
 
 
     /// SQoS
-    pub enum SQoS: UInt8 {
+    pub enum SQoSType: UInt8 {
         pub case Reveal
         pub case Challenge
         pub case Threshold
+        pub case Priority
+        pub case ExceptionRollback
+        pub case Anonymous
+        pub case Identity
+        pub case Isolation
+        pub case CrossVerify
     }
 
     pub struct SQoSItem {
-        pub let t: SQoS;
+        pub let t: SQoSType;
         pub let v: String;
+
+        init(type: SQoSType, value: String){
+            self.t = type;
+            self.v = value;
+        }
     }
 }
