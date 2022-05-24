@@ -141,23 +141,6 @@ pub contract SentMessageContract{
         }
 
         /**
-          * add cross chain message to SentMessageVault
-          * @param toChain - destination chain
-          * @param sender - message sender
-          * @param contractName - contract name of destination chain
-          * @param actionName - action name of destination contract
-          * @param data - contract execute data
-          */
-        // deprecated
-        // pub fun addMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String){
-        //     self.message.append(SentMessageCore(id: self.message.length, toChain: toChain, sender: sender, contractName: contractName, actionName: actionName, data: data));
-
-        //     if (self.message.length > 10){
-        //         self.message.removeFirst();
-        //     }
-        // }
-
-        /**
           * Query sent cross chain messages
           */
         pub fun getAllMessages(): [SentMessageCore]{
@@ -191,22 +174,5 @@ pub contract SentMessageContract{
       let pubLink = PublicPath(identifier: link);
       let senderRef = getAccount(msgSender).getCapability<&{SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
       return senderRef.getAllMessages();
-      // if let senderRef = senderLink.borrow(){
-      //     return senderRef.getAllMessages();
-      // } else{
-      //     panic("invalid sender address or `link`!");
-      // }
     }
-
-    // interface todo:
-    // create
-    // pub fun createSentMessageVault(msgSender: Address, link: String): @SentMessageVault{
-    //     // record the senders
-    //     return <- create SentMessageVault();
-    // }
-
-    // query senders
-    // pub fun querySenders(): [(Address, String)]{
-
-    // }
 }

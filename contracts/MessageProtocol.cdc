@@ -111,4 +111,17 @@ pub contract MessageProtocol {
             return nil;
         }
     }
+
+
+    /// SQoS
+    pub enum SQoS: UInt8 {
+        pub case Reveal
+        pub case Challenge
+        pub case Threshold
+    }
+
+    pub struct SQoSItem {
+        pub let t: SQoS;
+        pub let v: String;
+    }
 }
