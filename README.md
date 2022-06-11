@@ -1,4 +1,4 @@
-# Smart contracts for cadence
+# Protocol stack for cadence
 Smart contracts that provide some of the basic functions of the dante protocol stack for Omnichains.
 
 ## Version : 0.0.1
