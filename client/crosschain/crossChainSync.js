@@ -14,7 +14,8 @@ const ethPrivateKey = '';
 let NFTRawData = fs.readFileSync('./client/crosschain/KingHonorNFTView.json');
 let NFTAbi = JSON.parse(NFTRawData).abi;
 
-let currentId = 2;
+let currentId = 37;
+console.log('Initating cross chain sync service...');
 
 async function sync() {
   const script = fs.readFileSync(
@@ -32,6 +33,7 @@ async function sync() {
 
   const lastId = result.length;
   if (currentId < lastId) {
+    console.log(new Date);
     let currentMessage = result[currentId];
     console.log('Found new NFT :');
     console.log(currentMessage);
@@ -46,7 +48,7 @@ async function sync() {
     console.log(ret);
     currentId = currentId + 1;
   }
-  console.log('sleep 3 seconds.');
+  // console.log('sleep 3 seconds.');
   setTimeout(async () => {
     await sync();
   }, 3000);
