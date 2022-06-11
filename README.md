@@ -1,8 +1,6 @@
 # Smart contracts for cadence
 Smart contracts that provide some of the basic functions of the dante protocol stack for Omnichains.
 
-Switch to the [demo-video](https://github.com/dantenetwork/cadence-contracts/tree/demo-video) branch to try a Demo.
-
 ## Version : 0.0.1
 
 This repository contains examples of contracts that are useful when deploying, managing, and/or using an DANTE network. They are provided for reference purposes:
