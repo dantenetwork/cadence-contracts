@@ -19,7 +19,7 @@ The private keys included in flow.json & default.json are used for test net debu
 
 ## Deploy contracts
 ```
-# Generate flow.json for emulator
+# Generate flow.json for emulator(Local Test Only)
 flow init
 
 # Start local emulator
@@ -28,11 +28,11 @@ flow emulator
 # Deploy contracts
 flow project deploy
 
+# Update contracts
+flow project deploy --update
+
 # Deploy contracts to testnet
 flow project deploy --network testnet
-
-# Update contracts
-sh ./updateContract.sh
 ```
 
 ## Examples
