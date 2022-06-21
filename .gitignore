@@ -1,5 +1,6 @@
 client/node_modules
 erc721/node_modules
 erc721/.secret
+erc721/build
 .DS_Store
 client/package-lock.json
