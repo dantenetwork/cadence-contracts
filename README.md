@@ -17,7 +17,20 @@ This repository contains examples of contracts that are useful when deploying, m
 ## Important note
 The private keys included in flow.json & default.json are used for test net debugging only. 
 
-## Deploy contracts
+## Deploy solidity contracts to rinkeby testnet
+```
+cd erc721
+truffle compile
+truffle deploy --network rinkeby --reset --skip-dry-run
+```
+
+## Mint NFT on rinkeby testnet
+```
+cd erc721
+node scripts/mint.js
+```
+
+## Deploy flow contracts
 ```
 # Generate flow.json for emulator(Local Test Only)
 flow init
