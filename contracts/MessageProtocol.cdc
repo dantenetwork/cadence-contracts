@@ -1,18 +1,28 @@
 pub contract MessageProtocol {
     /// Message Payload Defination
     pub enum MsgType: UInt8 {
-        pub case InkString
-        pub case InkU8
-        pub case InkU16
-        pub case InkU32
-        pub case InkU64
-        pub case InkU128
-        pub case InkI8
-        pub case InkI16
-        pub case InkI32
-        pub case InkI64
-        pub case InkI128
-        pub case UserData
+        pub case cdcString
+        pub case cdcU8
+        pub case cdcU16
+        pub case cdcU32
+        pub case cdcU64
+        pub case cdcU128
+        pub case cdcI8
+        pub case cdcI16
+        pub case cdcI32
+        pub case cdcI64
+        pub case cdcI128
+        pub case cdcVecString
+        pub case cdcVecU8
+        pub case cdcVecU16
+        pub case cdcVecU32
+        pub case cdcVecU64
+        pub case cdcVecU128
+        pub case cdcVecI8
+        pub case cdcVecI16
+        pub case cdcVecI32
+        pub case cdcVecI64
+        pub case cdcVecI128
     }
 
     // This is not supported yet
@@ -23,9 +33,9 @@ pub contract MessageProtocol {
     pub struct MessageItem {
         pub let n: UInt128;
         pub let t: MsgType;
-        pub let v: String;
+        pub let v: AnyStruct;
 
-        pub init(on: UInt128, ot: MsgType, ov: String){
+        pub init(on: UInt128, ot: MsgType, ov: AnyStruct){
             self.n = on;
             self.t = ot;
             self.v = ov;
@@ -41,34 +51,11 @@ pub contract MessageProtocol {
         // }
     }
 
-    pub struct MessageVec {
-        pub let n: UInt128;
-        pub let t: MsgType;
-        pub let v: [String];
-
-        pub init(on: UInt128, ot: MsgType){
-            self.n = on;
-            self.t = ot;
-            self.v = [];
-        }
-
-        // pub fun equals(_ other: {Equatable}): Bool {
-        //     if let otherMV = other as? MessageVec {
-        //         return self.n == otherMV.n;
-        //     }
-        //     else{
-        //         return false;
-        //     }
-        // }
-    }
-
     pub struct MessagePayload {
         pub let items: [MessageItem];
-        pub let vecs: [MessageVec];
 
         pub init() {
             self.items = [];
-            self.vecs = [];
         }
 
         pub fun addItem(omi: MessageItem): Bool {
@@ -90,28 +77,7 @@ pub contract MessageProtocol {
             }
             return nil;
         }
-
-        pub fun addVec(omv: MessageVec): Bool {
-            for ele in self.vecs {
-                if (ele.n == omv.n){
-                    return false;
-                }
-            }
-
-            self.vecs.append(omv);
-            return true;
-        }
-
-        pub fun getVec(_ id: UInt128): MessageVec? {
-            for ele in self.vecs {
-                if (ele.n == id) {
-                    return ele;
-                }
-            }
-            return nil;
-        }
     }
-
 
     /// SQoS
     pub enum SQoSType: UInt8 {
@@ -120,6 +86,7 @@ pub contract MessageProtocol {
         pub case Threshold
         pub case Priority
         pub case ExceptionRollback
+        pub case SelectionDelay
         pub case Anonymous
         pub case Identity
         pub case Isolation
