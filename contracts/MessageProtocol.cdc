@@ -35,7 +35,7 @@ pub contract MessageProtocol {
         pub let t: MsgType;
         pub let v: AnyStruct;
 
-        pub init(on: UInt128, ot: MsgType, ov: AnyStruct){
+        access(contract) init(on: UInt128, ot: MsgType, ov: AnyStruct){
             self.n = on;
             self.t = ot;
             self.v = ov;
@@ -100,6 +100,79 @@ pub contract MessageProtocol {
         init(type: SQoSType, value: String){
             self.t = type;
             self.v = value;
+        }
+    }
+
+    pub fun createMessageItem(ocn: UInt128, oct: MsgType, ocv: AnyStruct): MessageItem?{
+        switch oct {
+            case MsgType.cdcString: 
+                let v: String = ocv as? String!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcU8: 
+                let v: UInt8 = ocv as? UInt8!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcU16: 
+                let v: UInt16 = ocv as? UInt16!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcU32: 
+                let v: UInt32 = ocv as? UInt32!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcU64: 
+                let v: UInt64 = ocv as? UInt64!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcU128: 
+                let v: UInt128 = ocv as? UInt128!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcI8: 
+                let v: Int8 = ocv as? Int8!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcI16: 
+                let v: Int16 = ocv as? Int16!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcI32: 
+                let v: Int32 = ocv as? Int32!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcI64: 
+                let v: Int64 = ocv as? Int64!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcI128: 
+                let v: Int128 = ocv as? Int128!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecString: 
+                let v: [String] = ocv as? [String]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecU8: 
+                let v: [UInt8] = ocv as? [UInt8]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecU16: 
+                let v: [UInt16] = ocv as? [UInt16]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecU32: 
+                let v: [UInt32] = ocv as? [UInt32]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecU64: 
+                let v: [UInt64] = ocv as? [UInt64]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecU128: 
+                let v: [UInt128] = ocv as? [UInt128]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecI8: 
+                let v: [Int8] = ocv as? [Int8]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecI16: 
+                let v: [Int16] = ocv as? [Int16]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecI32: 
+                let v: [Int32] = ocv as? [Int32]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecI64: 
+                let v: [Int64] = ocv as? [Int64]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            case MsgType.cdcVecI128: 
+                let v: [Int128] = ocv as? [Int128]!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+            default:
+                return nil;
         }
     }
 }
