@@ -41,6 +41,85 @@ pub contract MessageProtocol {
             self.v = ov;
         }
 
+        pub fun toBytes(): [UInt8] {
+            var dataBytes: [UInt8] = [];
+            dataBytes = dataBytes.concat(self.n.toBigEndianBytes());
+            dataBytes = dataBytes.concat([self.t as? UInt8!]);
+
+            //TODO: check how `AnyStruct` can be encoded into `[UInt8]` conveniently
+            switch self.t {
+                case MsgType.cdcString:
+                    dataBytes = dataBytes.concat(self.v as? String!.utf8);
+                case MsgType.cdcU8: 
+                let v: UInt8 = ocv as? UInt8!;
+                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcU16: 
+                    let v: UInt16 = ocv as? UInt16!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcU32: 
+                    let v: UInt32 = ocv as? UInt32!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcU64: 
+                    let v: UInt64 = ocv as? UInt64!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcU128: 
+                    let v: UInt128 = ocv as? UInt128!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcI8: 
+                    let v: Int8 = ocv as? Int8!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcI16: 
+                    let v: Int16 = ocv as? Int16!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcI32: 
+                    let v: Int32 = ocv as? Int32!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcI64: 
+                    let v: Int64 = ocv as? Int64!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcI128: 
+                    let v: Int128 = ocv as? Int128!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecString: 
+                    let v: [String] = ocv as? [String]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecU8: 
+                    let v: [UInt8] = ocv as? [UInt8]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecU16: 
+                    let v: [UInt16] = ocv as? [UInt16]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecU32: 
+                    let v: [UInt32] = ocv as? [UInt32]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecU64: 
+                    let v: [UInt64] = ocv as? [UInt64]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecU128: 
+                    let v: [UInt128] = ocv as? [UInt128]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecI8: 
+                    let v: [Int8] = ocv as? [Int8]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecI16: 
+                    let v: [Int16] = ocv as? [Int16]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecI32: 
+                    let v: [Int32] = ocv as? [Int32]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecI64: 
+                    let v: [Int64] = ocv as? [Int64]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                case MsgType.cdcVecI128: 
+                    let v: [Int128] = ocv as? [Int128]!;
+                    return MessageItem(on: ocn, ot: oct, ov: ocv);
+                default:
+                    return nil;
+            }
+
+            return dataBytes;
+        }
+
         // pub fun equals(_ other: {Equatable}): Bool {
         //     if let otherMI = other as? MessageItem {
         //         return self.n == otherMI.n;
@@ -77,6 +156,14 @@ pub contract MessageProtocol {
             }
             return nil;
         }
+
+        pub fun toBytes(): [UInt8] {
+            var dataBytes: [UInt8] = [];
+
+            //TODO: iterate `self.items` to build the encoding bytes
+
+            return dataBytes;
+        }
     }
 
     /// SQoS
@@ -101,6 +188,14 @@ pub contract MessageProtocol {
             self.t = type;
             self.v = value;
         }
+
+        pub fun toBytes(): [UInt8] {
+            var dataBytes: [UInt8] = [];
+            dataBytes = dataBytes.concat([self.t as? UInt8!]);
+            dataBytes = dataBytes.concat(self.v.utf8);
+
+            return dataBytes;
+        }
     }
 
     /// Session
@@ -116,6 +211,15 @@ pub contract MessageProtocol {
             self.id = oId;
             self.type = oType;
             self.callback = oCallback;
+        }
+
+        pub fun toBytes(): [UInt8] {
+            var dataBytes: [UInt8] = [];
+            dataBytes = dataBytes.concat(self.id.toBigEndianBytes());
+            dataBytes = dataBytes.concat([self.type]);
+            dataBytes = dataBytes.concat(self.callback.utf8);
+
+            return dataBytes;
         }
     }
 

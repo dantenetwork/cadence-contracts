@@ -1,11 +1,11 @@
 
 pub contract CrossChain {
-    pub var RegisteredContracts:[Address]; // stores all contracts' address
+    pub var RegisteredRecvAccounts:[Address]; // stores all contracts' address
     pub var Validators:[Address]; // stores all validators' address
 
     // init cross chain
     init(){
-        self.RegisteredContracts = [];
+        self.RegisteredRecvAccounts = [];
         self.Validators = [];
     }
 
@@ -15,17 +15,17 @@ pub contract CrossChain {
       */
     pub fun registerRecvAccount(address: Address): Bool{
         // append contract's address into RegisteredContracts
-        if(self.RegisteredContracts.contains(address)){
+        if(self.RegisteredRecvAccounts.contains(address)){
             return false;
         }
-        self.RegisteredContracts.append(address);
+        self.RegisteredRecvAccounts.append(address);
         return true;
     }
 
     /**
       * Query registered contract list
       */
-    pub fun queryRegisteredContracts(): [Address]{
-      return self.RegisteredContracts;
+    pub fun queryRegisteredRecvAccount(): [Address]{
+      return self.RegisteredRecvAccounts;
     }
 }

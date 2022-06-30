@@ -1,3 +1,5 @@
+import MessageProtocol from 0xTheProtocolContractAddress
+
 pub contract ReceivedMessageContract{
 
     // Define message core
@@ -6,27 +8,36 @@ pub contract ReceivedMessageContract{
       pub let fromChain: String; // FLOW, source chain name
       pub let toChain: String; // destination chain name
       pub let sender: String; // sender of cross chain message
+      pub let sqos: MessageProtocol.SQoS;
       pub let content: AnyStruct; // message content
+      pub let session: MessageProtocol.Session;
       pub let messageHash: String; // message hash value
 
-      init(id: Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String){
+      init(id: Int, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
+            contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
+            session: MessageProtocol.Session){
         self.id = id;
         self.fromChain = fromChain;
         self.toChain = "FLOW";
         self.sender = sender;
+        self.sqos = sqos;
         self.content = {
           "contractName": contractName, // contract name of destination chain
           "actionName": actionName, // action name of contract
           "data": data // cross chain message data
         };
+        self.session = session;
 
         // hash message info
         var originData: [UInt8] = id.toBigEndianBytes();
         originData = originData.concat(fromChain.utf8);
+        originData = originData.concat(toChain.utf8);
         originData = originData.concat(sender.utf8);
+        originData = originData.concat(sqos.toBytes());
         originData = originData.concat(contractName.utf8);
         originData = originData.concat(actionName.utf8);
-        originData = originData.concat(data.utf8);
+        originData = originData.concat(data.toBytes());
+        originData = originData.concat(session.toBytes());
         let digest = HashAlgorithm.SHA2_256.hash(originData);
         self.messageHash = String.encodeHex(digest);
       }

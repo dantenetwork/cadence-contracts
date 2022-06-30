@@ -8,17 +8,19 @@ pub contract SentMessageContract{
       pub let contractName: String;
       pub let actionName: String;
       pub let data: MessageProtocol.MessagePayload;
-      pub let session: MessageProtocol.Session;
+      pub let callType: UInt8;
+      pub let callback: String?;
 
       init(toChain: String, sqos: [MessageProtocol.SQoSItem], 
-            contractName: String, actionName: String, data: MessageProtocol.MessagePayload, 
-            session: MessageProtocol.Session){
+            contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
+            callType: UInt8, callback: String?){
           self.toChain = toChain;
           self.sqos = sqos;
           self.contractName = contractName;
           self.actionName = actionName;
           self.data = data;
-          self.session = session;
+          self.callType = callType;
+          self.callback = callback;
       }
     }
 
@@ -82,10 +84,12 @@ pub contract SentMessageContract{
       pub let signer: String; // signer of the message call, the same as sender in Flow
       pub let sqos: [MessageProtocol.SQoSItem];
       pub let content: {String: AnyStruct}; // message content
+      pub let session: MessageProtocol.Session;
 
       init(id: Int, toChain: String, sender: String, signer: String, 
                     sqos: [MessageProtocol.SQoSItem], 
-                    contractName: String, actionName: String, data: MessageProtocol.MessagePayload){
+                    contractName: String, actionName: String, data: MessageProtocol.MessagePayload, 
+                    session: MessageProtocol.Session){
         self.id = id;
         self.fromChain = "FLOW";
         self.toChain = toChain;
@@ -97,6 +101,7 @@ pub contract SentMessageContract{
           "actionName": actionName, // action name of contract
           "data": data // cross chain message data
         };
+        self.session = session;
       }
     }
 
@@ -117,10 +122,12 @@ pub contract SentMessageContract{
 
     // Define sent message vault
     pub resource SentMessageVault: SentMessageInterface, AcceptorFace{
+        var sessionID: UInt128;
         pub let message: [SentMessageCore];
 
         init(){
             self.message = [];
+            self.sessionID = 0;
         }
 
         /**
@@ -145,8 +152,11 @@ pub contract SentMessageContract{
                                                     sqos: rst.sqos,
                                                     contractName: rst.contractName, 
                                                     actionName: rst.actionName, 
-                                                    data: rst.data));
+                                                    data: rst.data,
+                                                    session: MessageProtocol.Session(id: self.sessionID, type: rst.callType, callback: rst.callback)));
                 
+                self.session = self.session + 1;
+
                 // if (self.message.length > 10){
                 //   self.message.removeFirst();
                 // }
