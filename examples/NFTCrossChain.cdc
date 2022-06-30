@@ -53,6 +53,6 @@ pub contract NFTCrossChain {
       * Register current contract into cross chain contract
       */
     pub fun register():Bool{
-      return CrossChain.registerContract(address: self.account.address);
+      return CrossChain.registerRecvAccount(address: self.account.address);
     }
 }

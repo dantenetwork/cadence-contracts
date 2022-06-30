@@ -10,10 +10,10 @@ pub contract CrossChain {
     }
 
     /**
-      * Register contract's address into cross chain contract
-      * @param address - address of contract
+      * Register the address of accouts wanna to receive visiting from other chains into cross chain contract
+      * @param address - address of account
       */
-    pub fun registerContract(address: Address): Bool{
+    pub fun registerRecvAccount(address: Address): Bool{
         // append contract's address into RegisteredContracts
         if(self.RegisteredContracts.contains(address)){
             return false;

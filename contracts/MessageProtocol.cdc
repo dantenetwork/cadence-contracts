@@ -103,6 +103,22 @@ pub contract MessageProtocol {
         }
     }
 
+    /// Session
+    /// Member@type: 0, C-C(Corss-Chain) call requires call_back; 1, C-C call ignores call_back; 2, C-C call_back;
+    pub struct Session {
+        pub let id: UInt32;
+        pub let type: UInt8;
+        pub let callback: String;
+
+        //TODO: commitment
+
+        init(oId: UInt32, oType: UInt8, oCallback: String) {
+            self.id = oId;
+            self.type = oType;
+            self.callback = oCallback;
+        }
+    }
+
     pub fun createMessageItem(ocn: UInt128, oct: MsgType, ocv: AnyStruct): MessageItem?{
         switch oct {
             case MsgType.cdcString: 

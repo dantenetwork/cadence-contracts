@@ -8,13 +8,17 @@ pub contract SentMessageContract{
       pub let contractName: String;
       pub let actionName: String;
       pub let data: MessageProtocol.MessagePayload;
+      pub let session: MessageProtocol.Session;
 
-      init(toChain: String, sqos: [MessageProtocol.SQoSItem], contractName: String, actionName: String, data: MessageProtocol.MessagePayload){
+      init(toChain: String, sqos: [MessageProtocol.SQoSItem], 
+            contractName: String, actionName: String, data: MessageProtocol.MessagePayload, 
+            session: MessageProtocol.Session){
           self.toChain = toChain;
           self.sqos = sqos;
           self.contractName = contractName;
           self.actionName = actionName;
           self.data = data;
+          self.session = session;
       }
     }
 
