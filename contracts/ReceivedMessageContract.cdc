@@ -66,7 +66,7 @@ pub contract ReceivedMessageContract{
 
     // Define received message array
     pub struct ReceivedMessageArray{
-      pub let msgInstance: {Hash, messageCopy};
+      pub let msgInstance: {[UInt8], messageCopy};
 
       init(receivedMessageCore: ReceivedMessageCore){
         self.message = [receivedMessageCore];
