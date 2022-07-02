@@ -45,9 +45,9 @@ pub contract ReceivedMessageContract{
 
      // Interface is used for access control.
     pub resource interface ReceivedMessageInterface{
-        pub message: [ReceivedMessageArray];
+        pub message: [ReceivedMessageCache];
 
-        pub fun getMessageById(messageId: Int):ReceivedMessageArray;
+        pub fun getMessageById(messageId: Int):ReceivedMessageCache;
 
         pub fun getMessageCount(): Int;
 
@@ -62,14 +62,18 @@ pub contract ReceivedMessageContract{
             self messageInfo = om;
             submitters = [];
         }
+
+        pub fun addSubmitter(submitter: UInt128) {
+            self.submitters.append(submitter);
+        }
     }
 
     // Define received message array
-    pub struct ReceivedMessageArray{
-      pub let msgInstance: {[UInt8], messageCopy};
+    pub struct ReceivedMessageCache{
+      pub let msgInstance: {String, messageCopy};
 
       init(receivedMessageCore: ReceivedMessageCore){
-        self.message = [receivedMessageCore];
+        self.msgInstance = [receivedMessageCore];
       }
 
       pub fun append(receivedMessageCore: ReceivedMessageCore){
