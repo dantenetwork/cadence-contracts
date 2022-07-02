@@ -54,9 +54,19 @@ pub contract ReceivedMessageContract{
         pub fun messageVerify(messageId: Int): Bool;
     }
 
+    pub struct messageCopy {
+        pub let messageInfo: ReceivedMessageCore;
+        pub let submitters: [UInt128];
+
+        init(om: ReceivedMessageCore) {
+            self messageInfo = om;
+            submitters = [];
+        }
+    }
+
     // Define received message array
     pub struct ReceivedMessageArray{
-      pub let message: [ReceivedMessageCore];
+      pub let msgInstance: {Hash, messageCopy};
 
       init(receivedMessageCore: ReceivedMessageCore){
         self.message = [receivedMessageCore];
@@ -89,14 +99,18 @@ pub contract ReceivedMessageContract{
           * @param actionName - action name of source contract
           * @param data - contract execute data
           */
-        pub fun addMessage(messageId: Int, fromChain: String, sender: String, contractName: String, actionName: String, data: String){
+        pub fun submitRecvMessage(id: Int, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
+                                  contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
+                                  session: MessageProtocol.Session){
           // TODO
           /*
             * the submitter of the message should be verified
             * this can be done by the signature and public keys routers registered(`ReceivedMessageContract.registerRouter`)
           */
           
-          let receivedMessageCore = ReceivedMessageCore(id:messageId, fromChain:fromChain, sender:sender, contractName:contractName, actionName:actionName, data:data);
+          let receivedMessageCore = ReceivedMessageCore(id: id, fromChain: fromChain, sender: sender, sqos: sqos, 
+                                                        contractName: contractName, actionName: actionName, data: data,
+                                                        session: session);
           if(self.message.length < messageId + 1){
             // message id not exists
             let receivedMessageArray = ReceivedMessageArray(receivedMessageCore:receivedMessageCore);

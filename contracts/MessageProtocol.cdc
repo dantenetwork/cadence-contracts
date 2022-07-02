@@ -181,7 +181,7 @@ pub contract MessageProtocol {
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
 
-            //TODO: iterate `self.items` to build the encoding bytes
+            //iterate `self.items` to build the encoding bytes
             for ele in self.items {
                 dataBytes = dataBytes.concat(ele.toBytes());
             }
