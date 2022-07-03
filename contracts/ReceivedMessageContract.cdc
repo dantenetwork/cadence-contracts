@@ -41,6 +41,10 @@ pub contract ReceivedMessageContract{
             let digest = HashAlgorithm.SHA2_256.hash(originData);
             self.messageHash = String.encodeHex(digest);
         }
+
+        pub fun getRecvMessageHash(): [UInt8] {
+            return self.messageHash.decodeHex();
+        }
     }
 
      // Interface is used for access control.
@@ -57,10 +61,12 @@ pub contract ReceivedMessageContract{
     pub struct messageCopy {
         pub let messageInfo: ReceivedMessageCore;
         pub let submitters: [Address];
+        pub var credibility: UInt128;
 
         init(om: ReceivedMessageCore) {
             self messageInfo = om;
-            submitters = [];
+            self.submitters = [];
+            self.credibility = 0;
         }
 
         pub fun addSubmitter(submitter: Address) {
@@ -89,17 +95,17 @@ pub contract ReceivedMessageContract{
             }
             
             // Add to related messageCopy
-            if (self.msgInstance.contains(receivedMessageCore.messageHash)) {
-                self.msgInstance[receivedMessageCore.messageHash].submitters.append()
+            if (self.msgInstance.containsKey(receivedMessageCore.messageHash)) {
+                self.msgInstance[receivedMessageCore.messageHash].submitters.append(pubAddr);
             } else {
                 let mCopy = messageCopy(om: receivedMessageCore);
-                mCopy.addSubmitter(submitter: pubkey);
-                self.msgInstance.insert(receivedMessageCore.messageHash, messageCopy());
+                mCopy.addSubmitter(submitter: pubAddr);
+                self.msgInstance.insert(key: receivedMessageCore.messageHash, mCopy);
             }
         }
 
         pub fun getMessageCount(): Int{
-            return self.message.length;
+            return self.msgInstance.length;
         }
     }
 
