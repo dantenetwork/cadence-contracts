@@ -4,43 +4,43 @@ pub contract ReceivedMessageContract{
 
     // Define message core
     pub struct ReceivedMessageCore{
-      pub let id: Int; // message id
-      pub let fromChain: String; // FLOW, source chain name
-      pub let toChain: String; // destination chain name
-      pub let sender: String; // sender of cross chain message
-      pub let sqos: MessageProtocol.SQoS;
-      pub let content: AnyStruct; // message content
-      pub let session: MessageProtocol.Session;
-      pub let messageHash: String; // message hash value
+        pub let id: Int; // message id
+        pub let fromChain: String; // FLOW, source chain name
+        pub let toChain: String; // destination chain name
+        pub let sender: String; // sender of cross chain message
+        pub let sqos: MessageProtocol.SQoS;
+        pub let content: AnyStruct; // message content
+        pub let session: MessageProtocol.Session;
+        pub let messageHash: String; // message hash value
 
-      init(id: Int, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
-            contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
-            session: MessageProtocol.Session){
-        self.id = id;
-        self.fromChain = fromChain;
-        self.toChain = "FLOW";
-        self.sender = sender;
-        self.sqos = sqos;
-        self.content = {
-          "contractName": contractName, // contract name of destination chain
-          "actionName": actionName, // action name of contract
-          "data": data // cross chain message data
-        };
-        self.session = session;
+        init(id: Int, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
+              contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
+              session: MessageProtocol.Session){
+            self.id = id;
+            self.fromChain = fromChain;
+            self.toChain = "FLOW";
+            self.sender = sender;
+            self.sqos = sqos;
+            self.content = {
+              "contractName": contractName, // contract name of destination chain
+              "actionName": actionName, // action name of contract
+              "data": data // cross chain message data
+            };
+            self.session = session;
 
-        // hash message info
-        var originData: [UInt8] = id.toBigEndianBytes();
-        originData = originData.concat(fromChain.utf8);
-        originData = originData.concat(toChain.utf8);
-        originData = originData.concat(sender.utf8);
-        originData = originData.concat(sqos.toBytes());
-        originData = originData.concat(contractName.utf8);
-        originData = originData.concat(actionName.utf8);
-        originData = originData.concat(data.toBytes());
-        originData = originData.concat(session.toBytes());
-        let digest = HashAlgorithm.SHA2_256.hash(originData);
-        self.messageHash = String.encodeHex(digest);
-      }
+            // hash message info
+            var originData: [UInt8] = id.toBigEndianBytes();
+            originData = originData.concat(fromChain.utf8);
+            originData = originData.concat(toChain.utf8);
+            originData = originData.concat(sender.utf8);
+            originData = originData.concat(sqos.toBytes());
+            originData = originData.concat(contractName.utf8);
+            originData = originData.concat(actionName.utf8);
+            originData = originData.concat(data.toBytes());
+            originData = originData.concat(session.toBytes());
+            let digest = HashAlgorithm.SHA2_256.hash(originData);
+            self.messageHash = String.encodeHex(digest);
+        }
     }
 
      // Interface is used for access control.
@@ -56,33 +56,51 @@ pub contract ReceivedMessageContract{
 
     pub struct messageCopy {
         pub let messageInfo: ReceivedMessageCore;
-        pub let submitters: [UInt128];
+        pub let submitters: [Address];
 
         init(om: ReceivedMessageCore) {
             self messageInfo = om;
             submitters = [];
         }
 
-        pub fun addSubmitter(submitter: UInt128) {
+        pub fun addSubmitter(submitter: Address) {
             self.submitters.append(submitter);
         }
     }
 
     // Define received message array
     pub struct ReceivedMessageCache{
-      pub let msgInstance: {String, messageCopy};
+        pub let msgInstance: {String, messageCopy};
 
-      init(receivedMessageCore: ReceivedMessageCore){
-        self.msgInstance = [receivedMessageCore];
-      }
+        init(){
+            self.msgInstance = {};
+        }
 
-      pub fun append(receivedMessageCore: ReceivedMessageCore){
-        self.message.append(receivedMessageCore);
-      }
+        pub fun insert(receivedMessageCore: ReceivedMessageCore, pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]){
+            // Verify the signature
+            let pubAcct = getAccount(pubAddr);
+            let pk = PublicKey(publicKey: pubAcct.keys.get(keyIndex: 0)!.decodeHex(), 
+                                signatureAlgorithm: signatureAlgorithm);
+            if (!pk.verify(signature: signature,
+                            signedData: self.messageHash.decodeHex(),
+                            domainSeparationTag: "",
+                            hashAlgorithm: HashAlgorithm.SHA2_256)) {
+                return;
+            }
+            
+            // Add to related messageCopy
+            if (self.msgInstance.contains(receivedMessageCore.messageHash)) {
+                self.msgInstance[receivedMessageCore.messageHash].submitters.append()
+            } else {
+                let mCopy = messageCopy(om: receivedMessageCore);
+                mCopy.addSubmitter(submitter: pubkey);
+                self.msgInstance.insert(receivedMessageCore.messageHash, messageCopy());
+            }
+        }
 
-      pub fun getMessageCount(): Int{
-        return self.message.length;
-      }
+        pub fun getMessageCount(): Int{
+            return self.message.length;
+        }
     }
 
     // define resource to stores received cross chain message 
