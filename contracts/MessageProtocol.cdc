@@ -1,4 +1,6 @@
 pub contract MessageProtocol {
+    access(contract) var messageID: UInt128;
+    
     /// Message Payload Defination
     pub enum MsgType: UInt8 {
         pub case cdcString
@@ -90,51 +92,49 @@ pub contract MessageProtocol {
                     dataBytes = dataBytes.concat(self.v as? [UInt8]!);
                     break;
                 case MsgType.cdcVecU16: 
-                    for ele in self.v as? [UInt16] {
+                    for ele in self.v as? [UInt16]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecU32: 
-                    for ele in self.v as? [UInt32] {
+                    for ele in self.v as? [UInt32]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecU64: 
-                    for ele in self.v as? [UInt64] {
+                    for ele in self.v as? [UInt64]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecU128: 
-                    for ele in self.v as? [UInt128] {
+                    for ele in self.v as? [UInt128]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI8: 
-                    for ele in self.v as? [Int8] {
+                    for ele in self.v as? [Int8]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI16: 
-                    for ele in self.v as? [Int16] {
+                    for ele in self.v as? [Int16]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI32: 
-                    for ele in self.v as? [Int32] {
+                    for ele in self.v as? [Int32]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI64: 
-                    for ele in self.v as? [Int64] {
+                    for ele in self.v as? [Int64]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI128: 
-                    for ele in self.v as? [Int128] {
+                    for ele in self.v as? [Int128]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
-                    break;
-                default:
                     break;
             }
 
@@ -247,6 +247,10 @@ pub contract MessageProtocol {
         }
     }
 
+    init() {
+        self.messageID = 0;
+    }
+
     pub fun createMessageItem(ocn: UInt128, oct: MsgType, ocv: AnyStruct): MessageItem?{
         switch oct {
             case MsgType.cdcString: 
@@ -318,5 +322,11 @@ pub contract MessageProtocol {
             default:
                 return nil;
         }
+    }
+
+    pub fun getNextMessageID(): UInt128 {
+        let id = self.messageID;
+        self.messageID = self.messageID + 1;
+        return id;
     }
 }

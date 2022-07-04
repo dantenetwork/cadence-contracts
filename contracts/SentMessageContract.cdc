@@ -77,7 +77,7 @@ pub contract SentMessageContract{
 
     // Define message core
     pub struct SentMessageCore{
-      pub let id: Int; // message id
+      pub let id: UInt128; // message id
       pub let fromChain: String; // FLOW, source chain name
       pub let toChain: String; // destination chain name
       pub let sender: String; // sender of cross chain message
@@ -86,7 +86,7 @@ pub contract SentMessageContract{
       pub let content: {String: AnyStruct}; // message content
       pub let session: MessageProtocol.Session;
 
-      init(id: Int, toChain: String, sender: String, signer: String, 
+      init(id: UInt128, toChain: String, sender: String, signer: String, 
                     sqos: [MessageProtocol.SQoSItem], 
                     contractName: String, actionName: String, data: MessageProtocol.MessagePayload, 
                     session: MessageProtocol.Session){
@@ -147,7 +147,7 @@ pub contract SentMessageContract{
             if let submittorRef = submittorLink.borrow(){
                 let rst = submittorRef.getHookedContent();
                 
-                self.message.append(SentMessageCore(id: self.message.length, 
+                self.message.append(SentMessageCore(id: MessageProtocol.getNextMessageID(), 
                                                     toChain: rst.toChain, 
                                                     sender: submitterAddr.toString(), 
                                                     signer: submitterAddr.toString(),

@@ -4,7 +4,7 @@ pub contract ReceivedMessageContract{
 
     // Define message core
     pub struct ReceivedMessageCore{
-        pub let id: Int; // message id
+        pub let id: UInt128; // message id
         pub let fromChain: String; // FLOW, source chain name
         pub let toChain: String; // destination chain name
         pub let sender: String; // sender of cross chain message
@@ -13,7 +13,7 @@ pub contract ReceivedMessageContract{
         pub let session: MessageProtocol.Session;
         pub let messageHash: String; // message hash value
 
-        init(id: Int, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
+        init(id: UInt128, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
               contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
               session: MessageProtocol.Session){
             self.id = id;
@@ -56,6 +56,8 @@ pub contract ReceivedMessageContract{
         pub fun getMessageCount(): Int;
 
         pub fun messageVerify(messageId: Int): Bool;
+
+        pub fun isValidRecver(): Bool;
     }
 
     pub struct messageCopy {
@@ -77,23 +79,16 @@ pub contract ReceivedMessageContract{
     // Define received message array
     pub struct ReceivedMessageCache{
         pub let msgInstance: {String, messageCopy};
+        pub let msgID: UInt128;
+        pub var msgCount: Int;
 
-        init(){
+        init(id: UInt128){
             self.msgInstance = {};
+            self.msgID = id;
+            self.msgCount = 0;
         }
 
-        pub fun insert(receivedMessageCore: ReceivedMessageCore, pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]){
-            // Verify the signature
-            let pubAcct = getAccount(pubAddr);
-            let pk = PublicKey(publicKey: pubAcct.keys.get(keyIndex: 0)!.decodeHex(), 
-                                signatureAlgorithm: signatureAlgorithm);
-            if (!pk.verify(signature: signature,
-                            signedData: self.messageHash.decodeHex(),
-                            domainSeparationTag: "",
-                            hashAlgorithm: HashAlgorithm.SHA2_256)) {
-                return;
-            }
-            
+        pub fun insert(receivedMessageCore: ReceivedMessageCore, pubAddr: Address){
             // Add to related messageCopy
             if (self.msgInstance.containsKey(receivedMessageCore.messageHash)) {
                 self.msgInstance[receivedMessageCore.messageHash].submitters.append(pubAddr);
@@ -102,21 +97,29 @@ pub contract ReceivedMessageContract{
                 mCopy.addSubmitter(submitter: pubAddr);
                 self.msgInstance.insert(key: receivedMessageCore.messageHash, mCopy);
             }
+            self.msgCount = self.msgCount + 1;
         }
 
         pub fun getMessageCount(): Int{
-            return self.msgInstance.length;
+            // var sum: Int = 0;
+            // for ele in self.msgInstance.values {
+            //     sum = sum + ele.submitters.length;
+            // }
+            // return sum;
+            return self.msgCount;
         }
     }
 
     // define resource to stores received cross chain message 
     pub resource ReceivedMessageVault: ReceivedMessageInterface{
-        pub let message: [ReceivedMessageArray];
+        pub let message: {String, [ReceivedMessageCache]};
         pub let executableCount: Int;
+        pub var completedID: UInt128;   //TODO: check this tommorow!
 
         init(){
-          self.message = [];
+          self.message = {};
           self.executableCount = 10;
+          self.completedID = 0;
         }
 
         /**
@@ -126,31 +129,60 @@ pub contract ReceivedMessageContract{
           * @param contractName - contract name of source chain
           * @param actionName - action name of source contract
           * @param data - contract execute data
-          */
-        pub fun submitRecvMessage(id: Int, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
-                                  contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
-                                  session: MessageProtocol.Session){
+        **/
+        pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
+                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]){
           // TODO
           /*
             * the submitter of the message should be verified
             * this can be done by the signature and public keys routers registered(`ReceivedMessageContract.registerRouter`)
           */
-          
-          let receivedMessageCore = ReceivedMessageCore(id: id, fromChain: fromChain, sender: sender, sqos: sqos, 
-                                                        contractName: contractName, actionName: actionName, data: data,
-                                                        session: session);
-          if(self.message.length < messageId + 1){
-            // message id not exists
-            let receivedMessageArray = ReceivedMessageArray(receivedMessageCore:receivedMessageCore);
-            self.message.append(receivedMessageArray);
-          }else{
-            // message id exists
-            var receivedMessageArray = self.message[messageId];
-            if(receivedMessageArray.getMessageCount() < self.executableCount){
-              receivedMessageArray.append(receivedMessageCore:receivedMessageCore);
-              self.message[messageId] = receivedMessageArray;
+
+            // Verify the signature
+            let pubAcct = getAccount(pubAddr);
+            let pk = PublicKey(publicKey: pubAcct.keys.get(keyIndex: 0)!.decodeHex(), 
+                                signatureAlgorithm: signatureAlgorithm);
+            if (!pk.verify(signature: signature,
+                            signedData: pubAddr.toBigEndianBytes(),
+                            domainSeparationTag: "",
+                            hashAlgorithm: HashAlgorithm.SHA2_256)) {
+                panic("invalid submitter address `pubAddr`!")
+                return;
             }
-          }
+            
+            if (self.message.containsKey(recvMsg.fromChain)) {  
+                let caches: &[ReceivedMessageCache] = &self.message[recvMsg.fromChain]! as &[ReceivedMessageCache];
+
+                var found = false;
+                for idx, ele in self.message[recvMsg.fromChain]! {
+                    if (recvMsg.id == ele.msgID) {
+                        self.message[recvMsg.fromChain]![idx].insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if ((!found) && (recvMsg.id > self.completedID)) {
+                    // TODO: this strategy need to be checked!
+                }
+
+                if (recvMsg.id > caches[caches.length - 1].msgID){
+                    let mcache = ReceivedMessageCache(recvMsg.id);
+                    mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
+                    caches.append(mcache);
+                } else {
+                    for idx, ele in self.message[recvMsg.fromChain]! {
+                        if (recvMsg.id == ele.msgID) {
+                            self.message[recvMsg.fromChain]![idx].insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                let mcache = ReceivedMessageCache(recvMsg.id);
+                mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
+                self.message[recvMsg.fromChain] = [mcache];
+            }
         }
 
         /**
@@ -174,6 +206,10 @@ pub contract ReceivedMessageContract{
           */
         pub fun messageVerify(messageId: Int): Bool{
           // TODO
+          return true;
+        }
+
+        pub fun isValidRecver(): Bool {
           return true;
         }
 
