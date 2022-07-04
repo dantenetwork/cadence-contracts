@@ -23,13 +23,16 @@ contract NFT is ERC721 {
         return newItemId;
     }
 
-    /// @dev Returns an URI for a given token ID
-    function _baseURI() internal view virtual override returns (string memory) {
-        return "https://raw.githubusercontent.com/wuyahuang/opensea/main/";
+    /**
+        @dev Returns the total tokens minted so far.
+        1 is always subtracted from the Counter since it tracks the next available tokenId.
+     */
+    function totalSupply() public view returns (uint256) {
+        return currentTokenId.current() - 1;
     }
 
-    /// @dev Sets the base token URI prefix.
-    function setBaseTokenURI(string memory _baseTokenURI) public {
-        baseTokenURI = _baseTokenURI;
+    /// @dev Returns an URI for a given token ID
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        return "https://raw.githubusercontent.com/wuyahuang/opensea/main/1";
     }
 }

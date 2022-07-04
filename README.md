@@ -24,6 +24,11 @@ truffle compile
 truffle deploy --network rinkeby --reset --skip-dry-run
 ```
 
+## Update new NFT contract address
+```
+vim transactions/nft/MintNFT.cdc # line 41
+```
+
 ## Mint NFT on rinkeby testnet
 ```
 cd erc721
@@ -68,7 +73,7 @@ node client/nft/querySentMessage.mjs
 Wait for some time...You can see new NFT below:
 
 ```
-https://testnets.opensea.io/assets?search[query]=0x0DdD135645EC1C65b0595E7dad271F616926D5B2&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x263037FdFa433828fCBF97B87200A0E0b8d68C5f&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore
