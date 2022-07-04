@@ -112,6 +112,8 @@ pub contract SentMessageContract{
         pub fun getAllMessages():[SentMessageCore];
         
         pub fun getMessageById(mesasageId: Int): SentMessageCore;
+
+        pub fun isValidSender(): Bool;
     }
 
     // Acceptor's interface
@@ -180,6 +182,10 @@ pub contract SentMessageContract{
         pub fun getMessageById(mesasageId: Int): SentMessageCore{
             return self.message[mesasageId];
         }
+
+        pub fun isValidSender(): Bool {
+            return true;
+        }
     }
 
     // Create recource to store sent message
@@ -188,7 +194,7 @@ pub contract SentMessageContract{
     }
 
     pub fun createMessageSubmitter(): @Submitter{
-      return <- create Submitter();
+        return <- create Submitter();
     }
 
     // Query messages
