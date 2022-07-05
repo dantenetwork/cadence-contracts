@@ -1,4 +1,5 @@
 import MessageProtocol from 0xTheProtocolContractAddress
+import IdentityVerification from 0x01
 
 pub contract ReceivedMessageContract{
 
@@ -139,15 +140,12 @@ pub contract ReceivedMessageContract{
           */
 
             // Verify the signature
-            let pubAcct = getAccount(pubAddr);
-            let pk = PublicKey(publicKey: pubAcct.keys.get(keyIndex: 0)!.decodeHex(), 
-                                signatureAlgorithm: signatureAlgorithm);
-            if (!pk.verify(signature: signature,
-                            signedData: pubAddr.toBigEndianBytes(),
-                            domainSeparationTag: "",
-                            hashAlgorithm: HashAlgorithm.SHA2_256)) {
-                panic("invalid submitter address `pubAddr`!")
-                return;
+            if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
+                                              signatureAlgorithm: signatureAlgorithm,
+                                              signature: signature,
+                                              hashAlgorithm: HashAlgorithm.SHA2_256)) {
+                panic("invalid recver address or `link`!")
+                return false;
             }
             
             if (self.message.containsKey(recvMsg.fromChain)) {  

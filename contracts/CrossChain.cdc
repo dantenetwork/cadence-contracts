@@ -1,5 +1,6 @@
 import SentMessageContract from 0x01
 import ReceivedMessageContract from 0x01
+import IdentityVerification from 0x01
 
 pub contract CrossChain {
     pub var registeredRecvAccounts: {Address, String};   // stores all recvers' address
@@ -34,13 +35,10 @@ pub contract CrossChain {
     /*Remove registered recver. Needs signature verification */ 
     pub fun removeRecvAccount(address: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]): Bool {
         // Verify the signature
-        let pubAcct = getAccount(address);
-        let pk = PublicKey(publicKey: pubAcct.keys.get(keyIndex: 0)!.decodeHex(), 
-                            signatureAlgorithm: signatureAlgorithm);
-        if (!pk.verify(signature: signature,
-                        signedData: address.toBigEndianBytes(),
-                        domainSeparationTag: "",
-                        hashAlgorithm: HashAlgorithm.SHA2_256)) {
+        if (!IdentityVerification.basicVerify(pubAddr: address, 
+                                              signatureAlgorithm: signatureAlgorithm,
+                                              signature: signature,
+                                              hashAlgorithm: HashAlgorithm.SHA2_256)) {
             panic("invalid recver address or `link`!")
             return false;
         }
@@ -48,7 +46,7 @@ pub contract CrossChain {
         self.registeredRecvAccounts.remove(key: address);
         return true;
     }
-
+.
     /**
       * Query registered contract list
       */
@@ -77,14 +75,11 @@ pub contract CrossChain {
     /// Remove registered sender. Needs signature verification
     pub fun removeSendAccount(address: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]): Bool {
         // Verify the signature
-        let pubAcct = getAccount(address);
-        let pk = PublicKey(publicKey: pubAcct.keys.get(keyIndex: 0)!.decodeHex(), 
-                            signatureAlgorithm: signatureAlgorithm);
-        if (!pk.verify(signature: signature,
-                        signedData: address.toBigEndianBytes(),
-                        domainSeparationTag: "",
-                        hashAlgorithm: HashAlgorithm.SHA2_256)) {
-            panic("invalid sender address or `link`!")
+        if (!IdentityVerification.basicVerify(pubAddr: address, 
+                                              signatureAlgorithm: signatureAlgorithm,
+                                              signature: signature,
+                                              hashAlgorithm: HashAlgorithm.SHA2_256)) {
+            panic("invalid recver address or `link`!")
             return false;
         }
 
