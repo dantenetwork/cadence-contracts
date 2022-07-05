@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@onflow/fcl": "^1.0.2",
-    "@onflow/transport-grpc": "^1.0.1",
-    "@onflow/types": "^1.0.1",
+    "@onflow/fcl": "^1.1.0",
+    "@onflow/transport-grpc": "^1.1.0",
+    "@onflow/types": "^1.0.2",
     "config": "^3.3.7",
     "elliptic": "^6.5.4",
     "fs": "^0.0.1-security",

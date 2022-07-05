@@ -27,7 +27,7 @@ pub contract ReceivedMessageContract{
         originData = originData.concat(contractName.utf8);
         originData = originData.concat(actionName.utf8);
         originData = originData.concat(data.utf8);
-        let digest = HashAlgorithm.SHA2_256.hash(originData);
+        let digest = HashAlgorithm.SHA3_256.hash(originData);
         self.messageHash = String.encodeHex(digest);
       }
     }
@@ -185,6 +185,32 @@ pub contract ReceivedMessageContract{
        */
      pub fun unregisterRouter(){
 
+     }
+
+    /**
+       * Create an ECDSA_P256 signature in offchain and verify it in Cadence
+       */
+     pub fun verifySignature(message: String, publicKey: String, signature: String): Bool{
+      
+        var originData:[UInt8] = message.utf8;
+
+        let digest = HashAlgorithm.SHA3_256.hash(originData);
+        let pk = PublicKey(
+            publicKey: publicKey.decodeHex(),
+            signatureAlgorithm: SignatureAlgorithm.ECDSA_P256
+        )
+
+        let isValid = pk.verify(
+            signature: signature.decodeHex(),
+            signedData: originData,
+            domainSeparationTag: "",
+            hashAlgorithm: HashAlgorithm.SHA3_256
+        )
+
+        if(!isValid){
+          panic("signature verify failed.");
+        }
+        return isValid;
      }
 }
 
