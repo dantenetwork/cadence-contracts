@@ -3,8 +3,8 @@ import ReceivedMessageContract from 0x01
 import IdentityVerification from 0x01
 
 pub contract CrossChain {
-    pub var registeredRecvAccounts: {Address, String};   // stores all recvers' address
-    pub var registeredSendAccounts: {Address, String};  // stores all senders' address
+    pub var registeredRecvAccounts: {Address: String};   // stores all recvers' address
+    pub var registeredSendAccounts: {Address: String};  // stores all senders' address
     pub var validators:[Address];               // stores all validators' address
     
 
@@ -12,7 +12,7 @@ pub contract CrossChain {
     init(){
         self.registeredRecvAccounts = [];
         self.validators = [];
-        slef.registeredSendAccounts = {};
+        self.registeredSendAccounts = {};
     }
 
     /**
@@ -46,7 +46,7 @@ pub contract CrossChain {
         self.registeredRecvAccounts.remove(key: address);
         return true;
     }
-.
+
     /**
       * Query registered contract list
       */
