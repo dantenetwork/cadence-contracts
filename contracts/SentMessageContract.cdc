@@ -1,4 +1,4 @@
-import MessageProtocol from 0xTheProtocolContractAddress
+import MessageProtocol from 0x01
 
 pub contract SentMessageContract{
 
@@ -124,7 +124,7 @@ pub contract SentMessageContract{
 
     // Define sent message vault
     pub resource SentMessageVault: SentMessageInterface, AcceptorFace{
-        var sessionID: UInt128;
+        priv var sessionID: UInt128;
         pub let message: [SentMessageCore];
 
         init(){
@@ -157,7 +157,7 @@ pub contract SentMessageContract{
                                                     data: rst.data,
                                                     session: MessageProtocol.Session(id: self.sessionID, type: rst.callType, callback: rst.callback)));
                 
-                self.session = self.session + 1;
+                self.sessionID = self.sessionID + 1;
 
                 // if (self.message.length > 10){
                 //   self.message.removeFirst();

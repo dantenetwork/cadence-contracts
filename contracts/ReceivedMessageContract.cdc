@@ -1,4 +1,4 @@
-import MessageProtocol from 0xTheProtocolContractAddress
+import MessageProtocol from 0x01
 import IdentityVerification from 0x01
 
 pub contract ReceivedMessageContract{
@@ -32,7 +32,7 @@ pub contract ReceivedMessageContract{
             // hash message info
             var originData: [UInt8] = id.toBigEndianBytes();
             originData = originData.concat(fromChain.utf8);
-            originData = originData.concat(toChain.utf8);
+            originData = originData.concat(self.toChain.utf8);
             originData = originData.concat(sender.utf8);
             originData = originData.concat(sqos.toBytes());
             originData = originData.concat(contractName.utf8);
@@ -50,14 +50,8 @@ pub contract ReceivedMessageContract{
 
      // Interface is used for access control.
     pub resource interface ReceivedMessageInterface{
-        pub message: [ReceivedMessageCache];
-
-        pub fun getMessageById(messageId: Int):ReceivedMessageCache;
-
-        pub fun getMessageCount(): Int;
-
-        pub fun messageVerify(messageId: Int): Bool;
-
+        pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
+                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
         pub fun isValidRecver(): Bool;
     }
 
@@ -67,7 +61,7 @@ pub contract ReceivedMessageContract{
         pub var credibility: UInt128;
 
         init(om: ReceivedMessageCore) {
-            self messageInfo = om;
+            self.messageInfo = om;
             self.submitters = [];
             self.credibility = 0;
         }
@@ -79,7 +73,7 @@ pub contract ReceivedMessageContract{
 
     // Define received message array
     pub struct ReceivedMessageCache{
-        pub let msgInstance: {String, messageCopy};
+        pub let msgInstance: {String: messageCopy};
         pub let msgID: UInt128;
         pub var msgCount: Int;
 
@@ -92,7 +86,7 @@ pub contract ReceivedMessageContract{
         pub fun insert(receivedMessageCore: ReceivedMessageCore, pubAddr: Address){
             // Add to related messageCopy
             if (self.msgInstance.containsKey(receivedMessageCore.messageHash)) {
-                self.msgInstance[receivedMessageCore.messageHash].submitters.append(pubAddr);
+                self.msgInstance[receivedMessageCore.messageHash]!.submitters.append(pubAddr);
             } else {
                 let mCopy = messageCopy(om: receivedMessageCore);
                 mCopy.addSubmitter(submitter: pubAddr);
@@ -113,7 +107,7 @@ pub contract ReceivedMessageContract{
 
     // define resource to stores received cross chain message 
     pub resource ReceivedMessageVault: ReceivedMessageInterface{
-        pub let message: {String, [ReceivedMessageCache]};
+        pub let message: {String: [ReceivedMessageCache]};
         pub let executableCount: Int;
         pub var completedID: UInt128;   //TODO: check this tommorow!
 
@@ -165,7 +159,7 @@ pub contract ReceivedMessageContract{
                 }
 
                 if (recvMsg.id > caches[caches.length - 1].msgID){
-                    let mcache = ReceivedMessageCache(recvMsg.id);
+                    let mcache = ReceivedMessageCache(id: recvMsg.id);
                     mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
                     caches.append(mcache);
                 } else {
@@ -177,25 +171,10 @@ pub contract ReceivedMessageContract{
                     }
                 }
             } else {
-                let mcache = ReceivedMessageCache(recvMsg.id);
+                let mcache = ReceivedMessageCache(id: recvMsg.id);
                 mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
                 self.message[recvMsg.fromChain] = [mcache];
             }
-        }
-
-        /**
-          * Query received cross chain messages by message id
-          * @param messageId - message id
-          */
-        pub fun getMessageById(messageId: Int):ReceivedMessageArray{
-          return self.message[messageId];
-        }
-
-        /**
-          * Query count of received cross chain messages
-          */
-        pub fun getMessageCount(): Int{
-          return self.message.length;
         }
 
         /**
