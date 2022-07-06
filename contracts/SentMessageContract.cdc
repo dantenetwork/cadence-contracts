@@ -113,7 +113,7 @@ pub contract SentMessageContract{
         
         pub fun getMessageById(mesasageId: Int): SentMessageCore;
 
-        pub fun isValidSender(): Bool;
+        pub fun isOnline(): Bool;
     }
 
     // Acceptor's interface
@@ -126,10 +126,12 @@ pub contract SentMessageContract{
     pub resource SentMessageVault: SentMessageInterface, AcceptorFace{
         priv var sessionID: UInt128;
         pub let message: [SentMessageCore];
+        priv var online: Bool;
 
         init(){
             self.message = [];
             self.sessionID = 0;
+            self.online = true;
         }
 
         /**
@@ -183,8 +185,16 @@ pub contract SentMessageContract{
             return self.message[mesasageId];
         }
 
-        pub fun isValidSender(): Bool {
-            return true;
+        pub fun isOnline(): Bool {
+            return self.online;
+        }
+
+        pub fun setOnline() {
+            self.online = true;
+        }
+
+        pub fun setOffline() {
+            self.online = false;
         }
     }
 

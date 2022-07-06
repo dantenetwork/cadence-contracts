@@ -1,6 +1,5 @@
 import SentMessageContract from 0x01
 import ReceivedMessageContract from 0x01
-import IdentityVerification from 0x01
 
 pub contract CrossChain {
     pub var registeredRecvAccounts: {Address: String};   // stores all recvers' address
@@ -10,7 +9,7 @@ pub contract CrossChain {
 
     // init cross chain
     init(){
-        self.registeredRecvAccounts = [];
+        self.registeredRecvAccounts = {};
         self.validators = [];
         self.registeredSendAccounts = {};
     }
@@ -22,8 +21,8 @@ pub contract CrossChain {
     pub fun registerRecvAccount(address: Address, link: String): Bool{
         let pubLink = PublicPath(identifier: link);
         let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
-        if (!recverRef.isValidRecver()) {
-            panic("invalid recver address or `link`!")
+        if (!recverRef.isOnline()) {
+            panic("The recver is offline!")
             return false;
         }
         
@@ -33,13 +32,12 @@ pub contract CrossChain {
     }
 
     /*Remove registered recver. Needs signature verification */ 
-    pub fun removeRecvAccount(address: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]): Bool {
+    pub fun removeRecvAccount(address: Address, link: String): Bool {
         // Verify the signature
-        if (!IdentityVerification.basicVerify(pubAddr: address, 
-                                              signatureAlgorithm: signatureAlgorithm,
-                                              signature: signature,
-                                              hashAlgorithm: HashAlgorithm.SHA2_256)) {
-            panic("invalid recver address or `link`!")
+        let pubLink = PublicPath(identifier: link);
+        let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+        if (recverRef.isOnline()) {
+            panic("The recver is online!")
             return false;
         }
 
@@ -61,8 +59,8 @@ pub contract CrossChain {
     pub fun registerSendAccount(address: Address, link: String): Bool{
         let pubLink = PublicPath(identifier: link);
         let senderRef = getAccount(address).getCapability<&{SentMessageContract.SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
-        if (!senderRef.isValidSender()) {
-            panic("invalid sender address or `link`!")
+        if (!senderRef.isOnline()) {
+            panic("The sender is offline!")
             return false;
         }
         
@@ -73,13 +71,12 @@ pub contract CrossChain {
     }
 
     /// Remove registered sender. Needs signature verification
-    pub fun removeSendAccount(address: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]): Bool {
+    pub fun removeSendAccount(address: Address, link: String): Bool {
         // Verify the signature
-        if (!IdentityVerification.basicVerify(pubAddr: address, 
-                                              signatureAlgorithm: signatureAlgorithm,
-                                              signature: signature,
-                                              hashAlgorithm: HashAlgorithm.SHA2_256)) {
-            panic("invalid recver address or `link`!")
+        let pubLink = PublicPath(identifier: link);
+        let senderRef = getAccount(address).getCapability<&{SentMessageContract.SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+        if (senderRef.isOnline()) {
+            panic("The sender is online!")
             return false;
         }
 

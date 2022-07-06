@@ -2,6 +2,7 @@ import MessageProtocol from 0x01
 import IdentityVerification from 0x01
 
 pub contract ReceivedMessageContract{
+    // TODO: add struct content
 
     // Define message core
     pub struct ReceivedMessageCore{
@@ -52,7 +53,7 @@ pub contract ReceivedMessageContract{
     pub resource interface ReceivedMessageInterface{
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
-        pub fun isValidRecver(): Bool;
+        pub fun isOnline(): Bool;
     }
 
     pub struct messageCopy {
@@ -75,7 +76,7 @@ pub contract ReceivedMessageContract{
     pub struct ReceivedMessageCache{
         pub let msgInstance: {String: messageCopy};
         pub let msgID: UInt128;
-        pub var msgCount: Int;
+        priv var msgCount: Int;
 
         init(id: UInt128){
             self.msgInstance = {};
@@ -109,12 +110,17 @@ pub contract ReceivedMessageContract{
     pub resource ReceivedMessageVault: ReceivedMessageInterface{
         pub let message: {String: [ReceivedMessageCache]};
         pub let executableCount: Int;
-        pub var completedID: UInt128;   //TODO: check this tommorow!
+        pub var completedID: {String: UInt128};   //TODO: check this tommorow!
+        priv var online: Bool;
+        priv var defaultCopyCount: Int;
+        // TODO: context
 
         init(){
           self.message = {};
           self.executableCount = 10;
-          self.completedID = 0;
+          self.completedID = {};
+          self.online = true;
+          self.defaultCopyCount = 3;
         }
 
         /**
@@ -131,6 +137,7 @@ pub contract ReceivedMessageContract{
           /*
             * the submitter of the message should be verified
             * this can be done by the signature and public keys routers registered(`ReceivedMessageContract.registerRouter`)
+            * This can be substituted with the mechanism of resource `router`. This will be implemented later
           */
 
             // Verify the signature
@@ -146,30 +153,50 @@ pub contract ReceivedMessageContract{
                 let caches: &[ReceivedMessageCache] = &self.message[recvMsg.fromChain]! as &[ReceivedMessageCache];
 
                 var found = false;
+                var cacheIdx: Int = -1;
+
                 for idx, ele in self.message[recvMsg.fromChain]! {
                     if (recvMsg.id == ele.msgID) {
                         self.message[recvMsg.fromChain]![idx].insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
+                        cacheIdx = idx;
                         found = true;
                         break;
                     }
                 }
+                
+                if (!found) {
+                    var completedID: UInt128 = 0;
+                    if let var = self.completedID[recvMsg.fromChain] {
+                        completedID = var;
+                    } else {
+                        self.completedID[recvMsg.fromChain] = 0;
+                    }
 
-                if ((!found) && (recvMsg.id > self.completedID)) {
-                    // TODO: this strategy need to be checked!
+                    if (recvMsg.id > completedID) {
+                        // TODO: this strategy need to be checked!
+                        let mcache = ReceivedMessageCache(id: recvMsg.id);
+                        mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
+                        caches.append(mcache);
+
+                        cacheIdx = caches.length - 1;
+                    } else {
+                        panic("Invalid `recvMsg` ID!");
+                    }
                 }
 
-                if (recvMsg.id > caches[caches.length - 1].msgID){
-                    let mcache = ReceivedMessageCache(id: recvMsg.id);
-                    mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
-                    caches.append(mcache);
-                } else {
-                    for idx, ele in self.message[recvMsg.fromChain]! {
-                        if (recvMsg.id == ele.msgID) {
-                            self.message[recvMsg.fromChain]![idx].insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
-                            break;
+                if (cacheIdx >= 0) {
+                    if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
+                        // TODO: do verification
+
+                        // TODO: call destination
+
+                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                        if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
+                            self.completedID[recvMsg.fromChain] = recvMsg.id;
                         }
                     }
                 }
+
             } else {
                 let mcache = ReceivedMessageCache(id: recvMsg.id);
                 mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
@@ -186,8 +213,24 @@ pub contract ReceivedMessageContract{
           return true;
         }
 
-        pub fun isValidRecver(): Bool {
-          return true;
+        pub fun isOnline(): Bool {
+            return self.online;
+        }
+
+        pub fun setOnline() {
+            self.online = true;
+        }
+
+        pub fun setOffline() {
+            self.online = false;
+        }
+
+        pub fun setCopyCount(count: Int) {
+            if (count > 0) {
+                self.defaultCopyCount = count;
+            } else {
+                panic("Invalid input parameter!");
+            }
         }
 
         /**
@@ -227,6 +270,10 @@ pub contract ReceivedMessageContract{
         pub fun setInitialCredibility(initValue: Int){
           // TODO
         }
+    }
+
+    init() {
+
     }
 
     // Create recource to store received message
