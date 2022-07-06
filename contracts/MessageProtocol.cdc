@@ -228,13 +228,15 @@ pub contract MessageProtocol {
         pub let id: UInt32;
         pub let type: UInt8;
         pub let callback: String;
+        pub let commitment: [UInt8]?;
+        pub let answer: [UInt8]?;
 
-        //TODO: commitment
-
-        init(oId: UInt32, oType: UInt8, oCallback: String) {
+        init(oId: UInt32, oType: UInt8, oCallback: String, oc: [UInt8]?, oa: [UInt8]?) {
             self.id = oId;
             self.type = oType;
             self.callback = oCallback;
+            self.commitment = oc;
+            self.answer = oa;
         }
 
         pub fun toBytes(): [UInt8] {
@@ -242,6 +244,12 @@ pub contract MessageProtocol {
             dataBytes = dataBytes.concat(self.id.toBigEndianBytes());
             dataBytes = dataBytes.concat([self.type]);
             dataBytes = dataBytes.concat(self.callback.utf8);
+            if (nil != commitment) {
+                dataBytes = dataBytes.concat(commitment!);
+            }
+            if (nil != answer) {
+                dataBytes = dataBytes.concat(answer!);
+            }
 
             return dataBytes;
         }

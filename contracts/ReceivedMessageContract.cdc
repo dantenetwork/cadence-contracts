@@ -24,8 +24,8 @@ pub contract ReceivedMessageContract{
             self.sender = sender;
             self.sqos = sqos;
             self.content = {
-              "contractName": contractName, // contract name of destination chain
-              "actionName": actionName, // action name of contract
+              "accountAddress": contractName, // contract name of destination chain
+              "Link": actionName, // action name of contract
               "data": data // cross chain message data
             };
             self.session = session;

@@ -3,24 +3,28 @@ import MessageProtocol from 0x01
 pub contract SentMessageContract{
 
     pub struct msgToSubmit{
-      pub let toChain: String;
-      pub let sqos: [MessageProtocol.SQoSItem];
-      pub let contractName: String;
-      pub let actionName: String;
-      pub let data: MessageProtocol.MessagePayload;
-      pub let callType: UInt8;
-      pub let callback: String?;
+        pub let toChain: String;
+        pub let sqos: [MessageProtocol.SQoSItem];
+        pub let contractName: String;
+        pub let actionName: String;
+        pub let data: MessageProtocol.MessagePayload;
+        pub let callType: UInt8;
+        pub let callback: String?;
+        pub let commitment: [UInt8]?;
+        pub let answer: [UInt8]?;
 
       init(toChain: String, sqos: [MessageProtocol.SQoSItem], 
             contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
-            callType: UInt8, callback: String?){
-          self.toChain = toChain;
-          self.sqos = sqos;
-          self.contractName = contractName;
-          self.actionName = actionName;
-          self.data = data;
-          self.callType = callType;
-          self.callback = callback;
+            callType: UInt8, callback: String?, oc: [UInt8]?, oa: [UInt8]?){
+            self.toChain = toChain;
+            self.sqos = sqos;
+            self.contractName = contractName;
+            self.actionName = actionName;
+            self.data = data;
+            self.callType = callType;
+            self.callback = callback;
+            self.commitment = oc;
+            self.answer = oa;
       }
     }
 
@@ -157,7 +161,7 @@ pub contract SentMessageContract{
                                                     contractName: rst.contractName, 
                                                     actionName: rst.actionName, 
                                                     data: rst.data,
-                                                    session: MessageProtocol.Session(id: self.sessionID, type: rst.callType, callback: rst.callback)));
+                                                    session: MessageProtocol.Session(id: self.sessionID, type: rst.callType, callback: rst.callback, oc: rst.commitment, oa: rst.answer)));
                 
                 self.sessionID = self.sessionID + 1;
 
