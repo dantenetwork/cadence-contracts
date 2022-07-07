@@ -16,8 +16,8 @@ pub contract ReceivedMessageContract{
         pub let messageHash: String; // message hash value
 
         init(id: UInt128, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
-              contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
-              session: MessageProtocol.Session){
+            contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
+            session: MessageProtocol.Session){
             self.id = id;
             self.fromChain = fromChain;
             self.toChain = "FLOW";
@@ -116,11 +116,11 @@ pub contract ReceivedMessageContract{
         // TODO: context
 
         init(){
-          self.message = {};
-          self.executableCount = 10;
-          self.completedID = {};
-          self.online = true;
-          self.defaultCopyCount = 3;
+            self.message = {};
+            self.executableCount = 10;
+            self.completedID = {};
+            self.online = true;
+            self.defaultCopyCount = 3;
         }
 
         /**
@@ -210,7 +210,7 @@ pub contract ReceivedMessageContract{
           */
         pub fun messageVerify(messageId: Int): Bool{
           // TODO
-          return true;
+            return true;
         }
 
         pub fun isOnline(): Bool {
@@ -238,7 +238,7 @@ pub contract ReceivedMessageContract{
           */
         pub fun getExecutableMessage():Int{
           // TODO
-          return 0;
+            return 0;
         }
 
         /**
@@ -246,21 +246,21 @@ pub contract ReceivedMessageContract{
           */
         pub fun getNextPortingMessageId(): Int{
           // TODO
-          return self.message.length;
+            return self.message.length;
         }
 
         /**
           * Called from `messageVerify` to get the credibilities of validators to take weighted aggregation verification of messages
           */
         pub fun getValidatorCredibility(){
-          // TODO
+            // TODO
         }
 
         /**
           * Called from `messageVerify`. Update validator credibility by node behaviors after message verification.
           */
         pub fun updateValidatorCredibility(){
-          // TODO
+            // TODO
         }
 
         /**
@@ -268,7 +268,7 @@ pub contract ReceivedMessageContract{
           * @param initValue - init value of credibility
           */
         pub fun setInitialCredibility(initValue: Int){
-          // TODO
+            // TODO
         }
     }
 
@@ -278,11 +278,11 @@ pub contract ReceivedMessageContract{
 
     // Create recource to store received message
     pub fun createReceivedMessageVault():@ReceivedMessageVault{
-      // TODO
-      /**
-        * record the resouces' `public/link`
-        */
-      return <- create ReceivedMessageVault();
+        // TODO
+        /**
+          * record the resouces' `public/link`
+          */
+        return <- create ReceivedMessageVault();
     }
 
      /**
@@ -290,7 +290,7 @@ pub contract ReceivedMessageContract{
        * the common sign-verification mechanism or authority call-back submittion mechanis
        */
      pub fun registerRouter(){
-          // TODO
+        // TODO
      }
 
      /**
