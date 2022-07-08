@@ -46,7 +46,7 @@ pub contract MessageProtocol {
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
             dataBytes = dataBytes.concat(self.n.toBigEndianBytes());
-            dataBytes = dataBytes.concat([self.t as? UInt8!]);
+            dataBytes = dataBytes.concat([self.t.rawValue]);
 
             //Encode `AnyStruct` into `[UInt8]`
             switch self.t {
@@ -222,16 +222,34 @@ pub contract MessageProtocol {
         }
     }
 
+    pub struct SQoS {
+        pub let sqosItems: [SQoSItem];
+
+        init() {
+            self.sqosItems = [];
+        }
+
+        pub fun toBytes(): [UInt8] {
+            var dataBytes: [UInt8] = [];
+
+            for ele in self.sqosItems {
+                dataBytes = dataBytes.concat(ele.toBytes());
+            }
+
+            return dataBytes;
+        }
+    }
+
     /// Session
     /// Member@type: 0, C-C(Corss-Chain) call requires call_back; 1, C-C call ignores call_back; 2, C-C call_back;
     pub struct Session {
-        pub let id: UInt32;
+        pub let id: UInt128;
         pub let type: UInt8;
-        pub let callback: String;
+        pub let callback: String?;
         pub let commitment: [UInt8]?;
         pub let answer: [UInt8]?;
 
-        init(oId: UInt32, oType: UInt8, oCallback: String, oc: [UInt8]?, oa: [UInt8]?) {
+        init(oId: UInt128, oType: UInt8, oCallback: String?, oc: [UInt8]?, oa: [UInt8]?) {
             self.id = oId;
             self.type = oType;
             self.callback = oCallback;
@@ -243,12 +261,14 @@ pub contract MessageProtocol {
             var dataBytes: [UInt8] = [];
             dataBytes = dataBytes.concat(self.id.toBigEndianBytes());
             dataBytes = dataBytes.concat([self.type]);
-            dataBytes = dataBytes.concat(self.callback.utf8);
-            if (nil != commitment) {
-                dataBytes = dataBytes.concat(commitment!);
+            if (nil != self.callback) {
+                dataBytes = dataBytes.concat(self.callback!.utf8);
             }
-            if (nil != answer) {
-                dataBytes = dataBytes.concat(answer!);
+            if (nil != self.commitment) {
+                dataBytes = dataBytes.concat(self.commitment!);
+            }
+            if (nil != self.answer) {
+                dataBytes = dataBytes.concat(self.answer!);
             }
 
             return dataBytes;

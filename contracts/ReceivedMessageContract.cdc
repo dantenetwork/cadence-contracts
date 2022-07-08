@@ -1,8 +1,40 @@
-import MessageProtocol from 0x01
-import IdentityVerification from 0x01
+import MessageProtocol from 0x02
+import IdentityVerification from 0x03
 
 pub contract ReceivedMessageContract{
-    // TODO: add struct content
+    
+    // Interface is used for access control.
+    pub resource interface ReceivedMessageInterface{
+        pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
+                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
+        pub fun isOnline(): Bool;
+    }
+    
+    pub resource interface Callee {
+        pub fun callMe(data: MessageProtocol.MessagePayload);
+    }
+    
+    pub struct Content {
+        pub let accountAddress: Address;
+        pub let link: String;
+        pub let data: MessageProtocol.MessagePayload;
+
+        init(resourceAccount: Address, link: String, data: MessageProtocol.MessagePayload) {
+            self.accountAddress = resourceAccount;
+            self.link = link;
+            self.data = data;
+        }
+
+        pub fun toBytes(): [UInt8] {
+            var dataBytes: [UInt8] = [];
+
+            dataBytes = dataBytes.concat(self.accountAddress.toBytes());
+            dataBytes = dataBytes.concat(self.link.utf8);
+            dataBytes = dataBytes.concat(self.data.toBytes());
+
+            return dataBytes;
+        }
+    }
 
     // Define message core
     pub struct ReceivedMessageCore{
@@ -11,23 +43,19 @@ pub contract ReceivedMessageContract{
         pub let toChain: String; // destination chain name
         pub let sender: String; // sender of cross chain message
         pub let sqos: MessageProtocol.SQoS;
-        pub let content: AnyStruct; // message content
+        pub let content: Content; // message content
         pub let session: MessageProtocol.Session;
         pub let messageHash: String; // message hash value
 
         init(id: UInt128, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
-            contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
+            resourceAccount: Address, link: String, data: MessageProtocol.MessagePayload,
             session: MessageProtocol.Session){
             self.id = id;
             self.fromChain = fromChain;
             self.toChain = "FLOW";
             self.sender = sender;
             self.sqos = sqos;
-            self.content = {
-              "accountAddress": contractName, // contract name of destination chain
-              "Link": actionName, // action name of contract
-              "data": data // cross chain message data
-            };
+            self.content = Content(resourceAccount: resourceAccount, link: link, data: data);
             self.session = session;
 
             // hash message info
@@ -36,9 +64,7 @@ pub contract ReceivedMessageContract{
             originData = originData.concat(self.toChain.utf8);
             originData = originData.concat(sender.utf8);
             originData = originData.concat(sqos.toBytes());
-            originData = originData.concat(contractName.utf8);
-            originData = originData.concat(actionName.utf8);
-            originData = originData.concat(data.toBytes());
+            originData = originData.concat(self.content.toBytes());
             originData = originData.concat(session.toBytes());
             let digest = HashAlgorithm.SHA2_256.hash(originData);
             self.messageHash = String.encodeHex(digest);
@@ -47,13 +73,6 @@ pub contract ReceivedMessageContract{
         pub fun getRecvMessageHash(): [UInt8] {
             return self.messageHash.decodeHex();
         }
-    }
-
-     // Interface is used for access control.
-    pub resource interface ReceivedMessageInterface{
-        pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
-                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
-        pub fun isOnline(): Bool;
     }
 
     pub struct messageCopy {
@@ -87,7 +106,7 @@ pub contract ReceivedMessageContract{
         pub fun insert(receivedMessageCore: ReceivedMessageCore, pubAddr: Address){
             // Add to related messageCopy
             if (self.msgInstance.containsKey(receivedMessageCore.messageHash)) {
-                self.msgInstance[receivedMessageCore.messageHash]!.submitters.append(pubAddr);
+                self.msgInstance[receivedMessageCore.messageHash]!.addSubmitter(submitter: pubAddr);
             } else {
                 let mCopy = messageCopy(om: receivedMessageCore);
                 mCopy.addSubmitter(submitter: pubAddr);
@@ -145,8 +164,7 @@ pub contract ReceivedMessageContract{
                                               signatureAlgorithm: signatureAlgorithm,
                                               signature: signature,
                                               hashAlgorithm: HashAlgorithm.SHA2_256)) {
-                panic("invalid recver address or `link`!")
-                return false;
+                panic("invalid recver address or `link`!");
             }
             
             if (self.message.containsKey(recvMsg.fromChain)) {  
@@ -187,8 +205,23 @@ pub contract ReceivedMessageContract{
                 if (cacheIdx >= 0) {
                     if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
                         // TODO: do verification
+                        let msgContent = recvMsg.content;
 
                         // TODO: call destination
+                        let pubLink = PublicPath(identifier: msgContent.link);
+                        if (nil == pubLink)
+                        {
+                            self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                            panic("invalid `link` path!");
+                        }
+
+                        // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+                        let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
+                        if (nil == calleeRef){
+                            self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                            panic("invalid callee address or `link`!");
+                        }
+                        calleeRef!.callMe(data: msgContent.data);
 
                         self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
                         if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
@@ -202,15 +235,6 @@ pub contract ReceivedMessageContract{
                 mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
                 self.message[recvMsg.fromChain] = [mcache];
             }
-        }
-
-        /**
-          * Make sure that every message saved in ReceivedMessageArray is consistent
-          * @param messageId - message id
-          */
-        pub fun messageVerify(messageId: Int): Bool{
-          // TODO
-            return true;
         }
 
         pub fun isOnline(): Bool {
@@ -233,43 +257,37 @@ pub contract ReceivedMessageContract{
             }
         }
 
+        // Move to an independent cdc
         /**
-          * Query first executable message, the unrepeated messages are more than executableCount.
+          * Make sure that every message saved in ReceivedMessageArray is consistent
+          * @param messageId - message id
           */
-        pub fun getExecutableMessage():Int{
-          // TODO
-            return 0;
-        }
-
-        /**
-          * Query next message id
-          */
-        pub fun getNextPortingMessageId(): Int{
-          // TODO
-            return self.message.length;
-        }
+        // pub fun messageVerify(messageId: Int): Bool{
+        //   // TODO
+        //     return true;
+        // }
 
         /**
           * Called from `messageVerify` to get the credibilities of validators to take weighted aggregation verification of messages
           */
-        pub fun getValidatorCredibility(){
-            // TODO
-        }
+        // pub fun getValidatorCredibility(){
+        //     // TODO
+        // }
 
         /**
           * Called from `messageVerify`. Update validator credibility by node behaviors after message verification.
           */
-        pub fun updateValidatorCredibility(){
-            // TODO
-        }
+        // pub fun updateValidatorCredibility(){
+        //     // TODO
+        // }
 
         /**
           * Set the value of the credibility of the newly added validator
           * @param initValue - init value of credibility
           */
-        pub fun setInitialCredibility(initValue: Int){
-            // TODO
-        }
+        // pub fun setInitialCredibility(initValue: Int){
+        //     // TODO
+        // }
     }
 
     init() {
@@ -289,15 +307,15 @@ pub contract ReceivedMessageContract{
        * The interface of the register for off-chain routers
        * the common sign-verification mechanism or authority call-back submittion mechanis
        */
-     pub fun registerRouter(){
-        // TODO
-     }
+    //  pub fun registerRouter(){
+    //     // TODO
+    //  }
 
-     /**
-       * The interface of the unregister for off-chain routers
-       */
-     pub fun unregisterRouter(){
+    //  /**
+    //    * The interface of the unregister for off-chain routers
+    //    */
+    //  pub fun unregisterRouter(){
 
-     }
+    //  }
 }
 

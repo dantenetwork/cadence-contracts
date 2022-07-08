@@ -1,4 +1,4 @@
-import MessageProtocol from 0x01
+import MessageProtocol from 0x02
 
 pub contract SentMessageContract{
 
@@ -81,32 +81,32 @@ pub contract SentMessageContract{
 
     // Define message core
     pub struct SentMessageCore{
-      pub let id: UInt128; // message id
-      pub let fromChain: String; // FLOW, source chain name
-      pub let toChain: String; // destination chain name
-      pub let sender: String; // sender of cross chain message
-      pub let signer: String; // signer of the message call, the same as sender in Flow
-      pub let sqos: [MessageProtocol.SQoSItem];
-      pub let content: {String: AnyStruct}; // message content
-      pub let session: MessageProtocol.Session;
+        pub let id: UInt128; // message id
+        pub let fromChain: String; // FLOW, source chain name
+        pub let toChain: String; // destination chain name
+        pub let sender: String; // sender of cross chain message
+        pub let signer: String; // signer of the message call, the same as sender in Flow
+        pub let sqos: [MessageProtocol.SQoSItem];
+        pub let content: {String: AnyStruct}; // message content
+        pub let session: MessageProtocol.Session;
 
-      init(id: UInt128, toChain: String, sender: String, signer: String, 
-                    sqos: [MessageProtocol.SQoSItem], 
-                    contractName: String, actionName: String, data: MessageProtocol.MessagePayload, 
-                    session: MessageProtocol.Session){
-        self.id = id;
-        self.fromChain = "FLOW";
-        self.toChain = toChain;
-        self.sender = sender;
-        self.signer = signer;
-        self.sqos = sqos;
-        self.content = {
-          "contractName": contractName, // contract name of destination chain
-          "actionName": actionName, // action name of contract
-          "data": data // cross chain message data
-        };
-        self.session = session;
-      }
+        init(id: UInt128, toChain: String, sender: String, signer: String, 
+                        sqos: [MessageProtocol.SQoSItem], 
+                        contractName: String, actionName: String, data: MessageProtocol.MessagePayload, 
+                        session: MessageProtocol.Session){
+            self.id = id;
+            self.fromChain = "FLOW";
+            self.toChain = toChain;
+            self.sender = sender;
+            self.signer = signer;
+            self.sqos = sqos;
+            self.content = {
+            "contractName": contractName, // contract name of destination chain
+            "actionName": actionName, // action name of contract
+            "data": data // cross chain message data
+            };
+            self.session = session;
+        }
     }
 
     // Interface is used for access control.

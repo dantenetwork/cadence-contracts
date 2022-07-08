@@ -1,5 +1,5 @@
 import SentMessageContract from 0x01
-import ReceivedMessageContract from 0x01
+import ReceivedMessageContract from 0x04
 
 pub contract CrossChain {
     pub var registeredRecvAccounts: {Address: String};   // stores all recvers' address
@@ -22,8 +22,7 @@ pub contract CrossChain {
         let pubLink = PublicPath(identifier: link);
         let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
         if (!recverRef.isOnline()) {
-            panic("The recver is offline!")
-            return false;
+            panic("The recver is offline!");
         }
         
         // add or update contract's address into RegisteredContracts
@@ -37,8 +36,7 @@ pub contract CrossChain {
         let pubLink = PublicPath(identifier: link);
         let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
         if (recverRef.isOnline()) {
-            panic("The recver is online!")
-            return false;
+            panic("The recver is online!");
         }
 
         self.registeredRecvAccounts.remove(key: address);
@@ -60,8 +58,7 @@ pub contract CrossChain {
         let pubLink = PublicPath(identifier: link);
         let senderRef = getAccount(address).getCapability<&{SentMessageContract.SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
         if (!senderRef.isOnline()) {
-            panic("The sender is offline!")
-            return false;
+            panic("The sender is offline!");
         }
         
         // add or update contract's address into RegisteredContracts
@@ -76,8 +73,7 @@ pub contract CrossChain {
         let pubLink = PublicPath(identifier: link);
         let senderRef = getAccount(address).getCapability<&{SentMessageContract.SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
         if (senderRef.isOnline()) {
-            panic("The sender is online!")
-            return false;
+            panic("The sender is online!");
         }
 
         self.registeredSendAccounts.remove(key: address);
