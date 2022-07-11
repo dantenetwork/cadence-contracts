@@ -13,7 +13,7 @@ transaction(
     name: String,
     description: String,
     thumbnail: String,
-    receiver: String,
+    owner: String,
     commitment: String
 ) {
     let signer: AuthAccount;
@@ -50,8 +50,8 @@ transaction(
       let answer = "";
 
       let data = MessageProtocol.MessagePayload();
-      let receiverItem = MessageProtocol.MessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: receiver);
-      data.addItem(item: receiverItem);
+      let ownerItem = MessageProtocol.MessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: owner);
+      data.addItem(item: ownerItem);
 
       // send cross chain message
       // borrow resource from storage

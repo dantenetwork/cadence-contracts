@@ -17,7 +17,13 @@ async function query() {
     script: script,
     args: []
   });
-  console.log(result);
+  
+  for(let item of result){
+    console.log(item);
+    console.log('sqos: ' + JSON.stringify(item.msgToSubmit.sqos));
+    console.log('data: ' + JSON.stringify(item.msgToSubmit.data));
+    console.log();
+  }
 };
 
 await query();
