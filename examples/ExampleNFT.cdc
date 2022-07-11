@@ -2,8 +2,8 @@
 // It is not part of the official standard but it assumed to be
 // very similar to how many NFTs would implement the core functionality.
 
-import MetadataViews from 0x4f85d5a5afe243d3;
-import NonFungibleToken from 0x4f85d5a5afe243d3;
+import MetadataViews from 0xf8d6e0586b0a20c7;
+import NonFungibleToken from 0xf8d6e0586b0a20c7;
 
 pub contract ExampleNFT: NonFungibleToken {
 
@@ -111,13 +111,13 @@ pub contract ExampleNFT: NonFungibleToken {
         // borrowNFT gets a reference to an NFT in the collection
         // so that the caller can read its metadata and call its methods
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
  
         pub fun borrowExampleNFT(id: UInt64): &ExampleNFT.NFT? {
             if self.ownedNFTs[id] != nil {
                 // Create an authorized reference to allow downcasting
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+                let ref = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
                 return ref as! &ExampleNFT.NFT
             }
 
@@ -125,7 +125,7 @@ pub contract ExampleNFT: NonFungibleToken {
         }
 
         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
-            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+            let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
             let exampleNFT = nft as! &ExampleNFT.NFT
             return exampleNFT as &AnyResource{MetadataViews.Resolver}
         }

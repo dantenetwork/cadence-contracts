@@ -316,6 +316,32 @@ pub contract ReceivedMessageContract{
     //    */
     //  pub fun unregisterRouter(){
 
-    //  }
+     }
+
+    /**
+       * Create an ECDSA_P256 signature in offchain and verify it in Cadence
+       */
+     pub fun verifySignature(message: String, publicKey: String, signature: String): Bool{
+      
+        var originData:[UInt8] = message.utf8;
+
+        let digest = HashAlgorithm.SHA3_256.hash(originData);
+        let pk = PublicKey(
+            publicKey: publicKey.decodeHex(),
+            signatureAlgorithm: SignatureAlgorithm.ECDSA_P256
+        )
+
+        let isValid = pk.verify(
+            signature: signature.decodeHex(),
+            signedData: originData,
+            domainSeparationTag: "",
+            hashAlgorithm: HashAlgorithm.SHA3_256
+        )
+
+        if(!isValid){
+          panic("signature verify failed.");
+        }
+        return isValid;
+     }
 }
 

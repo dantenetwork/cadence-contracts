@@ -17,9 +17,27 @@ This repository contains examples of contracts that are useful when deploying, m
 ## Important note
 The private keys included in flow.json & default.json are used for test net debugging only. 
 
-## Deploy contracts
+## Deploy solidity contracts to rinkeby testnet
 ```
-# Generate flow.json for emulator
+cd erc721
+truffle compile
+truffle deploy --network rinkeby --reset --skip-dry-run
+```
+
+## Update new NFT contract address
+```
+vim transactions/nft/MintNFT.cdc # line 41
+```
+
+## Mint NFT on rinkeby testnet
+```
+cd erc721
+node scripts/mint.js
+```
+
+## Deploy flow contracts
+```
+# Generate flow.json for emulator(Local Test Only)
 flow init
 
 # Start local emulator
@@ -28,11 +46,11 @@ flow emulator
 # Deploy contracts
 flow project deploy
 
+# Update contracts
+flow project deploy --update
+
 # Deploy contracts to testnet
 flow project deploy --network testnet
-
-# Update contracts
-sh ./updateContract.sh
 ```
 
 ## Examples
@@ -55,7 +73,7 @@ node client/nft/querySentMessage.mjs
 Wait for some time...You can see new NFT below:
 
 ```
-https://testnets.opensea.io/assets?search[query]=0x0DdD135645EC1C65b0595E7dad271F616926D5B2&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x263037FdFa433828fCBF97B87200A0E0b8d68C5f&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore

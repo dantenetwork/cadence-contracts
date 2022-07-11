@@ -6,11 +6,11 @@ import { SHA3 } from 'sha3';
 const ec = new elliptic.ec('p256');
 
 fcl.config()
-  .put('accessNode.api', 'http://127.0.0.1:8080');
+  .put('accessNode.api', 'http://127.0.0.1:8888');
 
 if (config.get('network') == 'testnet') {
   fcl.config()
-    .put('accessNode.api', 'http://access.devnet.nodes.onflow.org:8000');
+    .put('accessNode.api', 'https://rest-testnet.onflow.org');
 }
 
 class FlowService {
