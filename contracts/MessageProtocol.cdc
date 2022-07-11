@@ -33,106 +33,106 @@ pub contract MessageProtocol {
     // }
 
     pub struct MessageItem {
-        pub let n: UInt128;
-        pub let t: MsgType;
-        pub let v: AnyStruct;
+        pub let name: String;
+        pub let type: MsgType;
+        pub let value: AnyStruct;
 
-        access(contract) init(on: UInt128, ot: MsgType, ov: AnyStruct){
-            self.n = on;
-            self.t = ot;
-            self.v = ov;
+        access(contract) init(name: String, type: MsgType, value: AnyStruct){
+            self.name = name;
+            self.type = type;
+            self.value = value;
         }
 
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
-            dataBytes = dataBytes.concat(self.n.toBigEndianBytes());
-            dataBytes = dataBytes.concat([self.t.rawValue]);
+            dataBytes = dataBytes.concat(self.name.utf8);
+            dataBytes = dataBytes.concat([self.type.rawValue]);
 
             //Encode `AnyStruct` into `[UInt8]`
-            switch self.t {
+            switch self.type {
                 case MsgType.cdcString:
-                    dataBytes = dataBytes.concat(self.v as? String!.utf8);
+                    dataBytes = dataBytes.concat(self.value as? String!.utf8);
                     break;
                 case MsgType.cdcU8: 
-                    dataBytes = dataBytes.concat([self.v as? UInt8!]);
+                    dataBytes = dataBytes.concat([self.value as? UInt8!]);
                     break;
                 case MsgType.cdcU16: 
-                    dataBytes = dataBytes.concat(self.v as? UInt16!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(self.value as? UInt16!.toBigEndianBytes());
                     break;
                 case MsgType.cdcU32: 
-                    dataBytes = dataBytes.concat(self.v as? UInt32!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(self.value as? UInt32!.toBigEndianBytes());
                     break;
                 case MsgType.cdcU64: 
-                    dataBytes = dataBytes.concat(self.v as? UInt64!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(self.value as? UInt64!.toBigEndianBytes());
                     break;
                 case MsgType.cdcU128: 
-                    dataBytes = dataBytes.concat(self.v as? UInt128!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(self.value as? UInt128!.toBigEndianBytes());
                     break;
                 case MsgType.cdcI8: 
-                    dataBytes = dataBytes.concat(self.v as? Int8!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(self.value as? Int8!.toBigEndianBytes());
                     break;
                 case MsgType.cdcI16: 
-                    dataBytes = dataBytes.concat(self.v as? Int16!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(self.value as? Int16!.toBigEndianBytes());
                     break;
                 case MsgType.cdcI32: 
-                    dataBytes = dataBytes.concat(self.v as? Int32!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(self.value as? Int32!.toBigEndianBytes());
                     break;
                 case MsgType.cdcI64: 
-                    dataBytes = dataBytes.concat(self.v as? Int64!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(self.value as? Int64!.toBigEndianBytes());
                     break;
                 case MsgType.cdcI128: 
-                    dataBytes = dataBytes.concat(self.v as? Int128!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(self.value as? Int128!.toBigEndianBytes());
                     break;
                 case MsgType.cdcVecString: 
-                    for ele in self.v as? [String]! {
+                    for ele in self.value as? [String]! {
                         dataBytes = dataBytes.concat(ele.utf8);
                     }
                     break;
                 case MsgType.cdcVecU8: 
-                    dataBytes = dataBytes.concat(self.v as? [UInt8]!);
+                    dataBytes = dataBytes.concat(self.value as? [UInt8]!);
                     break;
                 case MsgType.cdcVecU16: 
-                    for ele in self.v as? [UInt16]! {
+                    for ele in self.value as? [UInt16]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecU32: 
-                    for ele in self.v as? [UInt32]! {
+                    for ele in self.value as? [UInt32]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecU64: 
-                    for ele in self.v as? [UInt64]! {
+                    for ele in self.value as? [UInt64]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecU128: 
-                    for ele in self.v as? [UInt128]! {
+                    for ele in self.value as? [UInt128]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI8: 
-                    for ele in self.v as? [Int8]! {
+                    for ele in self.value as? [Int8]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI16: 
-                    for ele in self.v as? [Int16]! {
+                    for ele in self.value as? [Int16]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI32: 
-                    for ele in self.v as? [Int32]! {
+                    for ele in self.value as? [Int32]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI64: 
-                    for ele in self.v as? [Int64]! {
+                    for ele in self.value as? [Int64]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
                 case MsgType.cdcVecI128: 
-                    for ele in self.v as? [Int128]! {
+                    for ele in self.value as? [Int128]! {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
@@ -158,20 +158,20 @@ pub contract MessageProtocol {
             self.items = [];
         }
 
-        pub fun addItem(omi: MessageItem): Bool {
+        pub fun addItem(item: MessageItem): Bool {
             for ele in self.items {
-                if (ele.n == omi.n) {
+                if (ele.name == item.name) {
                     return false;
                 }
             }
 
-            self.items.append(omi);
+            self.items.append(item);
             return true;
         }
 
-        pub fun getItem(_ id: UInt128): MessageItem? {
+        pub fun getItem(name: String): MessageItem? {
             for ele in self.items {
-                if (ele.n == id) {
+                if (ele.name == name) {
                     return ele;
                 }
             }
@@ -279,74 +279,74 @@ pub contract MessageProtocol {
         self.messageID = 0;
     }
 
-    pub fun createMessageItem(ocn: UInt128, oct: MsgType, ocv: AnyStruct): MessageItem?{
-        switch oct {
+    pub fun createMessageItem(name: String, type: MsgType, value: AnyStruct): MessageItem?{
+        switch type {
             case MsgType.cdcString: 
-                let v: String = ocv as? String!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: String = value as? String!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcU8: 
-                let v: UInt8 = ocv as? UInt8!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: UInt8 = value as? UInt8!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcU16: 
-                let v: UInt16 = ocv as? UInt16!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: UInt16 = value as? UInt16!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcU32: 
-                let v: UInt32 = ocv as? UInt32!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: UInt32 = value as? UInt32!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcU64: 
-                let v: UInt64 = ocv as? UInt64!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: UInt64 = value as? UInt64!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcU128: 
-                let v: UInt128 = ocv as? UInt128!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: UInt128 = value as? UInt128!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcI8: 
-                let v: Int8 = ocv as? Int8!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: Int8 = value as? Int8!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcI16: 
-                let v: Int16 = ocv as? Int16!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: Int16 = value as? Int16!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcI32: 
-                let v: Int32 = ocv as? Int32!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: Int32 = value as? Int32!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcI64: 
-                let v: Int64 = ocv as? Int64!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: Int64 = value as? Int64!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcI128: 
-                let v: Int128 = ocv as? Int128!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: Int128 = value as? Int128!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecString: 
-                let v: [String] = ocv as? [String]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [String] = value as? [String]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecU8: 
-                let v: [UInt8] = ocv as? [UInt8]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [UInt8] = value as? [UInt8]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecU16: 
-                let v: [UInt16] = ocv as? [UInt16]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [UInt16] = value as? [UInt16]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecU32: 
-                let v: [UInt32] = ocv as? [UInt32]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [UInt32] = value as? [UInt32]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecU64: 
-                let v: [UInt64] = ocv as? [UInt64]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [UInt64] = value as? [UInt64]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecU128: 
-                let v: [UInt128] = ocv as? [UInt128]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [UInt128] = value as? [UInt128]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecI8: 
-                let v: [Int8] = ocv as? [Int8]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [Int8] = value as? [Int8]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecI16: 
-                let v: [Int16] = ocv as? [Int16]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [Int16] = value as? [Int16]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecI32: 
-                let v: [Int32] = ocv as? [Int32]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [Int32] = value as? [Int32]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecI64: 
-                let v: [Int64] = ocv as? [Int64]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [Int64] = value as? [Int64]!;
+                return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecI128: 
-                let v: [Int128] = ocv as? [Int128]!;
-                return MessageItem(on: ocn, ot: oct, ov: ocv);
+                let v: [Int128] = value as? [Int128]!;
+                return MessageItem(name: name, type: type, value: value);
             default:
                 return nil;
         }

@@ -12,6 +12,8 @@
     }
   },
   "contracts": {
+    "MessageProtocol":"./contracts/MessageProtocol.cdc",
+    "IdentityVerification":"./contracts/IdentityVerification.cdc",
     "SentMessageContract": "./contracts/SentMessageContract.cdc",
     "ReceivedMessageContract": "./contracts/ReceivedMessageContract.cdc",
     "CrossChain": "./contracts/CrossChain.cdc",
@@ -40,6 +42,8 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "MessageProtocol",
+        "IdentityVerification",
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",
@@ -51,13 +55,15 @@
     },
     "testnet": {
       "testnet-account": [
+        "MessageProtocol",
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",
         "MetadataViews",
         "NonFungibleToken",
         "ExampleNFT",
-        "NFTCrossChain"
+        "NFTCrossChain",
+        "IdentityVerification"
       ]
     }
   }

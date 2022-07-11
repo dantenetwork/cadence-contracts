@@ -15,7 +15,9 @@ async function query() {
     'utf8'
   );
 
-  const id = 0;
+  // Passing in Number as value for UInt64 is deprecated and will cease to work in future releases of @onflow/types.
+  // Going forward, use String as value for UInt64.
+  const id = JSON.stringify(0);
 
   const result = await flowService.executeScript({
     script: script,

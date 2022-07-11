@@ -1,4 +1,4 @@
-import MessageProtocol from 0x02
+import MessageProtocol from 0xf8d6e0586b0a20c7
 
 pub contract SentMessageContract{
 
@@ -10,12 +10,12 @@ pub contract SentMessageContract{
         pub let data: MessageProtocol.MessagePayload;
         pub let callType: UInt8;
         pub let callback: String?;
-        pub let commitment: [UInt8]?;
-        pub let answer: [UInt8]?;
+        pub let commitment: String?;
+        pub let answer: String?;
 
       init(toChain: String, sqos: [MessageProtocol.SQoSItem], 
             contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
-            callType: UInt8, callback: String?, oc: [UInt8]?, oa: [UInt8]?){
+            callType: UInt8, callback: String?, commitment: String?, answer: String?){
             self.toChain = toChain;
             self.sqos = sqos;
             self.contractName = contractName;
@@ -23,8 +23,8 @@ pub contract SentMessageContract{
             self.data = data;
             self.callType = callType;
             self.callback = callback;
-            self.commitment = oc;
-            self.answer = oa;
+            self.commitment = commitment;
+            self.answer = answer;
       }
     }
 
@@ -83,29 +83,18 @@ pub contract SentMessageContract{
     pub struct SentMessageCore{
         pub let id: UInt128; // message id
         pub let fromChain: String; // FLOW, source chain name
-        pub let toChain: String; // destination chain name
+        pub let toChain: String;
         pub let sender: String; // sender of cross chain message
         pub let signer: String; // signer of the message call, the same as sender in Flow
-        pub let sqos: [MessageProtocol.SQoSItem];
-        pub let content: {String: AnyStruct}; // message content
-        pub let session: MessageProtocol.Session;
+        pub let msgToSubmit: msgToSubmit;
 
-        init(id: UInt128, toChain: String, sender: String, signer: String, 
-                        sqos: [MessageProtocol.SQoSItem], 
-                        contractName: String, actionName: String, data: MessageProtocol.MessagePayload, 
-                        session: MessageProtocol.Session){
+        init(id: UInt128, toChain: String, sender: String, signer: String, msgToSubmit: msgToSubmit){
             self.id = id;
-            self.fromChain = "FLOW";
+            self.fromChain = "FLOW";            
             self.toChain = toChain;
             self.sender = sender;
             self.signer = signer;
-            self.sqos = sqos;
-            self.content = {
-            "contractName": contractName, // contract name of destination chain
-            "actionName": actionName, // action name of contract
-            "data": data // cross chain message data
-            };
-            self.session = session;
+            self.msgToSubmit = msgToSubmit;
         }
     }
 
@@ -147,7 +136,6 @@ pub contract SentMessageContract{
 
             let pubAcct = getAccount(submitterAddr);
             let linkPath = PublicPath(identifier: link);
-            // let linkPath = /public/submitlink;
             let submittorLink = pubAcct.getCapability<&{SubmitterFace}>(linkPath!);
 
             if let submittorRef = submittorLink.borrow(){
@@ -157,18 +145,8 @@ pub contract SentMessageContract{
                                                     toChain: rst.toChain, 
                                                     sender: submitterAddr.toString(), 
                                                     signer: submitterAddr.toString(),
-                                                    sqos: rst.sqos,
-                                                    contractName: rst.contractName, 
-                                                    actionName: rst.actionName, 
-                                                    data: rst.data,
-                                                    session: MessageProtocol.Session(id: self.sessionID, type: rst.callType, callback: rst.callback, oc: rst.commitment, oa: rst.answer)));
-                
-                self.sessionID = self.sessionID + 1;
-
-                // if (self.message.length > 10){
-                //   self.message.removeFirst();
-                // }
-
+                                                    msgToSubmit: rst
+                                                    ));
             }else{
                 panic("Invalid submitter!");
             }

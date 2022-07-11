@@ -1,5 +1,5 @@
-import MessageProtocol from 0x02
-import IdentityVerification from 0x03
+import MessageProtocol from 0xf8d6e0586b0a20c7
+import IdentityVerification from 0xf8d6e0586b0a20c7
 
 pub contract ReceivedMessageContract{
     
@@ -316,7 +316,7 @@ pub contract ReceivedMessageContract{
     //    */
     //  pub fun unregisterRouter(){
 
-     }
+    //  }
 
     /**
        * Create an ECDSA_P256 signature in offchain and verify it in Cadence

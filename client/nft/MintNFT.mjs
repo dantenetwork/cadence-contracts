@@ -3,6 +3,7 @@ import path from 'path';
 import FlowService from '../flow.mjs';
 import fcl from "@onflow/fcl";
 import types from "@onflow/types";
+import crypto from 'crypto';
 
 const flowService = new FlowService();
 
@@ -28,6 +29,14 @@ async function mintNFT() {
   console.log(NFTThumbnail);
   console.log();
 
+  // Generate random number
+  const randomNumber = Buffer.from(crypto.randomBytes(256)).toString('hex');
+  console.log('Random number: ' + randomNumber);
+
+  const commitment = crypto.createHash('sha256').update(randomNumber).digest('hex');
+  console.log('Commitment: ' + commitment);
+
+  const receiver = '0x3aE841B899Ae4652784EA734cc61F524c36325d1';
 
   var id = await queryNFTCount();
   id++;
@@ -39,7 +48,9 @@ async function mintNFT() {
       fcl.arg(flowService.getSignerAddress(), types.Address),
       fcl.arg(NFTName, types.String),
       fcl.arg(NFTDescription, types.String),
-      fcl.arg(NFTThumbnail, types.String)
+      fcl.arg(NFTThumbnail, types.String),
+      fcl.arg(receiver, types.String),
+      fcl.arg(commitment, types.String)
     ],
     proposer: authorization,
     authorizations: [authorization],
