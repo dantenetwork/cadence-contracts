@@ -1,31 +1,89 @@
+import SentMessageContract from 0x01
+import ReceivedMessageContract from 0x04
 
 pub contract CrossChain {
-    pub var RegisteredContracts:[Address]; // stores all contracts' address
-    pub var Validators:[Address]; // stores all validators' address
+    pub var registeredRecvAccounts: {Address: String};   // stores all recvers' address
+    pub var registeredSendAccounts: {Address: String};  // stores all senders' address
+    pub var validators:[Address];               // stores all validators' address
+    
 
     // init cross chain
     init(){
-        self.RegisteredContracts = [];
-        self.Validators = [];
+        self.registeredRecvAccounts = {};
+        self.validators = [];
+        self.registeredSendAccounts = {};
     }
 
     /**
-      * Register contract's address into cross chain contract
-      * @param address - address of contract
+      * Register the address of accouts wanna to receive visiting from other chains into cross chain contract
+      * @param address - address of account
       */
-    pub fun registerContract(address: Address): Bool{
-        // append contract's address into RegisteredContracts
-        if(self.RegisteredContracts.contains(address)){
-            return false;
+    pub fun registerRecvAccount(address: Address, link: String): Bool{
+        let pubLink = PublicPath(identifier: link);
+        let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+        if (!recverRef.isOnline()) {
+            panic("The recver is offline!");
         }
-        self.RegisteredContracts.append(address);
+        
+        // add or update contract's address into RegisteredContracts
+        self.registeredRecvAccounts[address] = link;
+        return true;
+    }
+
+    /*Remove registered recver. Needs signature verification */ 
+    pub fun removeRecvAccount(address: Address, link: String): Bool {
+        // Verify the signature
+        let pubLink = PublicPath(identifier: link);
+        let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+        if (recverRef.isOnline()) {
+            panic("The recver is online!");
+        }
+
+        self.registeredRecvAccounts.remove(key: address);
         return true;
     }
 
     /**
       * Query registered contract list
       */
-    pub fun queryRegisteredContracts(): [Address]{
-      return self.RegisteredContracts;
+    pub fun queryRegisteredRecvAccount(): [Address]{
+        return self.registeredRecvAccounts.keys;
+    }
+
+    /**
+      * Register the address of accouts wanna to send messages to other chains' contract
+      * @param address - address of account
+      */
+    pub fun registerSendAccount(address: Address, link: String): Bool{
+        let pubLink = PublicPath(identifier: link);
+        let senderRef = getAccount(address).getCapability<&{SentMessageContract.SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+        if (!senderRef.isOnline()) {
+            panic("The sender is offline!");
+        }
+        
+        // add or update contract's address into RegisteredContracts
+        self.registeredSendAccounts[address] = link;
+
+        return true;
+    }
+
+    /// Remove registered sender. Needs signature verification
+    pub fun removeSendAccount(address: Address, link: String): Bool {
+        // Verify the signature
+        let pubLink = PublicPath(identifier: link);
+        let senderRef = getAccount(address).getCapability<&{SentMessageContract.SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+        if (senderRef.isOnline()) {
+            panic("The sender is online!");
+        }
+
+        self.registeredSendAccounts.remove(key: address);
+        return true;
+    }
+
+    /**
+      * Query registered contract list
+      */
+    pub fun queryRegisteredSendAccount(): [Address]{
+      return self.registeredSendAccounts.keys;
     }
 }

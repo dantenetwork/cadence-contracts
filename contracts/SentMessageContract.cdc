@@ -1,16 +1,30 @@
+import MessageProtocol from 0x02
+
 pub contract SentMessageContract{
 
     pub struct msgToSubmit{
-      pub let toChain: String;
-      pub let contractName: String;
-      pub let actionName: String;
-      pub let data: String;
+        pub let toChain: String;
+        pub let sqos: [MessageProtocol.SQoSItem];
+        pub let contractName: String;
+        pub let actionName: String;
+        pub let data: MessageProtocol.MessagePayload;
+        pub let callType: UInt8;
+        pub let callback: String?;
+        pub let commitment: [UInt8]?;
+        pub let answer: [UInt8]?;
 
-      init(toChain: String, contractName: String, actionName: String, data: String){
-          self.toChain = toChain;
-          self.contractName = contractName;
-          self.actionName = actionName;
-          self.data = data;
+      init(toChain: String, sqos: [MessageProtocol.SQoSItem], 
+            contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
+            callType: UInt8, callback: String?, oc: [UInt8]?, oa: [UInt8]?){
+            self.toChain = toChain;
+            self.sqos = sqos;
+            self.contractName = contractName;
+            self.actionName = actionName;
+            self.data = data;
+            self.callType = callType;
+            self.callback = callback;
+            self.commitment = oc;
+            self.answer = oa;
       }
     }
 
@@ -19,7 +33,7 @@ pub contract SentMessageContract{
         access(contract) fun getHookedContent(): msgToSubmit;
     }
 
-    // Submitter
+    // Submitter.
     pub resource Submitter: SubmitterFace{
         priv var hookedContent: msgToSubmit?;
         // in resource `Submitter`
@@ -67,23 +81,32 @@ pub contract SentMessageContract{
 
     // Define message core
     pub struct SentMessageCore{
-      pub let id: Int; // message id
-      pub let fromChain: String; // FLOW, source chain name
-      pub let toChain: String; // destination chain name
-      pub let sender: String; // sender of cross chain message
-      pub let content: AnyStruct; // message content
+        pub let id: UInt128; // message id
+        pub let fromChain: String; // FLOW, source chain name
+        pub let toChain: String; // destination chain name
+        pub let sender: String; // sender of cross chain message
+        pub let signer: String; // signer of the message call, the same as sender in Flow
+        pub let sqos: [MessageProtocol.SQoSItem];
+        pub let content: {String: AnyStruct}; // message content
+        pub let session: MessageProtocol.Session;
 
-      init(id: Int, toChain: String, sender: String, contractName: String, actionName: String, data: String){
-        self.id = id;
-        self.fromChain = "FLOW";
-        self.toChain = toChain;
-        self.sender = sender;
-        self.content = {
-          "contractName": contractName, // contract name of destination chain
-          "actionName": actionName, // action name of contract
-          "data": data // cross chain message data
-        };
-      }
+        init(id: UInt128, toChain: String, sender: String, signer: String, 
+                        sqos: [MessageProtocol.SQoSItem], 
+                        contractName: String, actionName: String, data: MessageProtocol.MessagePayload, 
+                        session: MessageProtocol.Session){
+            self.id = id;
+            self.fromChain = "FLOW";
+            self.toChain = toChain;
+            self.sender = sender;
+            self.signer = signer;
+            self.sqos = sqos;
+            self.content = {
+            "contractName": contractName, // contract name of destination chain
+            "actionName": actionName, // action name of contract
+            "data": data // cross chain message data
+            };
+            self.session = session;
+        }
     }
 
     // Interface is used for access control.
@@ -93,6 +116,8 @@ pub contract SentMessageContract{
         pub fun getAllMessages():[SentMessageCore];
         
         pub fun getMessageById(mesasageId: Int): SentMessageCore;
+
+        pub fun isOnline(): Bool;
     }
 
     // Acceptor's interface
@@ -103,10 +128,14 @@ pub contract SentMessageContract{
 
     // Define sent message vault
     pub resource SentMessageVault: SentMessageInterface, AcceptorFace{
+        priv var sessionID: UInt128;
         pub let message: [SentMessageCore];
+        priv var online: Bool;
 
         init(){
             self.message = [];
+            self.sessionID = 0;
+            self.online = true;
         }
 
         /**
@@ -124,13 +153,18 @@ pub contract SentMessageContract{
             if let submittorRef = submittorLink.borrow(){
                 let rst = submittorRef.getHookedContent();
                 
-                self.message.append(SentMessageCore(id: self.message.length, 
+                self.message.append(SentMessageCore(id: MessageProtocol.getNextMessageID(), 
                                                     toChain: rst.toChain, 
                                                     sender: submitterAddr.toString(), 
+                                                    signer: submitterAddr.toString(),
+                                                    sqos: rst.sqos,
                                                     contractName: rst.contractName, 
                                                     actionName: rst.actionName, 
-                                                    data: rst.data));
+                                                    data: rst.data,
+                                                    session: MessageProtocol.Session(id: self.sessionID, type: rst.callType, callback: rst.callback, oc: rst.commitment, oa: rst.answer)));
                 
+                self.sessionID = self.sessionID + 1;
+
                 // if (self.message.length > 10){
                 //   self.message.removeFirst();
                 // }
@@ -139,23 +173,6 @@ pub contract SentMessageContract{
                 panic("Invalid submitter!");
             }
         }
-
-        /**
-          * add cross chain message to SentMessageVault
-          * @param toChain - destination chain
-          * @param sender - message sender
-          * @param contractName - contract name of destination chain
-          * @param actionName - action name of destination contract
-          * @param data - contract execute data
-          */
-        // deprecated
-        // pub fun addMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String){
-        //     self.message.append(SentMessageCore(id: self.message.length, toChain: toChain, sender: sender, contractName: contractName, actionName: actionName, data: data));
-
-        //     if (self.message.length > 10){
-        //         self.message.removeFirst();
-        //     }
-        // }
 
         /**
           * Query sent cross chain messages
@@ -171,6 +188,18 @@ pub contract SentMessageContract{
         pub fun getMessageById(mesasageId: Int): SentMessageCore{
             return self.message[mesasageId];
         }
+
+        pub fun isOnline(): Bool {
+            return self.online;
+        }
+
+        pub fun setOnline() {
+            self.online = true;
+        }
+
+        pub fun setOffline() {
+            self.online = false;
+        }
     }
 
     // Create recource to store sent message
@@ -179,7 +208,7 @@ pub contract SentMessageContract{
     }
 
     pub fun createMessageSubmitter(): @Submitter{
-      return <- create Submitter();
+        return <- create Submitter();
     }
 
     // Query messages
@@ -191,22 +220,5 @@ pub contract SentMessageContract{
       let pubLink = PublicPath(identifier: link);
       let senderRef = getAccount(msgSender).getCapability<&{SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
       return senderRef.getAllMessages();
-      // if let senderRef = senderLink.borrow(){
-      //     return senderRef.getAllMessages();
-      // } else{
-      //     panic("invalid sender address or `link`!");
-      // }
     }
-
-    // interface todo:
-    // create
-    // pub fun createSentMessageVault(msgSender: Address, link: String): @SentMessageVault{
-    //     // record the senders
-    //     return <- create SentMessageVault();
-    // }
-
-    // query senders
-    // pub fun querySenders(): [(Address, String)]{
-
-    // }
 }
