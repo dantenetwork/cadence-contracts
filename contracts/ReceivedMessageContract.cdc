@@ -1,5 +1,5 @@
-import MessageProtocol from 0xf8d6e0586b0a20c7
-import IdentityVerification from 0xf8d6e0586b0a20c7
+import MessageProtocol from "./MessageProtocol.cdc"
+import IdentityVerification from "IdentityVerification.cdc"
 
 pub contract ReceivedMessageContract{
     
@@ -152,16 +152,17 @@ pub contract ReceivedMessageContract{
         **/
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]){
-          // TODO
-          /*
-            * the submitter of the message should be verified
-            * this can be done by the signature and public keys routers registered(`ReceivedMessageContract.registerRouter`)
-            * This can be substituted with the mechanism of resource `router`. This will be implemented later
-          */
+            // TODO
+            /*
+                * the submitter of the message should be verified
+                * this can be done by the signature and public keys routers registered(`ReceivedMessageContract.registerRouter`)
+                * This can be substituted with the mechanism of resource `router`. This will be implemented later
+            */
 
             // Verify the signature
             if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
                                               signatureAlgorithm: signatureAlgorithm,
+                                              rawData: recvMsg.messageHash.utf8,
                                               signature: signature,
                                               hashAlgorithm: HashAlgorithm.SHA2_256)) {
                 panic("invalid recver address or `link`!");
@@ -317,31 +318,5 @@ pub contract ReceivedMessageContract{
     //  pub fun unregisterRouter(){
 
     //  }
-
-    /**
-       * Create an ECDSA_P256 signature in offchain and verify it in Cadence
-       */
-     pub fun verifySignature(message: String, publicKey: String, signature: String): Bool{
-      
-        var originData:[UInt8] = message.utf8;
-
-        let digest = HashAlgorithm.SHA3_256.hash(originData);
-        let pk = PublicKey(
-            publicKey: publicKey.decodeHex(),
-            signatureAlgorithm: SignatureAlgorithm.ECDSA_P256
-        )
-
-        let isValid = pk.verify(
-            signature: signature.decodeHex(),
-            signedData: originData,
-            domainSeparationTag: "",
-            hashAlgorithm: HashAlgorithm.SHA3_256
-        )
-
-        if(!isValid){
-          panic("signature verify failed.");
-        }
-        return isValid;
-     }
 }
 

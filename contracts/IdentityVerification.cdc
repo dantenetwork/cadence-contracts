@@ -6,7 +6,8 @@ pub contract IdentityVerification {
         self.nonce = {};
     }
 
-    pub fun basicVerify(pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8], hashAlgorithm: HashAlgorithm): Bool {
+    // Verify whether both the `pubAddr` and `rawData` are valid
+    pub fun basicVerify(pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, rawData: [UInt8], signature: [UInt8], hashAlgorithm: HashAlgorithm): Bool {
         var nonceV: UInt128 = 0;
         if let val = self.nonce[pubAddr] {
             nonceV = val + 1;
@@ -16,7 +17,7 @@ pub contract IdentityVerification {
         let pk = PublicKey(publicKey: pubAcct.keys.get(keyIndex: 0)!.publicKey.publicKey, 
                             signatureAlgorithm: signatureAlgorithm);
 
-        let originData: [UInt8] = pubAddr.toBytes().concat(nonceV.toBigEndianBytes());
+        let originData: [UInt8] = pubAddr.toBytes().concat(nonceV.toBigEndianBytes()).concat(rawData);
 
         if (pk.verify(signature: signature,
                         signedData: originData,
