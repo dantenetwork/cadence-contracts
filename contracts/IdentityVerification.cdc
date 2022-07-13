@@ -7,6 +7,7 @@ pub contract IdentityVerification {
     }
 
     // Verify whether both the `pubAddr` and `rawData` are valid
+    // So the `signature` is composited with: `pubAddr` + `self.nonce` + `rawData`
     pub fun basicVerify(pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, rawData: [UInt8], signature: [UInt8], hashAlgorithm: HashAlgorithm): Bool {
         var nonceV: UInt128 = 0;
         if let val = self.nonce[pubAddr] {
