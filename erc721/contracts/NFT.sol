@@ -12,7 +12,7 @@ contract NFT is ERC721 {
     constructor() ERC721("FLOW-DANTE", "FLOW-DANTE") {
     }
 
-    function crossChainPending(uint256 tokenId, address receiver, string memory token_url, string memory hashValue) public returns (bool){
+    function crossChainMint(uint256 tokenId, address receiver, string memory token_url, string memory hashValue) public returns (bool){
         // if token is already exists
         assert(keccak256(abi.encodePacked(tokens[tokenId])) != keccak256(abi.encodePacked("")));
 

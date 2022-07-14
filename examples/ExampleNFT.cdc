@@ -19,7 +19,6 @@ pub contract ExampleNFT: NonFungibleToken {
 
     pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
         pub let id: UInt64
-
         pub let tokenURL: String
 
         init(
