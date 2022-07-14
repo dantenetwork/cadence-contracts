@@ -35,35 +35,14 @@ pub contract MetadataViews {
     //
     pub struct Display {
 
-        // The name of the object. 
+        // The token url of the object. 
         //
-        // This field will be displayed in lists and therefore should
-        // be short an concise.
-        //
-        pub let name: String
-
-        // A written description of the object. 
-        //
-        // This field will be displayed in a detailed view of the object,
-        // so can be more verbose (e.g. a paragraph instead of a single line).
-        //
-        pub let description: String
-
-        // A small thumbnail representation of the object.
-        //
-        // This field should be a web-friendly file (i.e JPEG, PNG)
-        // that can be displayed in lists, link previews, etc.
-        //
-        pub let thumbnail: AnyStruct{File}
+        pub let tokenURL: String
 
         init(
-            name: String,
-            description: String,
-            thumbnail: AnyStruct{File}
+            tokenURL: String
         ) {
-            self.name = name
-            self.description = description
-            self.thumbnail = thumbnail
+            self.tokenURL = tokenURL
         }
     }
 

@@ -51,6 +51,15 @@ flow project deploy --update
 
 # Deploy contracts to testnet
 flow project deploy --network testnet
+
+# Create Locker account
+flow accounts create --key bb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025 --signer emulator-account
+
+# Replace locker account address to locker.address of config/default.json
+# Replace locker account address to locker of transactions/nft/CrossChainTransferNFT.cdc
+
+# Create Locker Collection
+node client/nft/setupLockerAccount.mjs
 ```
 
 ## Examples
@@ -59,7 +68,7 @@ flow project deploy --network testnet
 ```
 // Setup account & mint NFT 
 // Success when `Tx Sent: {...` is shown
-node client/nft/MintNFT.mjs
+node client/nft/mintNFT.mjs
 
 // Query NFT meda data by Node.js
 node client/nft/queryNFT.mjs
