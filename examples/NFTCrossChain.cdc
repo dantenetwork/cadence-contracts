@@ -23,7 +23,7 @@ pub contract NFTCrossChain {
       self.account.link<&{SentMessageContract.AcceptorFace}>(/public/acceptorFace, target: /storage/sentMessageVault);
 
       // add message submitter
-      let msgSubmitter <- SentMessageContract.createMessageSubmitter(); 
+      let msgSubmitter <- SentMessageContract.createMessageSubmitter();
       self.account.save(<-msgSubmitter, to: /storage/msgSubmitter);
       self.account.link<&{SentMessageContract.SubmitterFace}>(/public/msgSubmitter, target: /storage/msgSubmitter);
     }

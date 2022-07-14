@@ -10,11 +10,7 @@ import MessageProtocol from 0xf8d6e0586b0a20c7;
 
 transaction(
     recipient: Address,
-    name: String,
-    description: String,
-    thumbnail: String,
-    owner: String,
-    commitment: String
+    tokenURL: String
 ) {
     let signer: AuthAccount;
     prepare(signer: AuthAccount){
@@ -35,32 +31,7 @@ transaction(
       // Mint the NFT and deposit it to the recipient's collection
       minter.mintNFT(
           recipient: receiver,
-          name: name,
-          description: description,
-          thumbnail: thumbnail,
+          tokenURL: tokenURL
       );
-
-      let toChain = "Ethereum";
-      let SQoSItem = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Identity, value: "");
-      let contractName = "0x263037FdFa433828fCBF97B87200A0E0b8d68C5f";
-      let actionName = "mintTo";
-      let callType: UInt8 = 1;
-      let callback = "";
-      let commitment = commitment;
-      let answer = "";
-
-      let data = MessageProtocol.MessagePayload();
-      let ownerItem = MessageProtocol.MessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: owner);
-      data.addItem(item: ownerItem);
-
-      // send cross chain message
-      // borrow resource from storage
-      // let messageReference = self.account.borrow<&SentMessageContract.SentMessageVault>(from: /storage/sentMessageVault);
-      // messageReference!.addMessage(toChain: toChain, sender:self.account.address.toString(), contractName:contractName, actionName:actionName, data:data);
-
-      let msgSubmitterRef = self.signer.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter);
-      let msg = SentMessageContract.msgToSubmit(toChain: toChain, sqos: [SQoSItem], contractName: contractName, actionName: actionName, data: data, callType: callType, callback: callback, commitment: commitment, answer: answer);
-      msgSubmitterRef!.submitWithAuth(msg, acceptorAddr: self.signer.address, alink: "acceptorFace", oSubmitterAddr: self.signer.address, slink: "msgSubmitter");
-    
     }
 }

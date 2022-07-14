@@ -19,21 +19,14 @@ pub contract ExampleNFT: NonFungibleToken {
 
     pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
         pub let id: UInt64
-
-        pub let name: String
-        pub let description: String
-        pub let thumbnail: String
+        pub let tokenURL: String
 
         init(
             id: UInt64,
-            name: String,
-            description: String,
-            thumbnail: String,
+            tokenURL: String
         ) {
             self.id = id
-            self.name = name
-            self.description = description
-            self.thumbnail = thumbnail
+            self.tokenURL = tokenURL
         }
     
         pub fun getViews(): [Type] {
@@ -46,11 +39,7 @@ pub contract ExampleNFT: NonFungibleToken {
             switch view {
                 case Type<MetadataViews.Display>():
                     return MetadataViews.Display(
-                        name: self.name,
-                        description: self.description,
-                        thumbnail: MetadataViews.HTTPFile(
-                            url: self.thumbnail
-                        )
+                        tokenURL: self.tokenURL
                     )
             }
 
@@ -144,34 +133,28 @@ pub contract ExampleNFT: NonFungibleToken {
     // able to mint new NFTs
     //
     pub resource NFTMinter {
-
         // mintNFT mints a new NFT with a new ID
         // and deposit it in the recipients collection using their collection reference
         pub fun mintNFT(
             recipient: &{NonFungibleToken.CollectionPublic},
-            name: String,
-            description: String,
-            thumbnail: String,
+            tokenURL: String
         ) {
 
             // create a new NFT
             var newNFT <- create NFT(
                 id: ExampleNFT.totalSupply,
-                name: name,
-                description: description,
-                thumbnail: thumbnail,
+                tokenURL: tokenURL
             )
 
             // deposit it in the recipient's account using their reference
             recipient.deposit(token: <-newNFT)
-
             ExampleNFT.totalSupply = ExampleNFT.totalSupply + UInt64(1)
         }
     }
 
     init() {
         // Initialize the total supply
-        self.totalSupply = 0
+        self.totalSupply = 1
 
         // Set the named paths
         self.CollectionStoragePath = /storage/exampleNFTCollection

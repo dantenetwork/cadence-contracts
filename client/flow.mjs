@@ -14,15 +14,10 @@ if (config.get('network') == 'testnet') {
 }
 
 class FlowService {
-  constructor() {
-    let signer = config.get('emulator');
-
-    if (config.get('network') == 'testnet') {
-      signer = config.get('testnet');
-    }
-    this.signerFlowAddress = signer.address;// signer address 
-    this.signerPrivateKeyHex = signer.privateKey;// signer private key
-    this.signerAccountIndex = signer.keyId;// singer key index
+  constructor(address, privateKey, keyId) {
+    this.signerFlowAddress = address;// signer address 
+    this.signerPrivateKeyHex = privateKey;// signer private key
+    this.signerAccountIndex = keyId;// singer key index
   }
 
   // An authorization function must produce the information of the user that is going to sign and a signing function to use the information to produce a signature.

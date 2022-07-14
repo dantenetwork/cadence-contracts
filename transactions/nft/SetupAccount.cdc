@@ -5,7 +5,6 @@ import ExampleNFT from 0xf8d6e0586b0a20c7;
 // to set itself up to receive NFTs
 
 transaction {
-
     prepare(signer: AuthAccount) {
         // Return early if the account already has a collection
         if signer.borrow<&ExampleNFT.Collection>(from: ExampleNFT.CollectionStoragePath) != nil {
