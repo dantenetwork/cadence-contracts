@@ -1,5 +1,5 @@
-import SentMessageContract from 0xf8d6e0586b0a20c7
-import ReceivedMessageContract from 0xf8d6e0586b0a20c7
+import SentMessageContract from "./SentMessageContract.cdc"
+import ReceivedMessageContract from "./ReceivedMessageContract.cdc"
 
 pub contract CrossChain {
     pub var registeredRecvAccounts: {Address: String};   // stores all recvers' address
