@@ -2,6 +2,7 @@ import ExampleNFT from 0xf8d6e0586b0a20c7;
 import MessageProtocol from 0xf8d6e0586b0a20c7;
 import SentMessageContract from 0xf8d6e0586b0a20c7;
 import NonFungibleToken from 0xf8d6e0586b0a20c7;
+import MetadataViews from 0xf8d6e0586b0a20c7;
 
 // This transaction transfers an NFT from one user's collection
 // to another user's collection.
@@ -13,13 +14,22 @@ transaction(
     let signer: AuthAccount;
     // The field that will hold the NFT as it is being
     // transferred to the other account
-    let transferToken: @NonFungibleToken.NFT
+    let transferToken: @NonFungibleToken.NFT;
+    let tokenURL: String;
 	
     prepare(signer: AuthAccount) {
         self.signer = signer;
         // Borrow a reference from the stored collection
         let collectionRef = signer.borrow<&ExampleNFT.Collection>(from: ExampleNFT.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
+
+        let nft = collectionRef.borrowExampleNFT(id: id)!
+
+         // Get the basic display information for this NFT
+        let view = nft.resolveView(Type<MetadataViews.Display>())!
+
+        let display = view as! MetadataViews.Display
+        self.tokenURL = display.tokenURL
 
         // Call the withdraw function on the sender's Collection
         // to move the NFT out of the collection
@@ -52,6 +62,11 @@ transaction(
         let answer = ""
 
         let data = MessageProtocol.MessagePayload()
+        
+        let idItem = MessageProtocol.MessageItem(name: "id", type: MessageProtocol.MsgType.cdcU64, value: id)
+        data.addItem(item: idItem)
+        let tokenURLItem = MessageProtocol.MessageItem(name: "tokenURL", type: MessageProtocol.MsgType.cdcString, value: self.tokenURL)
+        data.addItem(item: tokenURLItem)
         let ownerItem = MessageProtocol.MessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: owner)
         data.addItem(item: ownerItem)
         let hashValueItem = MessageProtocol.MessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)

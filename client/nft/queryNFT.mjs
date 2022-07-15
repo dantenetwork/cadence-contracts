@@ -24,7 +24,7 @@ async function query() {
 
   // Passing in Number as value for UInt64 is deprecated and will cease to work in future releases of @onflow/types.
   // Going forward, use String as value for UInt64.
-  const owner = config.get('locker').address;
+  const owner = config.get('emulator').address;
   const id = 1;
 
   const result = await flowService.executeScript({

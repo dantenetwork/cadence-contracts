@@ -25,13 +25,17 @@ async function mintNFT() {
     'utf8'
   );
 
-  const id = 2;
+  const id = 10;
 
   // Generate random number
-  const randomNumber = Buffer.from(crypto.randomBytes(256)).toString('hex');
+  let randomNumber = Buffer.from(crypto.randomBytes(32)).toString('hex');
   console.log('Random number: ' + randomNumber);
 
-  const hashValue = crypto.createHash('sha256').update(randomNumber).digest('hex');
+  // TODO
+  // for debugging purpose, should be removed on the production environment
+  randomNumber = '044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217';
+
+  const hashValue = '0x' + crypto.createHash('sha256').update(randomNumber).digest('hex');
   console.log('hashValue: ' + hashValue);
 
   const owner = '0x3aE841B899Ae4652784EA734cc61F524c36325d1'; 

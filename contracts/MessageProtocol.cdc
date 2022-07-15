@@ -276,7 +276,7 @@ pub contract MessageProtocol {
     }
 
     init() {
-        self.messageID = 0;
+        self.messageID = 1;
     }
 
     pub fun createMessageItem(name: String, type: MsgType, value: AnyStruct): MessageItem?{
