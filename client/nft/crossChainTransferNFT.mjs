@@ -25,7 +25,7 @@ async function mintNFT() {
     'utf8'
   );
 
-  const id = 10;
+  const id = 14;
 
   // Generate random number
   let randomNumber = Buffer.from(crypto.randomBytes(32)).toString('hex');

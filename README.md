@@ -80,12 +80,17 @@ node client/nft/crossChainTransferNFT.mjs
 node client/nft/querySentMessage.mjs
 ```
 
+#### Cross chain mint & cross chain claim on Rinkeby
+```
+node client/nft/crossChainMint.mjs
+```
+
 #### Check NFT on Opensea browser
 
 Wait for some time...You can see new NFT below:
 
 ```
-https://testnets.opensea.io/assets?search[query]=0x263037FdFa433828fCBF97B87200A0E0b8d68C5f&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x3dCf9DE8B5e07dB6ffd435911E085687B0A2dc99&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore

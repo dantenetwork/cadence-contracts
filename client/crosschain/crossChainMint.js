@@ -89,6 +89,9 @@ async function crossChainMint() {
 };
 
 async function crossChainClaim(tokenId, anwser){
+  console.log('executing cross chain claim');
+  console.log('tokenId: ' + tokenId);
+  console.log('anwser: ' + anwser);
   let ret = await ethereum.sendTransaction(NFTContract, 'crossChainClaim', ethPrivateKey, [tokenId, anwser]);
   console.log(ret);
 }
