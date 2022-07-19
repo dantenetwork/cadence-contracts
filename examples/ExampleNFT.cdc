@@ -142,7 +142,7 @@ pub contract ExampleNFT: NonFungibleToken {
 
             // create a new NFT
             var newNFT <- create NFT(
-                id: ExampleNFT.totalSupply,
+                id: ExampleNFT.totalSupply + UInt64(1),
                 tokenURL: tokenURL
             )
 
@@ -154,7 +154,7 @@ pub contract ExampleNFT: NonFungibleToken {
 
     init() {
         // Initialize the total supply
-        self.totalSupply = 1
+        self.totalSupply = 0
 
         // Set the named paths
         self.CollectionStoragePath = /storage/exampleNFTCollection

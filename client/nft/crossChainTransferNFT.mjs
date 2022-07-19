@@ -5,6 +5,7 @@ import fcl from "@onflow/fcl";
 import types from "@onflow/types";
 import crypto from 'crypto';
 import config from 'config';
+import Util from '../util.mjs';
 
 let signer = config.get('emulator');
 
@@ -14,6 +15,8 @@ if (config.get('network') == 'testnet') {
 
 const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);
 const authorization = flowService.authorizationFunction();
+
+const util = new Util();
 
 async function mintNFT() {
   // setup account
@@ -25,25 +28,27 @@ async function mintNFT() {
     'utf8'
   );
 
-  const id = 14;
+  var totalSupply = await util.queryTotalSupply();
+  const tokenId = parseInt(totalSupply);
+  console.log('tokenId: ' + tokenId);
 
   // Generate random number
   let randomNumber = Buffer.from(crypto.randomBytes(32)).toString('hex');
-  console.log('Random number: ' + randomNumber);
 
   // TODO
   // for debugging purpose, should be removed on the production environment
-  randomNumber = '044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217';
+  randomNumber = config.get('randomNumber');
+  console.log('Random number: ' + randomNumber);
 
   const hashValue = '0x' + crypto.createHash('sha256').update(randomNumber).digest('hex');
   console.log('hashValue: ' + hashValue);
 
-  const owner = '0x3aE841B899Ae4652784EA734cc61F524c36325d1'; 
+  const owner = config.get('ethereumReceiver'); 
 
   let response = await flowService.sendTx({
     transaction,
     args: [
-      fcl.arg(JSON.stringify(id), types.UInt64),
+      fcl.arg(JSON.stringify(tokenId), types.UInt64),
       fcl.arg(owner, types.String),
       fcl.arg(hashValue, types.String)
     ],

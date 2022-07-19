@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import FlowService from '../flow.mjs';
+import Util from '../util.mjs';
 import fcl from "@onflow/fcl";
 import types from "@onflow/types";
 import config from 'config';
@@ -14,6 +15,8 @@ if (config.get('network') == 'testnet') {
 const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);
 const authorization = flowService.authorizationFunction();
 
+const util = new Util();
+
 async function mintNFT() {
   // Read mint transaction cdc
   const transaction = fs.readFileSync(
@@ -25,9 +28,6 @@ async function mintNFT() {
   );
 
   const tokenURL = 'https://raw.githubusercontent.com/wuyahuang/opensea/main/1';
-
-  var totalSupply = await queryTotalSupply();
-  console.log('totalSupply: ' + totalSupply);
 
   let response = await flowService.sendTx({
     transaction,
@@ -45,22 +45,8 @@ async function mintNFT() {
   console.log('The new NFT has been minted, waiting for the transaction to be sealed..');
   await fcl.tx(response).onceSealed();
   console.log('Transaction sealed.');
+  var totalSupply = await util.queryTotalSupply();
+  console.log('totalSupply: ' + totalSupply);
 }
-
-async function queryTotalSupply() {
-  const script = fs.readFileSync(
-    path.join(
-      process.cwd(),
-      './transactions/nft/QueryTotalSupply.cdc'
-    ),
-    'utf8'
-  );
-
-  let totalSupply = await flowService.executeScript({
-    script: script,
-    args: []
-  });
-  return totalSupply;
-};
 
 await mintNFT();

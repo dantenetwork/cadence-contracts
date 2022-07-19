@@ -9,34 +9,40 @@ contract NFT is ERC721 {
     mapping(uint256 => address) receivers;
     mapping(uint256 => bytes32) hashValues;
 
+    // Cross chain transfer NFT to other blockchain network
+    mapping(uint256 => string[3]) crossChainPending;
+
     constructor() ERC721("FLOW-DANTE", "FLOW-DANTE") {
     }
 
     event show(bytes32 hash);
     event showString(string hash);
 
-    function crossChainMint(uint256 tokenId, address receiver, string memory token_url, bytes32 hashValue) public returns (bool){
+    /// @dev Mint NFT from other blockchains
+    function crossChainMint(uint256 tokenId, address receiver, string memory tokenURL, bytes32 hashValue) public returns (bool){
         assert(tokenId > 0);
         // ensure token is not exists
         assert(_exists(tokenId) == false);
         assert(receivers[tokenId] == address(0));
 
-        tokens[tokenId] = token_url;
+        tokens[tokenId] = tokenURL;
         receivers[tokenId] = receiver;
         hashValues[tokenId] = hashValue;
 
         return true;
     }
 
+    /// @dev Query hash value by tokenId
     function getHashValue(uint256 tokenId) public view virtual returns (bytes32 hashValue){
         return hashValues[tokenId];
     }
 
+    /// @dev Receiver submit random number to claim NFT which was minted by other blockchains
     function crossChainClaim(uint256 tokenId, string memory anwser) public returns (bool){
-        // ensure token is exists
-        assert(receivers[tokenId] != address(0));
+        // Ensure token receiver equals to message sender
+        assert(receivers[tokenId] == msg.sender);
                 
-        // compare hashed value
+        // Compare hashed value
         bytes32 anwserHashValue = sha256(abi.encodePacked(anwser));
         assert(anwserHashValue == hashValues[tokenId]);
         
@@ -46,6 +52,23 @@ contract NFT is ERC721 {
         delete hashValues[tokenId];
         
         return true;
+    }
+
+    /// @dev Lock NFT to contract owner, and push cross chain info into crossChainPending
+    function crossChainTransfer(uint256 tokenId, string memory receiver, string memory hashValue) public returns (bool){
+        // Ensure token is exists
+        assert(_exists(tokenId) == true);
+        
+        crossChainPending[tokenId] = [receiver, tokens[tokenId], hashValue];
+
+        _transfer(msg.sender, address(this), tokenId);
+
+        return true;
+    }
+
+    /// @dev Returns cross chain transfer info for a given token ID
+    function queryCrossChainPending(uint256 tokenId) public view virtual returns (string[3] memory){
+        return crossChainPending[tokenId];
     }
 
     /// @dev Returns an URI for a given token ID

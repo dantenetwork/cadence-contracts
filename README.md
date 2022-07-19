@@ -74,7 +74,7 @@ node client/nft/mintNFT.mjs
 node client/nft/queryNFT.mjs
 
 # Tranfer NFT to locker and send cross chain message
-node client/nft/crossChainTransferNFT.mjs 
+node client/nft/crossChainTransferNFT.mjs
 
 # Query sent cross chain message By Node.js
 node client/nft/querySentMessage.mjs
