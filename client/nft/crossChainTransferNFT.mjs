@@ -19,11 +19,11 @@ const authorization = flowService.authorizationFunction();
 const util = new Util();
 
 async function mintNFT() {
-  // setup account
-  const transaction = fs.readFileSync(
+    // Get sent message 
+    const transaction = fs.readFileSync(
     path.join(
       process.cwd(),
-      './transactions/nft/CrossChainTransferNFT.cdc'
+      './transactions/nft/SentMessage.cdc'
     ),
     'utf8'
   );

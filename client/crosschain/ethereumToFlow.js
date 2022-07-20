@@ -6,8 +6,13 @@ import Ethereum from './ethereum.js';
 import config from 'config';
 import Util from '../util.mjs';
 
+let signer = config.get('emulator');
+if (config.get('network') == 'testnet') {
+    signer = config.get('testnet');
+}
 
-const flowService = new FlowService();
+const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);
+const authorization = flowService.authorizationFunction();
 
 // init ethereum contract
 const web3 = new Web3('https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161');
@@ -39,7 +44,7 @@ if (config.get('network') == 'testnet') {
     receiver = config.get('testnet');
 }
 
-async function crossChainTransfer(){
+async function crossChainTransfer() {
     console.log('Submit cross chain transfer to ethereum');
     // Query last NFT id
     var totalSupply = await util.queryTotalSupply();
@@ -51,8 +56,48 @@ async function crossChainTransfer(){
     console.log('blockHash: ' + ret.blockHash);
 
     // Query cross chain transfer pending info
+    console.log();
+    console.log('Query pending cross chain message from Ethereum to Flow');
     let result = await ethereum.contractCall(NFTContract, 'queryCrossChainPending', [tokenId]);
     console.log(result);
 }
 
-await crossChainTransfer();
+async function crossChainMint() {
+    // Submit received message 
+    const transaction = fs.readFileSync(
+        path.join(
+            process.cwd(),
+            './transactions/nft/ReceivedMessage.cdc'
+        ),
+        'utf8');
+
+    let response = await flowService.sendTx({
+        transaction,
+        args: [
+        ],
+        proposer: authorization,
+        authorizations: [authorization],
+        payer: authorization
+    });
+    console.log(response);
+}
+
+async function queryReceivedMessage(){
+    const script = fs.readFileSync(
+        path.join(
+          process.cwd(),
+          './transactions/nft/QueryReceivedMessage.cdc'
+        ),
+        'utf8'
+      );
+    
+      const result = await flowService.executeScript({
+        script: script,
+        args: []
+      });
+      console.log(result);
+}
+
+await crossChainMint();
+await queryReceivedMessage();
+// await crossChainTransfer();

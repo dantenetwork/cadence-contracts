@@ -1,10 +1,12 @@
 import SentMessageContract from 0xf8d6e0586b0a20c7;
 import CrossChain from 0xf8d6e0586b0a20c7;
+import ReceivedMessageContract from 0xf8d6e0586b0a20c7;
 
 pub contract NFTCrossChain {
 
     init(){  
       self.initSentMessageVault();
+      self.initReceivedMessageVault();
      }
 
     pub event showSentMessage(toChain: String, sender: String, contractName: String, actionName: String, data: String);
@@ -26,6 +28,14 @@ pub contract NFTCrossChain {
       let msgSubmitter <- SentMessageContract.createMessageSubmitter();
       self.account.save(<-msgSubmitter, to: /storage/msgSubmitter);
       self.account.link<&{SentMessageContract.SubmitterFace}>(/public/msgSubmitter, target: /storage/msgSubmitter);
+    }
+
+    priv fun initReceivedMessageVault(){
+      // create cross chain received message resource
+      let receivedMessageVault <- ReceivedMessageContract.createReceivedMessageVault();
+      // save message as resource
+      self.account.save(<-receivedMessageVault, to: /storage/receivedMessageVault);
+      self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault, target: /storage/receivedMessageVault);
     }
 
     /**

@@ -5,6 +5,8 @@ pub contract ReceivedMessageContract{
     
     // Interface is used for access control.
     pub resource interface ReceivedMessageInterface{
+        pub fun getAllMessages(): {String: [ReceivedMessageCache]};
+
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
         pub fun isOnline(): Bool;
@@ -42,14 +44,13 @@ pub contract ReceivedMessageContract{
         pub let fromChain: String; // FLOW, source chain name
         pub let toChain: String; // destination chain name
         pub let sender: String; // sender of cross chain message
-        pub let sqos: MessageProtocol.SQoS;
+        pub let sqos: MessageProtocol.SQoSItem;
         pub let content: Content; // message content
         pub let session: MessageProtocol.Session;
         pub let messageHash: String; // message hash value
 
-        init(id: UInt128, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
-            resourceAccount: Address, link: String, data: MessageProtocol.MessagePayload,
-            session: MessageProtocol.Session){
+        init(id: UInt128, fromChain: String, sender: String, sqos: MessageProtocol.SQoSItem, 
+            resourceAccount: Address, link: String, data: MessageProtocol.MessagePayload, session: MessageProtocol.Session){
             self.id = id;
             self.fromChain = fromChain;
             self.toChain = "FLOW";
@@ -70,8 +71,8 @@ pub contract ReceivedMessageContract{
             self.messageHash = String.encodeHex(digest);
         }
 
-        pub fun getRecvMessageHash(): [UInt8] {
-            return self.messageHash.decodeHex();
+        pub fun getRecvMessageHash(): String {
+            return self.messageHash;
         }
     }
 
@@ -238,6 +239,13 @@ pub contract ReceivedMessageContract{
             }
         }
 
+        /**
+          * Query sent cross chain messages
+          */
+        pub fun getAllMessages(): {String: [ReceivedMessageCache]}{
+          return self.message;
+        }
+
         pub fun isOnline(): Bool {
             return self.online;
         }
@@ -302,6 +310,13 @@ pub contract ReceivedMessageContract{
           * record the resouces' `public/link`
           */
         return <- create ReceivedMessageVault();
+    }
+    
+    // Query messages by identifier
+    pub fun QueryMessage(msgSender: Address, link: String): {String: [ReceivedMessageCache]}{
+      let pubLink = PublicPath(identifier: link);
+      let senderRef = getAccount(msgSender).getCapability<&{ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+      return senderRef.getAllMessages();
     }
 
      /**

@@ -82,7 +82,7 @@ node client/nft/querySentMessage.mjs
 
 #### Cross chain mint & cross chain claim on Rinkeby
 ```
-node client/nft/crossChainMint.mjs
+node client/crosschain/flowToEthereum.js
 ```
 
 #### Check NFT on Opensea browser
