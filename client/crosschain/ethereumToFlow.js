@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import FlowService from '../flow.mjs';
+import fcl from "@onflow/fcl";
+import types, { UInt8 } from "@onflow/types";
 import Web3 from 'web3';
 import Ethereum from './ethereum.js';
 import config from 'config';
@@ -71,9 +73,67 @@ async function crossChainMint() {
         ),
         'utf8');
 
+    const id = 1;
+    const fromChain = 'Ethereum';
+    const toChain = 'Flow';
+    const sqosString = '1';
+    const receiver = '0xf8d6e0586b0a20c7';
+    const publicPath = 'public/receivedMessageVault';
+    const hashValue = '';
+    const sessionId = 1;
+    const sessionType = 1;
+    const sessionCallback = 'ea621511fa72955ecf79bf41d1b29896f053efb03e907dab63b9f15322d81839';
+    const sessionCommitment = 'ea621511fa72955ecf79bf41d1b29896f053efb03e907dab63b9f15322d81839';
+    const sessionAnswer = 1;
+
+
+    let utf8Encode = new TextEncoder();
+
+    let originData = new Uint8Array();
+    originData = utf8Encode.encode(JSON.stringify(id));
+    // console.log(originData);
+    // const fromChainBytes = utf8Encode.encode(fromChain);
+    // originData.set(fromChainBytes, originData.length);
+    // console.log(originData);
+    // const toChainBytes = utf8Encode.encode(toChain);
+    // originData.set(toChainBytes, originData.length);
+    // console.log(originData);
+    // originData = originData.fill(utf8Encode.encode(signer));
+    // originData = originData.concat(utf8Encode.encode(sqosString));
+    // originData = originData.concat(utf8Encode.encode(receiver));
+    // originData = originData.concat(utf8Encode.encode(publicPath));
+    // originData = originData.concat(utf8Encode.encode(hashValue));
+    // originData = originData.concat(utf8Encode.encode(sessionId));
+    // originData = originData.concat(utf8Encode.encode(sessionType));
+    // originData = originData.concat(utf8Encode.encode(sessionCallback));
+    // originData = originData.concat(utf8Encode.encode(sessionCommitment));
+    // originData = originData.concat(utf8Encode.encode(sessionAnswer));
+
+    const msg = Buffer.from(originData).toString("hex");
+
+    // sign message
+    // hash = SHA3_256
+    // elliptic = ECDSA_P256
+    console.log('msg: ' + msg);
+    const signature = await flowService.signWithKey(signer.privateKey, msg);
+    console.log('signature: ' + signature);
+
     let response = await flowService.sendTx({
         transaction,
         args: [
+            fcl.arg(JSON.stringify(id), types.UInt128),
+            fcl.arg(fromChain, types.String),
+            fcl.arg(toChain, types.String),
+            fcl.arg(sqosString, types.String),
+            fcl.arg(receiver, types.Address),
+            fcl.arg(publicPath, types.String),
+            fcl.arg(hashValue, types.String),
+            fcl.arg(JSON.stringify(sessionId), types.UInt128),
+            fcl.arg(JSON.stringify(sessionType), types.UInt8),
+            fcl.arg(sessionCallback, types.String),
+            fcl.arg(JSON.stringify(sessionCommitment), types.String),
+            fcl.arg(JSON.stringify(sessionAnswer), types.String),
+            fcl.arg(signature, types.String),
         ],
         proposer: authorization,
         authorizations: [authorization],
@@ -83,6 +143,7 @@ async function crossChainMint() {
 }
 
 async function queryReceivedMessage(){
+    console.log('Query received message');
     const script = fs.readFileSync(
         path.join(
           process.cwd(),
@@ -95,7 +156,7 @@ async function queryReceivedMessage(){
         script: script,
         args: []
       });
-      console.log(result);
+      console.log(result.Ethereum[0].msgInstance);
 }
 
 await crossChainMint();

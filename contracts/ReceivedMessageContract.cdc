@@ -8,7 +8,7 @@ pub contract ReceivedMessageContract{
         pub fun getAllMessages(): {String: [ReceivedMessageCache]};
 
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
-                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
+                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: String);
         pub fun isOnline(): Bool;
     }
     
@@ -49,24 +49,24 @@ pub contract ReceivedMessageContract{
         pub let session: MessageProtocol.Session;
         pub let messageHash: String; // message hash value
 
-        init(id: UInt128, fromChain: String, sender: String, sqos: MessageProtocol.SQoSItem, 
+        init(id: UInt128, fromChain: String, toChain: String, sender: String, sqos: MessageProtocol.SQoSItem, 
             resourceAccount: Address, link: String, data: MessageProtocol.MessagePayload, session: MessageProtocol.Session){
             self.id = id;
             self.fromChain = fromChain;
-            self.toChain = "FLOW";
+            self.toChain = toChain;
             self.sender = sender;
             self.sqos = sqos;
             self.content = Content(resourceAccount: resourceAccount, link: link, data: data);
             self.session = session;
 
             // hash message info
-            var originData: [UInt8] = id.toBigEndianBytes();
-            originData = originData.concat(fromChain.utf8);
-            originData = originData.concat(self.toChain.utf8);
-            originData = originData.concat(sender.utf8);
-            originData = originData.concat(sqos.toBytes());
-            originData = originData.concat(self.content.toBytes());
-            originData = originData.concat(session.toBytes());
+            var originData: [UInt8] = id.toString().utf8;
+            // originData = originData.concat(fromChain.utf8);
+            // originData = originData.concat(toChain.utf8);
+            // originData = originData.concat(sender.utf8);
+            // originData = originData.concat(sqos.toBytes());
+            // originData = originData.concat(self.content.toBytes());
+            // originData = originData.concat(session.toBytes());
             let digest = HashAlgorithm.SHA2_256.hash(originData);
             self.messageHash = String.encodeHex(digest);
         }
@@ -152,7 +152,7 @@ pub contract ReceivedMessageContract{
           * @param data - contract execute data
         **/
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
-                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]){
+                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: String){
             // TODO
             /*
                 * the submitter of the message should be verified
@@ -161,13 +161,33 @@ pub contract ReceivedMessageContract{
             */
 
             // Verify the signature
-            if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
-                                              signatureAlgorithm: signatureAlgorithm,
-                                              rawData: recvMsg.messageHash.utf8,
-                                              signature: signature,
-                                              hashAlgorithm: HashAlgorithm.SHA2_256)) {
-                panic("invalid recver address or `link`!");
+            var originData:[UInt8] = recvMsg.id.toString().utf8;
+            // TODO
+            // add more params into originData
+
+            let pk = PublicKey(
+                publicKey: getAccount(pubAddr).keys.get(keyIndex: 0)!.publicKey.publicKey,
+                signatureAlgorithm: SignatureAlgorithm.ECDSA_P256
+            )
+
+            let isValid = pk.verify(
+                signature: signature.decodeHex(),
+                signedData: originData,
+                domainSeparationTag: "",
+                hashAlgorithm: HashAlgorithm.SHA3_256
+            )
+
+            if(!isValid){
+                panic("signature verify failed.");
             }
+        
+            // if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
+            //                                   signatureAlgorithm: signatureAlgorithm,
+            //                                   rawData: recvMsg.messageHash.utf8,
+            //                                   signature: signature.decodeHex(),
+            //                                   hashAlgorithm: HashAlgorithm.SHA2_256)) {
+            //     panic("verify signature failed!");
+            // }
             
             if (self.message.containsKey(recvMsg.fromChain)) {  
                 let caches: &[ReceivedMessageCache] = &self.message[recvMsg.fromChain]! as &[ReceivedMessageCache];
@@ -333,5 +353,28 @@ pub contract ReceivedMessageContract{
     //  pub fun unregisterRouter(){
 
     //  }
+
+    pub fun verifySignature(message: String, publicKey: String, signature: String): Bool{
+
+        var originData:[UInt8] = message.utf8;
+
+        let digest = HashAlgorithm.SHA3_256.hash(originData);
+        let pk = PublicKey(
+            publicKey: publicKey.decodeHex(),
+            signatureAlgorithm: SignatureAlgorithm.ECDSA_P256
+        )
+
+        let isValid = pk.verify(
+            signature: signature.decodeHex(),
+            signedData: originData,
+            domainSeparationTag: "",
+            hashAlgorithm: HashAlgorithm.SHA3_256
+        )
+
+        if(!isValid){
+          panic("signature verify failed.");
+        }
+        return isValid;
+     }
 }
 

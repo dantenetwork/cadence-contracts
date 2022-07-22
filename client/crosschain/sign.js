@@ -3,8 +3,15 @@ import FlowService from '../flow.mjs';
 import fs from 'fs';
 import path from 'path';
 import types from "@onflow/types";
+import config from 'config';
 
-const flowService = new FlowService();
+
+let signer = config.get('emulator');
+if (config.get('network') == 'testnet') {
+    signer = config.get('testnet');
+}
+
+const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);
 const authorization = flowService.authorizationFunction();
 
 (async function(){

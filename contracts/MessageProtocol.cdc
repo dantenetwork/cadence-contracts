@@ -215,7 +215,7 @@ pub contract MessageProtocol {
 
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
-            dataBytes = dataBytes.concat([self.t as? UInt8!]);
+            dataBytes = dataBytes.concat([self.t.rawValue as? UInt8!]);
             dataBytes = dataBytes.concat(self.v.utf8);
 
             return dataBytes;
@@ -246,10 +246,10 @@ pub contract MessageProtocol {
         pub let id: UInt128;
         pub let type: UInt8;
         pub let callback: String?;
-        pub let commitment: [UInt8]?;
-        pub let answer: [UInt8]?;
+        pub let commitment: String;
+        pub let answer: String;
 
-        init(oId: UInt128, oType: UInt8, oCallback: String?, oc: [UInt8]?, oa: [UInt8]?) {
+        init(oId: UInt128, oType: UInt8, oCallback: String?, oc: String, oa: String) {
             self.id = oId;
             self.type = oType;
             self.callback = oCallback;
@@ -265,10 +265,10 @@ pub contract MessageProtocol {
                 dataBytes = dataBytes.concat(self.callback!.utf8);
             }
             if (nil != self.commitment) {
-                dataBytes = dataBytes.concat(self.commitment!);
+                dataBytes = dataBytes.concat(self.commitment.utf8);
             }
             if (nil != self.answer) {
-                dataBytes = dataBytes.concat(self.answer!);
+                dataBytes = dataBytes.concat(self.answer.utf8);
             }
 
             return dataBytes;

@@ -1,7 +1,20 @@
-import MessageProtocol from "./MessageProtocol.cdc"
+import MessageProtocol from 0xf8d6e0586b0a20c7
 import ReceivedMessageContract from 0xf8d6e0586b0a20c7;
 
-transaction(){
+transaction(id: UInt128, 
+            fromChain: String, 
+            toChain: String,
+            sqosString: String, 
+            receiver: Address,
+            publicPath: String,
+            hashValue: String,
+            sessionId: UInt128,
+            sessionType: UInt8,
+            sessionCallback: String,
+            sessionCommitment: String,
+            sessionAnswer: String,
+            signature: String
+){
     let signer: AuthAccount;
 
     prepare(signer: AuthAccount){
@@ -10,33 +23,30 @@ transaction(){
 
     execute {
         // prepare received message 
-        let id:UInt128 = 1
-        let fromChain = "Ethereum"
+        // let id:UInt128 = 1
+        // let fromChain = "Ethereum"
         let sender = self.signer
-        let sqos = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Identity, value: "")
+        let sqos = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Reveal, value: sqosString)
         let resourceAccount = self.signer
-        let content = content
         let link = self.signer
         let data = MessageProtocol.MessagePayload()
 
-        let idItem = MessageProtocol.MessageItem(name: "id", type: MessageProtocol.MsgType.cdcU64, value: id)
+        let idItem = MessageProtocol.MessageItem(name: "NFTId", type: MessageProtocol.MsgType.cdcU128, value: id)
         data.addItem(item: idItem)
-        let tokenURLItem = MessageProtocol.MessageItem(name: "tokenURL", type: MessageProtocol.MsgType.cdcString, value: self.tokenURL)
-        data.addItem(item: tokenURLItem)
-        let ownerItem = MessageProtocol.MessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: owner)
+        let ownerItem = MessageProtocol.MessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: receiver.toString())
         data.addItem(item: ownerItem)
-        let hashValueItem = MessageProtocol.MessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)
-        data.addItem(item: hashValueItem)
 
-        let session = MessageProtocol.Session(oId: id, oType: 1, callback: "", commitment: 1, answer: 1)
+        let session = MessageProtocol.Session(oId: sessionId, oType: sessionType, callback: sessionCallback, commitment: sessionCommitment, answer: sessionAnswer)
 
-        let receivedMessageCore = ReceivedMessageContract.ReceivedMessageCore(id:id, fromChain:fromChain, sender:sender, sqos:sqos, resourceAccount:resourceAccount, link:link, data:data, session:session)
-
-        // Get hash received message
-        // TODO
+        let receivedMessageCore = ReceivedMessageContract.ReceivedMessageCore(id: id, fromChain: fromChain, toChain: toChain, sender: sender.address.toString(), sqos: sqos, resourceAccount: receiver, link: publicPath, data: data, session: session)
 
         // Submit received message
-        let receivedMessageVaultRef = self.signer.borrow<&ReceivedMessageContract.ReceivedMessageVault>(from: /storage/receivedMessageVault)
-        receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: self.signer, signatureAlgorithm: HashAlgorithm.SHA2_256, signature:signature)
+        let signerCapability = self.signer.getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault)
+
+        if let receivedMessageVaultRef = signerCapability.borrow(){
+            receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: self.signer.address, signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, signature:signature)    
+        }else{
+            panic("Invalid ReceivedMessageVault!");
+        }
     }
 }
