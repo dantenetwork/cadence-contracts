@@ -31,10 +31,12 @@ transaction(id: UInt128,
         let link = self.signer
         let data = MessageProtocol.MessagePayload()
 
-        let idItem = MessageProtocol.MessageItem(name: "NFTId", type: MessageProtocol.MsgType.cdcU128, value: id)
+        let idItem = MessageProtocol.MessageItem(name: "id", type: MessageProtocol.MsgType.cdcU128, value: id)
         data.addItem(item: idItem)
         let ownerItem = MessageProtocol.MessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: receiver.toString())
         data.addItem(item: ownerItem)
+        let hashValueItem = MessageProtocol.MessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)
+        data.addItem(item: hashValueItem)
 
         let session = MessageProtocol.Session(oId: sessionId, oType: sessionType, callback: sessionCallback, commitment: sessionCommitment, answer: sessionAnswer)
 
