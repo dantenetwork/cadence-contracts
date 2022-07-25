@@ -43,6 +43,9 @@ flow init
 # Start local emulator
 flow emulator
 
+# Create locker account
+flow accounts create --key bb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025 --signer emulator-account
+
 # Deploy contracts
 flow project deploy
 
@@ -51,9 +54,6 @@ flow project deploy --update
 
 # Deploy contracts to testnet
 flow project deploy --network testnet
-
-# Create locker account
-flow accounts create --key bb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025 --signer emulator-account
 
 # Update locker account address to locker.address of config/default.json
 # Update locker account address to locker of transactions/nft/CrossChainTransferNFT.cdc
@@ -83,6 +83,11 @@ node client/nft/querySentMessage.mjs
 #### Cross chain mint & cross chain claim on Rinkeby
 ```
 node client/crosschain/flowToEthereum.js
+```
+
+#### Cross chain mint & cross chain claim on Flow
+```
+node client/crosschain/ethereumToFlow.js
 ```
 
 #### Check NFT on Opensea browser

@@ -6,7 +6,6 @@ import Ethereum from './ethereum.js';
 import config from 'config';
 import Util from '../util.mjs';
 
-
 const flowService = new FlowService();
 
 // init ethereum contract
@@ -50,6 +49,7 @@ async function crossChainMint() {
         script: script,
         args: []
     });
+    console.log(sendMessages);
 
     // Get message info
     const message = sendMessages[tokenId - 1];

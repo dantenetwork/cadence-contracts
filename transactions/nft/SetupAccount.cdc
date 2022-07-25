@@ -1,5 +1,6 @@
 import NonFungibleToken from 0xf8d6e0586b0a20c7;
 import ExampleNFT from 0xf8d6e0586b0a20c7;
+import SentMessageContract from 0xf8d6e0586b0a20c7;
 
 // This transaction is what an account would run
 // to set itself up to receive NFTs
@@ -22,5 +23,20 @@ transaction {
             ExampleNFT.CollectionPublicPath,
             target: ExampleNFT.CollectionStoragePath
         )
+
+
+         // create cross chain sent message resource
+        let sentMessageVault <-SentMessageContract.createSentMessageVault();
+        // save message as resource
+        signer.save(<-sentMessageVault, to: /storage/sentMessageVault);
+        signer.link<&{SentMessageContract.SentMessageInterface}>(/public/sentMessageVault, target: /storage/sentMessageVault);
+        // add acceptor link
+        signer.link<&{SentMessageContract.AcceptorFace}>(/public/acceptorFace, target: /storage/sentMessageVault);
+
+        // add message submitter
+        let msgSubmitter <- SentMessageContract.createMessageSubmitter();
+        signer.save(<-msgSubmitter, to: /storage/msgSubmitter);
+        signer.link<&{SentMessageContract.SubmitterFace}>(/public/msgSubmitter, target: /storage/msgSubmitter);
+        
     }
 }

@@ -49,15 +49,9 @@ pub contract Locker{
         data.addItem(item: hashValueItem)
 
         // Send cross chain message
-        let lockerCapability = locker.getCapability<&SentMessageContract.Submitter>(/public/msgSubmitter)
-        
-        if let lockerSubmitterRef = lockerCapability.borrow(){
-            let msg = SentMessageContract.msgToSubmit(toChain: toChain, sqos: [SQoSItem], contractName: contractName, actionName: actionName, data: data, callType: callType, callback: callback, commitment: commitment, answer: answer)
-            lockerSubmitterRef!.submitWithAuth(msg, acceptorAddr: signerAddress, alink: "acceptorFace", oSubmitterAddr: signerAddress, slink: "msgSubmitter")
-        }else{
-            panic("Invalid lockerSubmitterRef!");
-        }
-        // let msgSubmitterRef = locker.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter)
+        let msgSubmitterRef  = locker.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter)
+        let msg = SentMessageContract.msgToSubmit(toChain: toChain, sqos: [SQoSItem], contractName: contractName, actionName: actionName, data: data, callType: callType, callback: callback, commitment: commitment, answer: answer)
+        msgSubmitterRef!.submitWithAuth(msg, acceptorAddr: locker.address, alink: "acceptorFace", oSubmitterAddr: locker.address, slink: "msgSubmitter")
     }
 
     pub fun ReceivedCrossChainMessage(){
