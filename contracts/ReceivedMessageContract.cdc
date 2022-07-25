@@ -48,7 +48,6 @@ pub contract ReceivedMessageContract{
         pub let content: Content; // message content
         pub let session: MessageProtocol.Session;
         pub let messageHash: String; // message hash value
-        pub let originData: [UInt8]; // origin data
 
         init(id: UInt128, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
             resourceAccount: Address, link: String, data: MessageProtocol.MessagePayload,
@@ -71,12 +70,11 @@ pub contract ReceivedMessageContract{
             originData = originData.concat(session.toBytes());
             let digest = HashAlgorithm.SHA2_256.hash(originData);
             self.messageHash = String.encodeHex(digest);
-            
         }
 
         pub fun getRecvMessageHash(): [UInt8] {
-            return self.messageHash;
-        }    
+            return self.messageHash.decodeHex();
+        }
     }
 
     pub struct messageCopy {
