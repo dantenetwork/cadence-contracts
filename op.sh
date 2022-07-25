@@ -1,3 +1,16 @@
 pm2 status
 
 pm2 start client/crosschain/crossChainSync.js —name FlowCrossChain
+
+flow signatures generate "f8d6e0586b0a20c70194641361b92573f46947c203d47820679efed581e155af07528e78fca08374b5" --signer emulator-account
+
+flow transactions send ./examples/verifyByIdentity.cdc "94641361b92573f46947c203d47820679efed581e155af07528e78fca08374b5" "b48d443790ac7d9f2f3a95fecbfb04a24e2b4df1d39017ebf54842e7775547b0507f85e70a6183032de95197f65ef47080a32f6a7b7c99c4de2a05c806c69b5c"
+
+flow scripts execute ./examples/recvCoreDataCreate.cdc 
+
+flow transactions send ./examples/signatureVerify.cdc
+
+flow scripts execute ./examples/getNonce.cdc
+
+flow signatures verify "Hello Nika" "b17a016a5e1b3986dd7e31ba19a5b1249effaeb4dd82bb4f86122cd0dc50e786fdfd1c1d55198c391f37d9b9a59f4434843b510206baf102384efb86b206fd6b" 0xbb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025
+

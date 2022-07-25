@@ -21,7 +21,7 @@ pub contract IdentityVerification {
         let originData: [UInt8] = pubAddr.toBytes().concat(nonceV.toBigEndianBytes()).concat(rawData);
 
         if (pk.verify(signature: signature,
-                        signedData: originData,
+                        signedData: String.encodeHex(originData).utf8,
                         domainSeparationTag: "",
                         hashAlgorithm: hashAlgorithm)) {
             self.nonce[pubAddr] = nonceV;
