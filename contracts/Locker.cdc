@@ -8,7 +8,7 @@ pub contract Locker{
     init(){
     }
 
-    pub fun SendCrossChainMessagge(transferToken: @NonFungibleToken.NFT, signerAddress: Address, id: UInt64, owner: String, hashValue: String){
+    pub fun SendCrossChainMessagge(transferToken: @AnyResource, signerAddress: Address, id: UInt64, owner: String, hashValue: String){
         let transferToken <- transferToken as! @ExampleNFT.NFT
         let id: UInt64 = transferToken.id
         let tokenURL: String = transferToken.tokenURL
