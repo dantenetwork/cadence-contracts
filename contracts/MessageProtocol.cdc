@@ -246,10 +246,10 @@ pub contract MessageProtocol {
         pub let id: UInt128;
         pub let type: UInt8;
         pub let callback: String?;
-        pub let commitment: String;
-        pub let answer: String;
+        pub let commitment: [UInt8]?;
+        pub let answer: [UInt8]?;
 
-        init(oId: UInt128, oType: UInt8, oCallback: String?, oc: String, oa: String) {
+        init(oId: UInt128, oType: UInt8, oCallback: String?, oc: [UInt8]?, oa: [UInt8]?) {
             self.id = oId;
             self.type = oType;
             self.callback = oCallback;
@@ -265,10 +265,10 @@ pub contract MessageProtocol {
                 dataBytes = dataBytes.concat(self.callback!.utf8);
             }
             if (nil != self.commitment) {
-                dataBytes = dataBytes.concat(self.commitment.utf8);
+                dataBytes = dataBytes.concat(self.commitment!);
             }
             if (nil != self.answer) {
-                dataBytes = dataBytes.concat(self.answer.utf8);
+                dataBytes = dataBytes.concat(self.answer!);
             }
 
             return dataBytes;
