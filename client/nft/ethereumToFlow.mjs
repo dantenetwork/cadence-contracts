@@ -80,7 +80,7 @@ async function crossChainMint(tokenId) {
     const toChain = 'Flow';
     const sqosString = '1';
     const receiver = '0xf8d6e0586b0a20c7';
-    const publicPath = 'public/receivedMessageVault';
+    const publicPath = '/public/calleeVault';
     const hashValue = '';
     const sessionId = 1;
     const sessionType = 1;

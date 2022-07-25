@@ -36,7 +36,7 @@ transaction(
     }
 
     execute {
-        Locker.SendCrossChainMessagge(transferToken: <-self.transferToken, signerAddress:self.signer.address, id: id, owner: owner, hashValue: hashValue);
+        Locker.sendCrossChainMessagge(transferToken: <-self.transferToken, signerAddress:self.signer.address, id: id, owner: owner, hashValue: hashValue);
     }
 }
  

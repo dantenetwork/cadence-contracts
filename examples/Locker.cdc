@@ -1,9 +1,9 @@
-import ExampleNFT from 0xf8d6e0586b0a20c7;
-import MessageProtocol from 0xf8d6e0586b0a20c7;
-import SentMessageContract from 0xf8d6e0586b0a20c7;
-import ReceivedMessageContract from 0xf8d6e0586b0a20c7;
-import NonFungibleToken from 0xf8d6e0586b0a20c7;
-import MetadataViews from 0xf8d6e0586b0a20c7;
+import ExampleNFT from 0xf8d6e0586b0a20c7
+import MessageProtocol from 0xf8d6e0586b0a20c7
+import SentMessageContract from 0xf8d6e0586b0a20c7
+import ReceivedMessageContract from 0xf8d6e0586b0a20c7
+import NonFungibleToken from 0xf8d6e0586b0a20c7
+import MetadataViews from 0xf8d6e0586b0a20c7
 
 pub contract Locker{
     init(){
@@ -19,28 +19,69 @@ pub contract Locker{
             target: ExampleNFT.CollectionStoragePath
         )
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////
         // create cross chain received message resource
-        let receivedMessageVault <- ReceivedMessageContract.createReceivedMessageVault();
+        let receivedMessageVault <- ReceivedMessageContract.createReceivedMessageVault()
         // save message as resource
-        self.account.save(<-receivedMessageVault, to: /storage/receivedMessageVault);
-        self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault, target: /storage/receivedMessageVault);
+        self.account.save(<-receivedMessageVault, to: /storage/receivedMessageVault)
+        self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault, target: /storage/receivedMessageVault)
     
+        ////////////////////////////////////////////////////////////////////////////////////////////////
         // create cross chain sent message resource
-        let sentMessageVault <-SentMessageContract.createSentMessageVault();
+        let sentMessageVault <-SentMessageContract.createSentMessageVault()
         // save message as resource
-        self.account.save(<-sentMessageVault, to: /storage/sentMessageVault);
-        self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/sentMessageVault, target: /storage/sentMessageVault);
+        self.account.save(<-sentMessageVault, to: /storage/sentMessageVault)
+        self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/sentMessageVault, target: /storage/sentMessageVault)
         // add acceptor link
-        self.account.link<&{SentMessageContract.AcceptorFace}>(/public/acceptorFace, target: /storage/sentMessageVault);
+        self.account.link<&{SentMessageContract.AcceptorFace}>(/public/acceptorFace, target: /storage/sentMessageVault)
 
         // add message submitter
-        let msgSubmitter <- SentMessageContract.createMessageSubmitter();
-        self.account.save(<-msgSubmitter, to: /storage/msgSubmitter);
-        self.account.link<&{SentMessageContract.SubmitterFace}>(/public/msgSubmitter, target: /storage/msgSubmitter);
-        
+        let msgSubmitter <- SentMessageContract.createMessageSubmitter()
+        self.account.save(<-msgSubmitter, to: /storage/msgSubmitter)
+        self.account.link<&{SentMessageContract.SubmitterFace}>(/public/msgSubmitter, target: /storage/msgSubmitter)
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // create callme vault 
+        let calleeVault <- self.createEmptyCalleeVault()
+        // save vault as resource
+        self.account.save(<-calleeVault, to: /storage/calleeVault)
+        self.account.link<&{ReceivedMessageContract.Callee}>(/public/calleeVault, target: /storage/calleeVault)
     }
 
-    pub fun SendCrossChainMessagge(transferToken: @AnyResource, signerAddress: Address, id: UInt64, owner: String, hashValue: String){
+    // Resouce to store messages from ReceivedMessageContract
+    pub resource CalleeVault: ReceivedMessageContract.Callee{
+        pub let receivedMessages: [MessageProtocol.MessagePayload]
+
+        init(){
+            self.receivedMessages = []
+        }
+
+        // Receive message from ReceivedMessageContract
+        pub fun callMe(data: MessageProtocol.MessagePayload){
+            self.receivedMessages.append(data)
+        }
+
+        pub fun getMessagesLength(): Int{
+            return self.receivedMessages.length
+        }
+
+        pub fun getAllMessages(): [MessageProtocol.MessagePayload]{
+            return self.receivedMessages
+        }
+    }
+
+    pub fun createEmptyCalleeVault(): @CalleeVault{
+        return <- create CalleeVault()
+    }
+
+    // query all callee messages
+    pub fun queryMessage(msgSender: Address, link: String): [MessageProtocol.MessagePayload]{
+        let pubLink = PublicPath(identifier: link)
+        let calleeRef = getAccount(msgSender).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow()
+        return calleeRef.getAllMessages()
+    }
+
+    pub fun sendCrossChainMessagge(transferToken: @AnyResource, signerAddress: Address, id: UInt64, owner: String, hashValue: String){
         let transferToken <- transferToken as! @ExampleNFT.NFT
         let id: UInt64 = transferToken.id
         let tokenURL: String = transferToken.tokenURL
@@ -52,7 +93,7 @@ pub contract Locker{
         // getting the public capability and borrowing a reference from it
         let lockerRef = locker.getCapability(ExampleNFT.CollectionPublicPath)
             .borrow<&{NonFungibleToken.CollectionPublic}>()
-            ?? panic("Could not get locker reference to the NFT Collection");
+            ?? panic("Could not get locker reference to the NFT Collection")
 
         // Deposit the NFT in the locker collection
         lockerRef.deposit(token: <-transferToken)
@@ -86,7 +127,7 @@ pub contract Locker{
         msgSubmitterRef!.submitWithAuth(msg, acceptorAddr: locker.address, alink: "acceptorFace", oSubmitterAddr: locker.address, slink: "msgSubmitter")
     }
 
-    pub fun ReceivedCrossChainMessage(
+    pub fun receivedCrossChainMessage(
         signer:Address,
         id: UInt128, 
         fromChain: String, 
@@ -105,11 +146,13 @@ pub contract Locker{
         // Get the locker's public account object
         let locker = self.account
 
-        // prepare received message 
-        // let id:UInt128 = 1
-        // let fromChain = "Ethereum"
+        // prepare received message
         let sender = signer.toString()
-        let sqos = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Reveal, value: sqosString)
+
+        let sqos = MessageProtocol.SQoS()
+        let sqosItem = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Reveal, value: sqosString)
+        sqos.addItem(item: sqosItem)
+
         let resourceAccount = signer.toString()
         let link = signer.toString()
         let data = MessageProtocol.MessagePayload()
@@ -121,16 +164,16 @@ pub contract Locker{
         let hashValueItem = MessageProtocol.MessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)
         data.addItem(item: hashValueItem)
 
-        let session = MessageProtocol.Session(oId: sessionId, oType: sessionType, callback: sessionCallback, commitment: sessionCommitment, answer: sessionAnswer)
+        let session = MessageProtocol.Session(oId: sessionId, oType: sessionType, callback: sessionCallback, commitment: sessionCommitment.utf8, answer: sessionAnswer.utf8)
 
-        let receivedMessageCore = ReceivedMessageContract.ReceivedMessageCore(id: id, fromChain: fromChain, toChain: toChain, sender: signer.toString(), sqos: sqos, resourceAccount: receiver, link: publicPath, data: data, session: session)
+        let receivedMessageCore = ReceivedMessageContract.ReceivedMessageCore(id: id, fromChain: fromChain, sender: signer.toString(), sqos: sqos, resourceAccount: receiver, link: publicPath, data: data, session: session)
 
         // Submit received message
         let lockerCapability = locker.getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault)
         if let receivedMessageVaultRef = lockerCapability.borrow(){
-            receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: signer, signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, signature:signature)    
+            receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: signer, signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, signature:signature.utf8)    
         }else{
-            panic("Invalid ReceivedMessageVault!");
+            panic("Invalid ReceivedMessageVault!")
         }
     }
 
@@ -144,63 +187,63 @@ pub contract Locker{
         // Get the locker's public account object
         let locker = self.account
 
-        if (self.message.containsKey(fromChain)) {
-            // Hash anwser
-            var originData: [UInt8] = anwser.utf8;
-            let digest = HashAlgorithm.SHA2_256.hash(originData);
-            let hash = String.encodeHex(digest);
+        // if (self.message.containsKey(fromChain)) {
+            // // Hash anwser
+            // var originData: [UInt8] = anwser.utf8
+            // let digest = HashAlgorithm.SHA2_256.hash(originData)
+            // let hash = String.encodeHex(digest)
             
-            // Query received message
-            let lockerCapability = locker.getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault)
-            if let receivedMessageVaultRef = lockerCapability.borrow(){
-                // Query target info
-                let message = receivedMessageVaultRef.getAllMessages();
-                let caches: &[ReceivedMessageCache] = message[fromChain]! as &[ReceivedMessageCache];
+            // // Query received message
+            // let lockerCapability = locker.getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/calleeVault)
+            // if let receivedMessageVaultRef = lockerCapability.borrow(){
+            //     // Query target info
+            //     let message = receivedMessageVaultRef.getAllMessages()
+            //     let caches: &[ReceivedMessageCache] = message[fromChain]! as &[ReceivedMessageCache]
 
-                let mcache = ReceivedMessageCache(id: recvMsg.id);
-                var found = false;
-                var cacheIdx: Int = -1;
-                var items = {};
+            //     let mcache = ReceivedMessageCache(id: recvMsg.id)
+            //     var found = false
+            //     var cacheIdx: Int = -1
+            //     var items = {}
 
-                // Match NFT id
-                for idx, ele in message[fromChain]! {
-                    if (id == ele.msgID) {
-                        cacheIdx = idx;
-                        found = true;
-                        items = ele.content.data;
-                        break;
-                    }
-                }
+            //     // Match NFT id
+            //     for idx, ele in message[fromChain]! {
+            //         if (id == ele.msgID) {
+            //             cacheIdx = idx
+            //             found = true
+            //             items = ele.content.data
+            //             break
+            //         }
+            //     }
 
-                if(!found){
-                    panic("id is not exists");
-                }
+            //     if(!found){
+            //         panic("id is not exists")
+            //     }
 
-                // NFT id exists
-                if (cacheIdx >= 0) {
-                    // Get message contract info
-                    var id: UInt64 = items[0].value;
-                    var receiver: Address = items[1].value;
-                    var hashValue: String = items[2].value;
+            //     // NFT id exists
+            //     if (cacheIdx >= 0) {
+            //         // Get message contract info
+            //         var id: UInt64 = items[0].value
+            //         var receiver: Address = items[1].value
+            //         var hashValue: String = items[2].value
 
-                    if(hash == hashValue){
-                        // Transfer NFT to receiver
-                        self.transfer(id: id, receiver: receiver);
-                        // Remove message from ReceivedMessageVault
-                    }else{
-                        panic("hash verify failed");
-                    }
+            //         if(hash == hashValue){
+            //             // Transfer NFT to receiver
+            //             self.transfer(id: id, receiver: receiver)
+            //             // Remove message from ReceivedMessageVault
+            //         }else{
+            //             panic("hash verify failed")
+            //         }
                         
-                }
+            //     }
 
 
-            }else{
-                panic("Invalid ReceivedMessageVault!");
-            }
+            // }else{
+            //     panic("Invalid ReceivedMessageVault!")
+            // }
 
-        }else{
-            panic("fromChain is not exists");
-        }
+        // }else{
+        //     panic("fromChain is not exists")
+        // }
     }
 
     // Transfer NFT back to receiver
@@ -222,7 +265,7 @@ pub contract Locker{
         // getting the public capability and borrowing a reference from it
         let receiverRef = getAccount(receiver).getCapability(ExampleNFT.CollectionPublicPath)
             .borrow<&{NonFungibleToken.CollectionPublic}>()
-            ?? panic("Could not get receiver reference to the NFT Collection");
+            ?? panic("Could not get receiver reference to the NFT Collection")
 
         // Deposit the NFT in the receiver collection
         receiverRef.deposit(token: <-token)

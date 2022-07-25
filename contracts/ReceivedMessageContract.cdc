@@ -14,6 +14,8 @@ pub contract ReceivedMessageContract{
     
     pub resource interface Callee {
         pub fun callMe(data: MessageProtocol.MessagePayload);
+        pub fun getMessagesLength(): Int;
+        pub fun getAllMessages(): [MessageProtocol.MessagePayload];
     }
     
     pub struct Content {
@@ -141,7 +143,7 @@ pub contract ReceivedMessageContract{
             self.executableCount = 10;
             self.completedID = {};
             self.online = true;
-            self.defaultCopyCount = 3;
+            self.defaultCopyCount = 1; // TODO defaultCopyCount = 1, debug only
         }
 
         /**
@@ -314,7 +316,7 @@ pub contract ReceivedMessageContract{
     }
     
     // Query messages by identifier
-    pub fun QueryMessage(msgSender: Address, link: String): {String: [ReceivedMessageCache]}{
+    pub fun queryMessage(msgSender: Address, link: String): {String: [ReceivedMessageCache]}{
       let pubLink = PublicPath(identifier: link);
       let senderRef = getAccount(msgSender).getCapability<&{ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
       return senderRef.getAllMessages();

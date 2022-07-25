@@ -23,7 +23,7 @@ transaction(id: UInt128,
     }
 
     execute {
-        Locker.ReceivedCrossChainMessage(
+        Locker.receivedCrossChainMessage(
             signer: self.signer.address, 
             id: id, 
             fromChain: fromChain, 
