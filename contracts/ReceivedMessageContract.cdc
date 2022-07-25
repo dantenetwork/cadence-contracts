@@ -8,7 +8,7 @@ pub contract ReceivedMessageContract{
         pub fun getAllMessages(): {String: [ReceivedMessageCache]};
 
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
-                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: String);
+                                  pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
         pub fun isOnline(): Bool;
     }
     
@@ -62,9 +62,9 @@ pub contract ReceivedMessageContract{
             self.session = session;
 
             // hash message info
-            var originData: [UInt8] = id.toString().utf8;
+            var originData: [UInt8] = id.toBigEndianBytes();
             originData = originData.concat(fromChain.utf8);
-            originData = originData.concat(toChain.utf8);
+            originData = originData.concat(self.toChain.utf8);
             originData = originData.concat(sender.utf8);
             originData = originData.concat(sqos.toBytes());
             originData = originData.concat(self.content.toBytes());
@@ -72,10 +72,6 @@ pub contract ReceivedMessageContract{
             let digest = HashAlgorithm.SHA2_256.hash(originData);
             self.messageHash = String.encodeHex(digest);
             
-        }
-
-        pub fun getOriginData(): [UInt8]{
-            return self.originData;
         }
 
         pub fun getRecvMessageHash(): [UInt8] {
@@ -171,9 +167,9 @@ pub contract ReceivedMessageContract{
             // if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
             //                                   signatureAlgorithm: signatureAlgorithm,
             //                                   rawData: recvMsg.messageHash.utf8,
-            //                                   signature: signature.decodeHex(),
+            //                                   signature: signature,
             //                                   hashAlgorithm: HashAlgorithm.SHA2_256)) {
-            //     panic("verify signature failed!");
+            //     panic("invalid recver address or `link`!");
             // }
             
             if (self.message.containsKey(recvMsg.fromChain)) {

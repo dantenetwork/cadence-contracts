@@ -84,16 +84,6 @@ node client/crosschain/ethereumToFlow.js
 
 ```
 
-## Router
-
-#### Cross chain mint & cross chain claim on Rinkeby
-```
-```
-
-#### Cross chain mint & cross chain claim on Flow
-```
-```
-
 #### Check NFT on Opensea browser
 
 Wait for some time...You can see new NFT below:

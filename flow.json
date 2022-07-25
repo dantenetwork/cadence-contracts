@@ -21,7 +21,7 @@
     "NonFungibleToken": "./examples/NonFungibleToken.cdc",
     "ExampleNFT": "./examples/ExampleNFT.cdc",
     "NFTCrossChain": "./examples/NFTCrossChain.cdc",
-    "Locker":"./contracts/Locker.cdc"
+    "Locker":"./examples/Locker.cdc"
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
