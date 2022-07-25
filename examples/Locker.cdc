@@ -42,9 +42,9 @@ pub contract Locker{
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // create callme vault 
-        let calleeVault <- self.createEmptyCalleeVault()
+        // let calleeVault <- Locker.createEmptyCalleeVault()
         // save vault as resource
-        self.account.save(<-calleeVault, to: /storage/calleeVault)
+        self.account.save(<-create Locker.createEmptyCalleeVault(), to: /storage/calleeVault)
         self.account.link<&{ReceivedMessageContract.Callee}>(/public/calleeVault, target: /storage/calleeVault)
     }
 
@@ -77,7 +77,7 @@ pub contract Locker{
     // query all callee messages
     pub fun queryMessage(msgSender: Address, link: String): [MessageProtocol.MessagePayload]{
         let pubLink = PublicPath(identifier: link)
-        let calleeRef = getAccount(msgSender).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow()
+        let calleeRef = getAccount(msgSender).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow()!
         return calleeRef.getAllMessages()
     }
 
