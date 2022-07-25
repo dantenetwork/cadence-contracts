@@ -48,6 +48,7 @@ pub contract ReceivedMessageContract{
         pub let content: Content; // message content
         pub let session: MessageProtocol.Session;
         pub let messageHash: String; // message hash value
+        pub let originData: [UInt8]; // origin data
 
         init(id: UInt128, fromChain: String, toChain: String, sender: String, sqos: MessageProtocol.SQoSItem, 
             resourceAccount: Address, link: String, data: MessageProtocol.MessagePayload, session: MessageProtocol.Session){
@@ -67,12 +68,21 @@ pub contract ReceivedMessageContract{
             // originData = originData.concat(sqos.toBytes());
             // originData = originData.concat(self.content.toBytes());
             // originData = originData.concat(session.toBytes());
+            // TODO
+            // add more params into originData
+            self.originData = originData;
+
             let digest = HashAlgorithm.SHA2_256.hash(originData);
             self.messageHash = String.encodeHex(digest);
+            
         }
 
         pub fun getRecvMessageHash(): String {
             return self.messageHash;
+        }
+
+        pub fun getOriginData(): [UInt8]{
+            return self.originData;
         }
     }
 
@@ -135,7 +145,7 @@ pub contract ReceivedMessageContract{
         priv var defaultCopyCount: Int;
         // TODO: context
 
-        init(){
+        pub init(){
             self.message = {};
             self.executableCount = 10;
             self.completedID = {};
@@ -161,10 +171,6 @@ pub contract ReceivedMessageContract{
             */
 
             // Verify the signature
-            var originData:[UInt8] = recvMsg.id.toString().utf8;
-            // TODO
-            // add more params into originData
-
             let pk = PublicKey(
                 publicKey: getAccount(pubAddr).keys.get(keyIndex: 0)!.publicKey.publicKey,
                 signatureAlgorithm: SignatureAlgorithm.ECDSA_P256
@@ -172,7 +178,7 @@ pub contract ReceivedMessageContract{
 
             let isValid = pk.verify(
                 signature: signature.decodeHex(),
-                signedData: originData,
+                signedData: recvMsg.getOriginData(),
                 domainSeparationTag: "",
                 hashAlgorithm: HashAlgorithm.SHA3_256
             )
@@ -189,7 +195,7 @@ pub contract ReceivedMessageContract{
             //     panic("verify signature failed!");
             // }
             
-            if (self.message.containsKey(recvMsg.fromChain)) {  
+            if (self.message.containsKey(recvMsg.fromChain)) {
                 let caches: &[ReceivedMessageCache] = &self.message[recvMsg.fromChain]! as &[ReceivedMessageCache];
 
                 var found = false;

@@ -54,12 +54,6 @@ flow project deploy --update
 
 # Deploy contracts to testnet
 flow project deploy --network testnet
-
-# Update locker account address to locker.address of config/default.json
-# Update locker account address to locker of transactions/nft/CrossChainTransferNFT.cdc
-
-# Create NFT collection for locker account
-node client/nft/setupLockerAccount.mjs
 ```
 
 ## Examples
@@ -74,20 +68,30 @@ node client/nft/mintNFT.mjs
 node client/nft/queryNFT.mjs
 
 # Tranfer NFT to locker and send cross chain message
-node client/nft/crossChainTransferNFT.mjs
+node client/nft/flowToEthereum.mjs
 
 # Query sent cross chain message By Node.js
 node client/nft/querySentMessage.mjs
+
+# Sync NFT from Ethereum to Flow, submit random number to claim NFT on Ethereum
+node client/crosschain/flowToEthereum.js
+
+# Transfer NFT from Ethereum to Flow
+node client/nft/ethereumToFlow.mjs
+
+# Claim NFT on Flow
+node client/crosschain/ethereumToFlow.js
+
 ```
+
+## Router
 
 #### Cross chain mint & cross chain claim on Rinkeby
 ```
-node client/crosschain/flowToEthereum.js
 ```
 
 #### Cross chain mint & cross chain claim on Flow
 ```
-node client/crosschain/ethereumToFlow.js
 ```
 
 #### Check NFT on Opensea browser
