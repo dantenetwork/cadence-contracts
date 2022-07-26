@@ -1,5 +1,38 @@
 pub contract MessageProtocol {
     access(contract) var messageID: UInt128;
+
+    pub struct CDCAddress {
+        pub let addr: String;
+        pub let addrType: UInt8;
+
+        init(addr: String, t: UInt8) {
+            self.addr = addr;
+            self.addrType = t;
+        }
+
+        pub fun toBytes(): [UInt8] {
+            return self.addr.utf8;
+        }
+
+        pub fun getFlowAddress(): Address? {
+            if UInt8(4) == self.addrType {
+                var rst: UInt64 = 0;
+                var hexStr = self.addr;
+                if (self.addr[0] == "0") && (self.addr[1] == "x") {
+                    hexStr = hexStr.slice(from: 2, upTo: self.addr.length);
+                }
+                let hexVec = hexStr.decodeHex();
+                if Int(8) >= hexVec.length {
+                    for ele in hexVec {
+                        rst = (rst << 8) + UInt64(ele);
+                    }
+                    return Address(rst);
+                }
+            }
+            
+            return nil;
+        }
+    }
     
     /// Message Payload Defination
     pub enum MsgType: UInt8 {
@@ -25,6 +58,7 @@ pub contract MessageProtocol {
         pub case cdcVecI32
         pub case cdcVecI64
         pub case cdcVecI128
+        pub case cdcAddress
     }
 
     // This is not supported yet
@@ -136,6 +170,8 @@ pub contract MessageProtocol {
                         dataBytes = dataBytes.concat(ele.toBigEndianBytes());
                     }
                     break;
+                case MsgType.cdcAddress:
+                    dataBytes = dataBytes.concat((self.value as! CDCAddress).toBytes())
             }
 
             return dataBytes;
@@ -346,6 +382,9 @@ pub contract MessageProtocol {
                 return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcVecI128: 
                 let v: [Int128] = value as? [Int128]!;
+                return MessageItem(name: name, type: type, value: value);
+            case MsgType.cdcAddress:
+                let v: CDCAddress = value as! CDCAddress;
                 return MessageItem(name: name, type: type, value: value);
             default:
                 return nil;
