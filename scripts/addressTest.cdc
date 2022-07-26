@@ -4,7 +4,7 @@ pub fun main(): Address {
 
     let mp = MessageProtocol.MessagePayload();
 
-    let addr = MessageProtocol.CDCAddress(addr: "0x02", t: 4);
+    let addr = MessageProtocol.CDCAddress(addr: "0x1234", t: 4);
 
     let mi = MessageProtocol.createMessageItem(name: "1", type: MessageProtocol.MsgType.cdcAddress, value: addr)!;
     mp.addItem(item: mi);

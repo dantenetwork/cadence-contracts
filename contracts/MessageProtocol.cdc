@@ -1,11 +1,25 @@
 pub contract MessageProtocol {
     access(contract) var messageID: UInt128;
+    pub let flowTypeNumber: UInt8;
 
     pub struct CDCAddress {
         pub let addr: String;
         pub let addrType: UInt8;
 
         init(addr: String, t: UInt8) {
+            if (addr.length < 2) {
+                panic("invalid address length, too short!")
+            }
+
+            // Check if the address is valid if the type is `Flow`
+            if t == MessageProtocol.flowTypeNumber {
+                var hexStr = addr;
+                if (addr[0] == "0") && (addr[1] == "x") {
+                    hexStr = hexStr.slice(from: 2, upTo: addr.length);
+                }
+                let x = hexStr.decodeHex();
+            }
+
             self.addr = addr;
             self.addrType = t;
         }
@@ -15,7 +29,7 @@ pub contract MessageProtocol {
         }
 
         pub fun getFlowAddress(): Address? {
-            if UInt8(4) == self.addrType {
+            if MessageProtocol.flowTypeNumber == self.addrType {
                 var rst: UInt64 = 0;
                 var hexStr = self.addr;
                 if (self.addr[0] == "0") && (self.addr[1] == "x") {
@@ -313,6 +327,7 @@ pub contract MessageProtocol {
 
     init() {
         self.messageID = 0;
+        self.flowTypeNumber = 4;
     }
 
     pub fun createMessageItem(name: String, type: MsgType, value: AnyStruct): MessageItem?{
