@@ -89,6 +89,16 @@ pub contract ReceivedMessageContract{
         pub fun addSubmitter(submitter: Address) {
             self.submitters.append(submitter);
         }
+
+        pub fun checkExisted(submitter: Address): Bool {
+            for ele in self.submitters {
+                if (ele == submitter) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     // Define received message array
@@ -104,6 +114,10 @@ pub contract ReceivedMessageContract{
         }
 
         pub fun insert(receivedMessageCore: ReceivedMessageCore, pubAddr: Address){
+            if self.checkSubmitterExisted(pubAddr: pubAddr) {
+                panic("Repeatedly submit messages with the same id from the same address.");
+            }
+            
             // Add to related messageCopy
             if (self.msgInstance.containsKey(receivedMessageCore.messageHash)) {
                 self.msgInstance[receivedMessageCore.messageHash]!.addSubmitter(submitter: pubAddr);
@@ -122,6 +136,16 @@ pub contract ReceivedMessageContract{
             // }
             // return sum;
             return self.msgCount;
+        }
+
+        pub fun checkSubmitterExisted(pubAddr: Address): Bool {
+            for ele in self.msgInstance.values {
+                if ele.checkExisted(submitter: pubAddr) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
