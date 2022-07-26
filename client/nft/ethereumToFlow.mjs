@@ -80,8 +80,7 @@ async function crossChainMint(tokenId) {
     const toChain = 'Flow';
     const sqosString = '1';
     const receiver = '0xf8d6e0586b0a20c7';
-    const publicPath = '/public/calleeVault';
-    const hashValue = '';
+    const publicPath = 'calleeVault';
     const sessionId = 1;
     const sessionType = 1;
     const sessionCallback = 'ea621511fa72955ecf79bf41d1b29896f053efb03e907dab63b9f15322d81839';
@@ -127,9 +126,10 @@ async function crossChainMint(tokenId) {
             fcl.arg(fromChain, types.String),
             fcl.arg(toChain, types.String),
             fcl.arg(sqosString, types.String),
+            fcl.arg(JSON.stringify(id), types.UInt64),
             fcl.arg(receiver, types.Address),
             fcl.arg(publicPath, types.String),
-            fcl.arg(hashValue, types.String),
+            fcl.arg(randomNumberHash, types.String),
             fcl.arg(JSON.stringify(sessionId), types.UInt128),
             fcl.arg(JSON.stringify(sessionType), types.UInt8),
             fcl.arg(sessionCallback, types.String),
@@ -158,9 +158,7 @@ async function queryReceivedMessage() {
         script: script,
         args: []
     });
-    console.log(result);
-    console.log(result.Ethereum[0].msgInstance);
-    console.log(JSON.stringify(result.Ethereum[0].msgInstance));
+    console.log(JSON.stringify(result));
 }
 
 // await crossChainTransfer();

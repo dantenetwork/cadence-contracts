@@ -16,6 +16,7 @@ pub contract ReceivedMessageContract{
         pub fun callMe(data: MessageProtocol.MessagePayload);
         pub fun getMessagesLength(): Int;
         pub fun getAllMessages(): [MessageProtocol.MessagePayload];
+        pub fun claim(id: UInt64, answer: String);
     }
     
     pub struct Content {
@@ -229,7 +230,14 @@ pub contract ReceivedMessageContract{
                         calleeRef!.callMe(data: msgContent.data);
 
                         self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                        if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
+                        // if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
+                        //     self.completedID[recvMsg.fromChain] = recvMsg.id;
+                        // }
+                        if let cplID = self.completedID[recvMsg.fromChain] {
+                            if (cplID < recvMsg.id) {
+                                self.completedID[recvMsg.fromChain] = recvMsg.id;
+                            }
+                        } else {
                             self.completedID[recvMsg.fromChain] = recvMsg.id;
                         }
                     }

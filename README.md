@@ -79,9 +79,11 @@ node client/crosschain/flowToEthereum.js
 # Transfer NFT from Ethereum to Flow
 node client/nft/ethereumToFlow.mjs
 
-# Claim NFT on Flow
-node client/crosschain/ethereumToFlow.js
+# Query Locker message
+node client/nft/queryLockerMessage.mjs
 
+# Claim NFT on Flow
+node client/crosschain/claimNFT.js
 ```
 
 #### Check NFT on Opensea browser
