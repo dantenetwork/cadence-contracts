@@ -17,10 +17,7 @@
     "SentMessageContract": "./contracts/SentMessageContract.cdc",
     "ReceivedMessageContract": "./contracts/ReceivedMessageContract.cdc",
     "CrossChain": "./contracts/CrossChain.cdc",
-    "MetadataViews": "./examples/MetadataViews.cdc",
-    "NonFungibleToken": "./examples/NonFungibleToken.cdc",
-    "ExampleNFT": "./examples/ExampleNFT.cdc",
-    "NFTCrossChain": "./examples/NFTCrossChain.cdc"
+    "Locker": "./examples/Locker.cdc"
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
@@ -47,23 +44,17 @@
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",
-        "MetadataViews",
-        "NonFungibleToken",
-        "ExampleNFT",
-        "NFTCrossChain"
+        "Locker"
       ]
     },
     "testnet": {
       "testnet-account": [
         "MessageProtocol",
+        "IdentityVerification",
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",
-        "MetadataViews",
-        "NonFungibleToken",
-        "ExampleNFT",
-        "NFTCrossChain",
-        "IdentityVerification"
+        "Locker"
       ]
     }
   }
