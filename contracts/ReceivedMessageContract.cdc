@@ -94,6 +94,16 @@ pub contract ReceivedMessageContract{
         pub fun addSubmitter(submitter: Address) {
             self.submitters.append(submitter);
         }
+
+        pub fun checkExisted(submitter: Address): Bool {
+            for ele in self.submitters {
+                if (ele == submitter) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     // Define received message array
@@ -109,6 +119,10 @@ pub contract ReceivedMessageContract{
         }
 
         pub fun insert(receivedMessageCore: ReceivedMessageCore, pubAddr: Address){
+            if self.checkSubmitterExisted(pubAddr: pubAddr) {
+                panic("Repeatedly submit messages with the same id from the same address.");
+            }
+            
             // Add to related messageCopy
             if (self.msgInstance.containsKey(receivedMessageCore.messageHash)) {
                 self.msgInstance[receivedMessageCore.messageHash]!.addSubmitter(submitter: pubAddr);
@@ -127,6 +141,16 @@ pub contract ReceivedMessageContract{
             // }
             // return sum;
             return self.msgCount;
+        }
+
+        pub fun checkSubmitterExisted(pubAddr: Address): Bool {
+            for ele in self.msgInstance.values {
+                if ele.checkExisted(submitter: pubAddr) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
@@ -172,13 +196,14 @@ pub contract ReceivedMessageContract{
                                               hashAlgorithm: HashAlgorithm.SHA3_256)) {
                 panic("Signature verification failed!");
             }
+
+            var cacheIdx: Int = -1;
             
             if (self.message.containsKey(recvMsg.fromChain)) {
                 let caches: &[ReceivedMessageCache] = &self.message[recvMsg.fromChain]! as &[ReceivedMessageCache];
 
                 var found = false;
-                var cacheIdx: Int = -1;
-
+                
                 for idx, ele in self.message[recvMsg.fromChain]! {
                     if (recvMsg.id == ele.msgID) {
                         self.message[recvMsg.fromChain]![idx].insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
@@ -208,45 +233,47 @@ pub contract ReceivedMessageContract{
                     }
                 }
 
-                if (cacheIdx >= 0) {
-                    if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
-                        // TODO: do verification
-                        let msgContent = recvMsg.content;
-
-                        // TODO: call destination
-                        let pubLink = PublicPath(identifier: msgContent.link);
-                        if (nil == pubLink)
-                        {
-                            self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                            panic("invalid `link` path!");
-                        }
-
-                        // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
-                        let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
-                        if (nil == calleeRef){
-                            self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                            panic("invalid callee address or `link`!");
-                        }
-                        calleeRef!.callMe(data: msgContent.data);
-
-                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                        // if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
-                        //     self.completedID[recvMsg.fromChain] = recvMsg.id;
-                        // }
-                        if let cplID = self.completedID[recvMsg.fromChain] {
-                            if (cplID < recvMsg.id) {
-                                self.completedID[recvMsg.fromChain] = recvMsg.id;
-                            }
-                        } else {
-                            self.completedID[recvMsg.fromChain] = recvMsg.id;
-                        }
-                    }
-                }
-
             } else {
                 let mcache = ReceivedMessageCache(id: recvMsg.id);
                 mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
                 self.message[recvMsg.fromChain] = [mcache];
+                cacheIdx = 0;
+            }
+
+            if (cacheIdx >= 0) {
+                if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
+                    // TODO: do verification
+                    let msgContent = recvMsg.content;
+
+                    // TODO: call destination
+                    let pubLink = PublicPath(identifier: msgContent.link);
+                    if (nil == pubLink)
+                    {
+                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                        panic("invalid `link` path!");
+                    }
+
+                    // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+                    let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
+                    if (nil == calleeRef){
+                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                        panic("invalid callee address or `link`!");
+                    }
+                    calleeRef!.callMe(data: msgContent.data);
+
+                    self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                    // if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
+                    //     self.completedID[recvMsg.fromChain] = recvMsg.id;
+                    // }
+
+                    if let cplID = self.completedID[recvMsg.fromChain] {
+                        if (cplID < recvMsg.id) {
+                            self.completedID[recvMsg.fromChain] = recvMsg.id;
+                        }
+                    } else {
+                        self.completedID[recvMsg.fromChain] = recvMsg.id;
+                    }
+                }
             }
         }
 

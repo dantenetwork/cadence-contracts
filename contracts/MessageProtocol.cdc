@@ -185,7 +185,7 @@ pub contract MessageProtocol {
                     }
                     break;
                 case MsgType.cdcAddress:
-                    dataBytes = dataBytes.concat((self.value as! CDCAddress).toBytes())    
+                    dataBytes = dataBytes.concat((self.value as! CDCAddress).toBytes())
             }
 
             return dataBytes;
@@ -291,6 +291,10 @@ pub contract MessageProtocol {
             }
 
             return dataBytes;
+        }
+
+        pub fun addItem(item: SQoSItem) {
+            self.sqosItems.append(item);
         }
     }
 
@@ -404,7 +408,7 @@ pub contract MessageProtocol {
                 return MessageItem(name: name, type: type, value: value);
             case MsgType.cdcAddress:
                 let v: CDCAddress = value as! CDCAddress;
-                return MessageItem(name: name, type: type, value: value);                
+                return MessageItem(name: name, type: type, value: value);
             default:
                 return nil;
         }

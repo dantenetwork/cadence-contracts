@@ -1,23 +1,23 @@
-import ExampleNFT from 0xf8d6e0586b0a20c7
-import MessageProtocol from 0xf8d6e0586b0a20c7
-import SentMessageContract from 0xf8d6e0586b0a20c7
-import ReceivedMessageContract from 0xf8d6e0586b0a20c7
-import NonFungibleToken from 0xf8d6e0586b0a20c7
+import MessageProtocol from "../contracts/MessageProtocol.cdc"
+import SentMessageContract from "../contracts/SentMessageContract.cdc"
+import ReceivedMessageContract from "../contracts/ReceivedMessageContract.cdc"
 import MetadataViews from 0xf8d6e0586b0a20c7
+import NonFungibleToken from 0xf8d6e0586b0a20c7
+import StarRealm from  0xf8d6e0586b0a20c7
 
 pub contract Locker{
     init(){
-        // Create a new empty collection
-        let collection <- ExampleNFT.createEmptyCollection()
+        // // Create a new empty collection
+        // let collection <- StarRealm.createStarPort();
 
-        // save it to the account
-        self.account.save(<-collection, to: ExampleNFT.CollectionStoragePath)
+        // // save it to the account
+        // self.account.save(<-collection, to: StarRealm.PortStoragePath);
 
-        // create a public capability for the collection
-        self.account.link<&{NonFungibleToken.CollectionPublic, ExampleNFT.ExampleNFTCollectionPublic}>(
-            ExampleNFT.CollectionPublicPath,
-            target: ExampleNFT.CollectionStoragePath
-        )
+        // // create a public capability for the collection
+        // self.account.link<&{StarRealm.StarDocker}>(
+        //     StarRealm.DockerPublicPath,
+        //     target: StarRealm.PortStoragePath
+        // );
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // create cross chain received message resource
@@ -46,16 +46,34 @@ pub contract Locker{
         // save vault as resource
         self.account.save(<-create Locker.createEmptyCalleeVault(), to: /storage/calleeVault)
         self.account.link<&{ReceivedMessageContract.Callee}>(/public/calleeVault, target: /storage/calleeVault)
+        self.account.link<&{StarRealm.StarDocker}>(/public/lockerDocker, target: /storage/calleeVault)
     }
 
     // Resouce to store messages from ReceivedMessageContract
-    pub resource CalleeVault: ReceivedMessageContract.Callee{
+    pub resource CalleeVault: ReceivedMessageContract.Callee, StarRealm.StarDocker{
         pub let receivedMessages: [MessageProtocol.MessagePayload]
+        priv let lockedNFTs: @{UInt64: AnyResource{NonFungibleToken.INFT}};
 
         init(){
             self.receivedMessages = []
+            self.lockedNFTs <- {};
         }
 
+        destroy () {
+            destroy self.lockedNFTs;
+        }
+
+        // There will be one id exists at a time
+        pub fun docking(nft: @AnyResource{NonFungibleToken.INFT}): @AnyResource{NonFungibleToken.INFT}? {
+            if self.lockedNFTs.containsKey(nft.id) {
+                return <- nft;
+            } else {
+                self.lockedNFTs[nft.id] <-! nft;
+                return nil;
+            }
+        }
+
+        // This is a temporary solutions
         // Receive message from ReceivedMessageContract
         pub fun callMe(data: MessageProtocol.MessagePayload){
             self.receivedMessages.append(data)
@@ -86,7 +104,7 @@ pub contract Locker{
                     }
 
                     // Receiver submit random number to claim NFT
-                    Locker.transfer(id: id, receiver: receiver)
+                    self.transfer(id: id, receiver: receiver)
 
                     self.receivedMessages.remove(at: index);
                     break
@@ -97,6 +115,14 @@ pub contract Locker{
                 panic("id is not matched")
             }
         }
+
+        // Transfer NFT back to receiver
+        priv fun transfer(
+            id: UInt64,
+            receiver: Address
+        ){
+            
+        }
     }
 
     pub fun createEmptyCalleeVault(): @CalleeVault{
@@ -106,34 +132,42 @@ pub contract Locker{
     // pub fun test(): AnyStruct{
     //     let digest = HashAlgorithm.SHA2_256.hash("044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217".utf8)
     //     // return "0x".concat(String.encodeHex(digest));
-
     //     let calleeRef = self.account.getCapability<&{ReceivedMessageContract.Callee}>(/public/calleeVault).borrow()!
     //     let hashValue: String = element.items[2].value as? String!
     //     return "0x".concat(String.encodeHex(digest)) != hashValue
     // }
-
     // query all callee messages
     pub fun queryMessage(): [MessageProtocol.MessagePayload]{
-        let calleeRef = self.account.getCapability<&{ReceivedMessageContract.Callee}>(/public/calleeVault).borrow()!
+        let calleeRef = self.account.borrow<&Locker.CalleeVault>(from: /storage/calleeVault)!
         return calleeRef.getAllMessages()
     }
 
-    pub fun sendCrossChainMessagge(transferToken: @AnyResource, signerAddress: Address, id: UInt64, owner: String, hashValue: String){
-        let transferToken <- transferToken as! @ExampleNFT.NFT
-        let id: UInt64 = transferToken.id
-        let tokenURL: String = transferToken.tokenURL
+    // This is a temporary solutions
+    pub fun sendCrossChainNFT(transferToken: @AnyResource, signerAddress: Address, id: UInt64, owner: String, hashValue: String){
+
+        let NFTResolver <- transferToken as! @AnyResource{MetadataViews.Resolver};
+        let tokenURL: String = (NFTResolver.resolveView(Type<MetadataViews.Display>())! as! MetadataViews.Display).thumbnail.uri();
+
+        let NonToken <- NFTResolver as! @AnyResource{NonFungibleToken.INFT};
+        let id: UInt64 = NonToken.id
 
         // Get the locker's public account object
         let locker = self.account
 
         // Get the Collection reference for the locker
         // getting the public capability and borrowing a reference from it
-        let lockerRef = locker.getCapability(ExampleNFT.CollectionPublicPath)
-            .borrow<&{NonFungibleToken.CollectionPublic}>()
+        let lockerRef = locker.getCapability(/public/lockerDocker)
+            .borrow<&{StarRealm.StarDocker}>()
             ?? panic("Could not get locker reference to the NFT Collection")
 
         // Deposit the NFT in the locker collection
-        lockerRef.deposit(token: <-transferToken)
+        let v <- lockerRef.docking(nft: <- NonToken);
+
+        if v != nil {
+            panic("NFT docking failed, the `id` exists!")
+        } else {
+            destroy v;
+        }
 
         log("NFT transferred from owner to account locker")
 
@@ -164,7 +198,8 @@ pub contract Locker{
         msgSubmitterRef!.submitWithAuth(msg, acceptorAddr: locker.address, alink: "acceptorFace", oSubmitterAddr: locker.address, slink: "msgSubmitter")
     }
 
-    pub fun receivedCrossChainMessage(
+    // This is a temporary solutions
+    pub fun receivedCrossChainNFT(
         signer:Address,
         id: UInt128, 
         fromChain: String, 
@@ -209,34 +244,9 @@ pub contract Locker{
         // Submit received message
         let lockerCapability = locker.getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault)
         if let receivedMessageVaultRef = lockerCapability.borrow(){
-            receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: signer, signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, signature:signature.decodeHex())    
+            receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: signer, signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, signature:signature.utf8)    
         }else{
             panic("Invalid ReceivedMessageVault!")
         }
-    }
-
-    // Transfer NFT back to receiver
-    priv fun transfer(
-        id: UInt64,
-        receiver: Address
-    ){
-        // Borrow a reference from the stored collection
-        let collectionRef = self.account.borrow<&ExampleNFT.Collection>(from: ExampleNFT.CollectionStoragePath)
-            ?? panic("Could not borrow a reference to the locker's collection")
-
-        let nft = collectionRef.borrowExampleNFT(id: id)!
-
-        // Call the withdraw function on the sender's Collection
-        // to move the NFT out of the collection
-        let token <- collectionRef.withdraw(withdrawID: id)
-
-        // Get the Collection reference for the receiver
-        // getting the public capability and borrowing a reference from it
-        let receiverRef = getAccount(receiver).getCapability(ExampleNFT.CollectionPublicPath)
-            .borrow<&{NonFungibleToken.CollectionPublic}>()
-            ?? panic("Could not get receiver reference to the NFT Collection")
-
-        // Deposit the NFT in the receiver collection
-        receiverRef.deposit(token: <-token)
     }
 }
