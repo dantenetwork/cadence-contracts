@@ -163,7 +163,7 @@ pub contract ReceivedMessageContract{
             self.executableCount = 10;
             self.completedID = {};
             self.online = true;
-            self.defaultCopyCount = 3;
+            self.defaultCopyCount = 1;
         }
 
         /**
@@ -186,18 +186,19 @@ pub contract ReceivedMessageContract{
             // Verify the signature
             if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
                                               signatureAlgorithm: signatureAlgorithm,
-                                              rawData: recvMsg.messageHash.utf8,
+                                              rawData: recvMsg.messageHash.decodeHex(),
                                               signature: signature,
-                                              hashAlgorithm: HashAlgorithm.SHA2_256)) {
-                panic("invalid recver address or `link`!");
+                                              hashAlgorithm: HashAlgorithm.SHA3_256)) {
+                panic("Signature verification failed!");
             }
+
+            var cacheIdx: Int = -1;
             
             if (self.message.containsKey(recvMsg.fromChain)) {  
                 let caches: &[ReceivedMessageCache] = &self.message[recvMsg.fromChain]! as &[ReceivedMessageCache];
 
                 var found = false;
-                var cacheIdx: Int = -1;
-
+                
                 for idx, ele in self.message[recvMsg.fromChain]! {
                     if (recvMsg.id == ele.msgID) {
                         self.message[recvMsg.fromChain]![idx].insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
@@ -227,46 +228,47 @@ pub contract ReceivedMessageContract{
                     }
                 }
 
-                if (cacheIdx >= 0) {
-                    if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
-                        // TODO: do verification
-                        let msgContent = recvMsg.content;
-
-                        // TODO: call destination
-                        let pubLink = PublicPath(identifier: msgContent.link);
-                        if (nil == pubLink)
-                        {
-                            self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                            panic("invalid `link` path!");
-                        }
-
-                        // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
-                        let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
-                        if (nil == calleeRef){
-                            self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                            panic("invalid callee address or `link`!");
-                        }
-                        calleeRef!.callMe(data: msgContent.data);
-
-                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                        // if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
-                        //     self.completedID[recvMsg.fromChain] = recvMsg.id;
-                        // }
-
-                        if let cplID = self.completedID[recvMsg.fromChain] {
-                            if (cplID < recvMsg.id) {
-                                self.completedID[recvMsg.fromChain] = recvMsg.id;
-                            }
-                        } else {
-                            self.completedID[recvMsg.fromChain] = recvMsg.id;
-                        }
-                    }
-                }
-
             } else {
                 let mcache = ReceivedMessageCache(id: recvMsg.id);
                 mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
                 self.message[recvMsg.fromChain] = [mcache];
+                cacheIdx = 0;
+            }
+
+            if (cacheIdx >= 0) {
+                if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
+                    // TODO: do verification
+                    let msgContent = recvMsg.content;
+
+                    // TODO: call destination
+                    let pubLink = PublicPath(identifier: msgContent.link);
+                    if (nil == pubLink)
+                    {
+                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                        panic("invalid `link` path!");
+                    }
+
+                    // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+                    let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
+                    if (nil == calleeRef){
+                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                        panic("invalid callee address or `link`!");
+                    }
+                    calleeRef!.callMe(data: msgContent.data);
+
+                    self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                    // if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
+                    //     self.completedID[recvMsg.fromChain] = recvMsg.id;
+                    // }
+
+                    if let cplID = self.completedID[recvMsg.fromChain] {
+                        if (cplID < recvMsg.id) {
+                            self.completedID[recvMsg.fromChain] = recvMsg.id;
+                        }
+                    } else {
+                        self.completedID[recvMsg.fromChain] = recvMsg.id;
+                    }
+                }
             }
         }
 
