@@ -144,7 +144,7 @@ pub contract ReceivedMessageContract{
             self.executableCount = 10;
             self.completedID = {};
             self.online = true;
-            self.defaultCopyCount = 1; // TODO defaultCopyCount = 1, debug only
+            self.defaultCopyCount = 0; // TODO defaultCopyCount = 1, debug only
         }
 
         /**

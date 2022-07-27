@@ -37,7 +37,6 @@ const ethereum = new Ethereum();
 const util = new Util();
 
 console.log('Initating cross chain sync service...');
-console.log();
 
 // Get receiver from config/default.json
 let receiver = config.get('emulator');
@@ -75,7 +74,6 @@ async function crossChainMint(tokenId) {
         ),
         'utf8');
 
-    const id = tokenId;
     const fromChain = 'Ethereum';
     const toChain = 'Flow';
     const sqosString = '1';
@@ -89,45 +87,27 @@ async function crossChainMint(tokenId) {
 
 
     let utf8Encode = new TextEncoder();
-    const originData = new Uint8Array(utf8Encode.encode(JSON.stringify(id)));
+    const originData = new Uint8Array(utf8Encode.encode(JSON.stringify(tokenId)));
     // TODO
     // add more params into originData
-
-    console.log(originData);
-    // const toChainBytes = utf8Encode.encode(toChain);
-    // originData.set(toChainBytes, originData.length);
-    // console.log(originData);
-    // originData = originData.fill(utf8Encode.encode(fromChain));
-    // originData = originData.fill(utf8Encode.encode(toChain));
-    // originData = originData.fill(utf8Encode.encode(signer));
-    // originData = originData.concat(utf8Encode.encode(sqosString));
-    // originData = originData.concat(utf8Encode.encode(receiver));
-    // originData = originData.concat(utf8Encode.encode(publicPath));
-    // originData = originData.concat(utf8Encode.encode(hashValue));
-    // originData = originData.concat(utf8Encode.encode(sessionId));
-    // originData = originData.concat(utf8Encode.encode(sessionType));
-    // originData = originData.concat(utf8Encode.encode(sessionCallback));
-    // originData = originData.concat(utf8Encode.encode(sessionCommitment));
-    // originData = originData.concat(utf8Encode.encode(sessionAnswer));
-
     const msg = Buffer.from(originData).toString("hex");
 
     // sign message
     // hash = SHA3_256
     // elliptic = ECDSA_P256
-    console.log('msg: ' + msg);
+    // console.log('msg: ' + msg);
     const signature = await flowService.signWithKey(signer.privateKey, msg);
     console.log('signature: ' + signature);
 
     let response = await flowService.sendTx({
         transaction,
         args: [
-            fcl.arg(JSON.stringify(id), types.UInt128),
+            fcl.arg(tokenId, types.UInt128),
             fcl.arg(fromChain, types.String),
             fcl.arg(toChain, types.String),
             fcl.arg(sqosString, types.String),
-            fcl.arg(JSON.stringify(id), types.UInt64),
-            fcl.arg(receiver, types.Address),
+            fcl.arg(tokenId, types.UInt64),
+            fcl.arg(receiver, types.String),
             fcl.arg(publicPath, types.String),
             fcl.arg(randomNumberHash, types.String),
             fcl.arg(JSON.stringify(sessionId), types.UInt128),
@@ -162,5 +142,10 @@ async function queryReceivedMessage() {
 }
 
 // await crossChainTransfer();
-await crossChainMint(1);
+// Query last NFT id
+var totalSupply = await util.queryTotalSupply();
+const tokenId = totalSupply;
+console.log('tokenId: ' + tokenId);
+
+await crossChainMint(tokenId);
 await queryReceivedMessage();

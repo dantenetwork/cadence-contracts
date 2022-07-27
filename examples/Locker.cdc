@@ -76,7 +76,7 @@ pub contract Locker{
                 if (element.items[0].value as? UInt64 == id) {
                     isMatched = true
                     // id matched
-                    let receiver: String = element.items[1].value as? String!
+                    let receiver: Address = (element.items[1].value as? MessageProtocol.CDCAddress!).getFlowAddress()!
                     let hashValue: String = element.items[2].value as? String!
                         
                     let digest = HashAlgorithm.SHA2_256.hash(answer.utf8)
@@ -86,7 +86,7 @@ pub contract Locker{
                     }
 
                     // Receiver submit random number to claim NFT
-                    Locker.transfer(id: id, receiver: receiver as? Address!)
+                    Locker.transfer(id: id, receiver: receiver)
 
                     self.receivedMessages.remove(at: index);
                     break
@@ -139,7 +139,7 @@ pub contract Locker{
 
         // Message params
         let toChain = "Ethereum"
-        let SQoSItem = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Identity, value: "")
+        let sqosItem = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Identity, value: "")
         let contractName = "0x263037FdFa433828fCBF97B87200A0E0b8d68C5f"
         let actionName = "mintTo"
         let callType: UInt8 = 1
@@ -160,7 +160,7 @@ pub contract Locker{
 
         // Send cross chain message
         let msgSubmitterRef  = locker.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter)
-        let msg = SentMessageContract.msgToSubmit(toChain: toChain, sqos: [SQoSItem], contractName: contractName, actionName: actionName, data: data, callType: callType, callback: callback, commitment: commitment, answer: answer)
+        let msg = SentMessageContract.msgToSubmit(toChain: toChain, sqos: [sqosItem], contractName: contractName, actionName: actionName, data: data, callType: callType, callback: callback, commitment: commitment, answer: answer)
         msgSubmitterRef!.submitWithAuth(msg, acceptorAddr: locker.address, alink: "acceptorFace", oSubmitterAddr: locker.address, slink: "msgSubmitter")
     }
 
@@ -171,7 +171,7 @@ pub contract Locker{
         toChain: String,
         sqosString: String, 
         nftID: UInt64,
-        receiver: Address,
+        receiver: String,
         publicPath: String,
         hashValue: String,
         sessionId: UInt128,
@@ -197,7 +197,7 @@ pub contract Locker{
 
         let idItem = MessageProtocol.createMessageItem(name: "id", type: MessageProtocol.MsgType.cdcU64, value: nftID as UInt64)
         data.addItem(item: idItem!)
-        let ownerItem = MessageProtocol.createMessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: receiver.toString())
+        let ownerItem = MessageProtocol.createMessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcAddress, value: MessageProtocol.CDCAddress(addr: receiver, t: 4))
         data.addItem(item: ownerItem!)
         let hashValueItem = MessageProtocol.createMessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)
         data.addItem(item: hashValueItem!)

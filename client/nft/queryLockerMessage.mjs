@@ -17,7 +17,6 @@ async function query() {
         script: script,
         args: []
     });
-    console.log(result);
     console.log(JSON.stringify(result));
 };
 

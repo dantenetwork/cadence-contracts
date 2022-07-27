@@ -4,6 +4,7 @@ import FlowService from '../flow.mjs';
 import fcl from "@onflow/fcl";
 import types from "@onflow/types";
 import config from 'config';
+import Util from '../util.mjs';
 
 let signer = config.get('emulator');
 if (config.get('network') == 'testnet') {
@@ -17,6 +18,8 @@ const authorization = flowService.authorizationFunction();
 // for debugging purpose, should be removed on the production environment
 const randomNumber = config.get('randomNumber');
 
+const util = new Util();
+
 // Claim cross chain NFT on FLow
 async function crossChainClaim(){
     // Submit claim message 
@@ -27,13 +30,16 @@ async function crossChainClaim(){
         ),
         'utf8');
 
-    const id = 1;    
+    // Query last NFT id
+    var totalSupply = await util.queryTotalSupply();
+    const tokenId = totalSupply;
+    console.log('tokenId: ' + tokenId);
     console.log('randomNumber: ' + randomNumber);
 
     let response = await flowService.sendTx({
         transaction,
         args: [
-            fcl.arg(JSON.stringify(id), types.UInt64),
+            fcl.arg(tokenId, types.UInt64),
             fcl.arg(randomNumber, types.String)
         ],
         proposer: authorization,
