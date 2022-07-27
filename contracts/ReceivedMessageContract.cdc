@@ -62,7 +62,7 @@ pub contract ReceivedMessageContract{
             var originData: [UInt8] = id.toBigEndianBytes();
             originData = originData.concat(fromChain.utf8);
             originData = originData.concat(self.toChain.utf8);
-            originData = originData.concat(sender.utf8);
+            // originData = originData.concat(sender.utf8);
             originData = originData.concat(sqos.toBytes());
             originData = originData.concat(self.content.toBytes());
             originData = originData.concat(session.toBytes());

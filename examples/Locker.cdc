@@ -1,9 +1,9 @@
 import MessageProtocol from "../contracts/MessageProtocol.cdc"
 import SentMessageContract from "../contracts/SentMessageContract.cdc"
 import ReceivedMessageContract from "../contracts/ReceivedMessageContract.cdc"
-import MetadataViews from 0xf8d6e0586b0a20c7
-import NonFungibleToken from 0xf8d6e0586b0a20c7
-import StarRealm from  0xf8d6e0586b0a20c7
+import MetadataViews from "./MetadataViews.cdc"
+import NonFungibleToken from "./NonFungibleToken.cdc"
+import StarRealm from  "./StarRealm.cdc"
 
 pub contract Locker{
     init(){
@@ -121,7 +121,20 @@ pub contract Locker{
             id: UInt64,
             receiver: Address
         ){
-            
+            if let starDockerRef = StarRealm.getStarDockerFromAddress(addr: receiver) {
+                if self.lockedNFTs.containsKey(id) {
+                    let v <- starDockerRef.docking(nft: <- self.lockedNFTs.remove(key: id)!);
+                    if v != nil {
+                        panic("Transfer failed when docking!");
+                    } else {
+                        destroy v;
+                    }
+                } else {
+                    panic("The id of NFT has not been locked!");
+                }
+            } else {
+                panic("star docker does not exist!");
+            }
         }
     }
 
