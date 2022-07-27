@@ -66,13 +66,6 @@ async function crossChainTransfer() {
 }
 
 async function crossChainMint(tokenId) {
-    // Submit received message 
-    const transaction = fs.readFileSync(
-        path.join(
-            process.cwd(),
-            './transactions/nft/ReceivedMessage.cdc'
-        ),
-        'utf8');
 
     const fromChain = 'Ethereum';
     const toChain = 'Flow';
@@ -86,18 +79,77 @@ async function crossChainMint(tokenId) {
     const sessionAnswer = 1;
 
 
-    let utf8Encode = new TextEncoder();
-    const originData = new Uint8Array(utf8Encode.encode(JSON.stringify(tokenId)));
-    // TODO
-    // add more params into originData
-    const msg = Buffer.from(originData).toString("hex");
+    // Genereate digest
+    const script = fs.readFileSync(
+        path.join(
+            process.cwd(),
+            './transactions/nft/GenerateDigest.cdc'
+        ),
+        'utf8'
+    );
+    let createdData = await flowService.executeScript({
+        script: script,
+        args: [
+            fcl.arg(signer.address, types.Address),
+            fcl.arg(config.get("locker").address, types.Address),
+            fcl.arg(tokenId, types.UInt128),
+            fcl.arg(fromChain, types.String),
+            fcl.arg(toChain, types.String),
+            fcl.arg(sqosString, types.String),
+            fcl.arg(tokenId, types.UInt64),
+            fcl.arg(receiver, types.String),
+            fcl.arg(publicPath, types.String),
+            fcl.arg(randomNumberHash, types.String),
+            fcl.arg(JSON.stringify(sessionId), types.UInt128),
+            fcl.arg(JSON.stringify(sessionType), types.UInt8),
+            fcl.arg(sessionCallback, types.String),
+            fcl.arg(JSON.stringify(sessionCommitment), types.String),
+            fcl.arg(JSON.stringify(sessionAnswer), types.String)
+        ]
+    });
+    const rawData = createdData.rawData;
+    const toBeSign = createdData.toBeSign;
+
+    console.log('rawData: ' + rawData);
+    console.log('toBeSign: ' + toBeSign);
+
+    const message = Buffer.from(toBeSign).toString("hex");
+    console.log('message: ' + message);
 
     // sign message
     // hash = SHA3_256
     // elliptic = ECDSA_P256
-    // console.log('msg: ' + msg);
-    const signature = await flowService.signWithKey(signer.privateKey, msg);
+    const signature = await flowService.signWithKey(signer.privateKey, message);
     console.log('signature: ' + signature);
+
+    // // Submit received message 
+    // const transaction = fs.readFileSync(
+    //     path.join(
+    //         process.cwd(),
+    //         './transactions/nft/signatureVerify.cdc'
+    //     ),
+    //     'utf8');
+
+    // // Verify signature
+    // let response = await flowService.executeScript({
+    //     script: transaction,
+    //     args: [
+    //         fcl.arg(rawData, types.String),
+    //         fcl.arg("bb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025", types.String),
+    //         fcl.arg(signature, types.String),
+    //         fcl.arg(signer.address, types.Address)
+    //     ],
+    // });
+    // console.log(response);
+
+
+    // Submit received message 
+    const transaction = fs.readFileSync(
+        path.join(
+            process.cwd(),
+            './transactions/nft/ReceivedMessage.cdc'
+        ),
+        'utf8');
 
     let response = await flowService.sendTx({
         transaction,

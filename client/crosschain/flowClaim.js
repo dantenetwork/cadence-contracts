@@ -26,7 +26,7 @@ async function crossChainClaim(){
     const transaction = fs.readFileSync(
         path.join(
             process.cwd(),
-            './transactions/nft/ClaimNFT.cdc'
+            './transactions/nft/ClaimFlowNFT.cdc'
         ),
         'utf8');
 

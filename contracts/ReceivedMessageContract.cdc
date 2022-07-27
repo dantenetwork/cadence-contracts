@@ -144,7 +144,7 @@ pub contract ReceivedMessageContract{
             self.executableCount = 10;
             self.completedID = {};
             self.online = true;
-            self.defaultCopyCount = 0; // TODO defaultCopyCount = 1, debug only
+            self.defaultCopyCount = 1; // TODO defaultCopyCount = 1, debug only
         }
 
         /**
@@ -165,13 +165,13 @@ pub contract ReceivedMessageContract{
             */
 
             // Verify the signature
-            // if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
-            //                                   signatureAlgorithm: signatureAlgorithm,
-            //                                   rawData: recvMsg.messageHash.utf8,
-            //                                   signature: signature,
-            //                                   hashAlgorithm: HashAlgorithm.SHA2_256)) {
-            //     panic("invalid recver address or `link`!");
-            // }
+            if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
+                                              signatureAlgorithm: signatureAlgorithm,
+                                              rawData: recvMsg.messageHash.decodeHex(),
+                                              signature: signature,
+                                              hashAlgorithm: HashAlgorithm.SHA3_256)) {
+                panic("Signature verification failed!");
+            }
             
             if (self.message.containsKey(recvMsg.fromChain)) {
                 let caches: &[ReceivedMessageCache] = &self.message[recvMsg.fromChain]! as &[ReceivedMessageCache];
