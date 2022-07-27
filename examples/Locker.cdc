@@ -1,6 +1,7 @@
-import MessageProtocol from 0xf8d6e0586b0a20c7
-import SentMessageContract from 0xf8d6e0586b0a20c7
-import ReceivedMessageContract from 0xf8d6e0586b0a20c7
+import MessageProtocol from "../contracts/MessageProtocol.cdc"
+import SentMessageContract from "../contracts/SentMessageContract.cdc"
+import ReceivedMessageContract from "../contracts/ReceivedMessageContract.cdc"
+import MetadataViews from 0xf8d6e0586b0a20c7
 import NonFungibleToken from 0xf8d6e0586b0a20c7
 import StarRealm from  0xf8d6e0586b0a20c7
 
@@ -51,11 +52,11 @@ pub contract Locker{
     // Resouce to store messages from ReceivedMessageContract
     pub resource CalleeVault: ReceivedMessageContract.Callee, StarRealm.StarDocker{
         pub let receivedMessages: [MessageProtocol.MessagePayload]
-        priv let lockedNFTs: @{UInt64, AnyResource{NonFungibleToken.INFT}};
+        priv let lockedNFTs: @{UInt64: AnyResource{NonFungibleToken.INFT}};
 
         init(){
             self.receivedMessages = []
-            self.lockedNFTs = {};
+            self.lockedNFTs <- {};
         }
 
         destroy () {
@@ -137,15 +138,18 @@ pub contract Locker{
     // }
     // query all callee messages
     pub fun queryMessage(): [MessageProtocol.MessagePayload]{
-        let calleeRef = self.account.getCapability<&{ReceivedMessageContract.Callee}>(/public/calleeVault).borrow()!
+        let calleeRef = self.account.borrow<&Locker.CalleeVault>(from: /storage/calleeVault)!
         return calleeRef.getAllMessages()
     }
 
     // This is a temporary solutions
     pub fun sendCrossChainNFT(transferToken: @AnyResource, signerAddress: Address, id: UInt64, owner: String, hashValue: String){
-        let transferToken <- transferToken as! @ExampleNFT.NFT
-        let id: UInt64 = transferToken.id
-        let tokenURL: String = transferToken.tokenURL
+
+        let NFTResolver <- transferToken as! @AnyResource{MetadataViews.Resolver};
+        let tokenURL: String = (NFTResolver.resolveView(Type<MetadataViews.Display>())! as! MetadataViews.Display).thumbnail.uri();
+
+        let NonToken <- NFTResolver as! @AnyResource{NonFungibleToken.INFT};
+        let id: UInt64 = NonToken.id
 
         // Get the locker's public account object
         let locker = self.account
@@ -157,8 +161,12 @@ pub contract Locker{
             ?? panic("Could not get locker reference to the NFT Collection")
 
         // Deposit the NFT in the locker collection
-        if (lockerRef.docking(nft: <-transferToken) != nil) {
+        let v <- lockerRef.docking(nft: <- NonToken);
+
+        if v != nil {
             panic("NFT docking failed, the `id` exists!")
+        } else {
+            destroy v;
         }
 
         log("NFT transferred from owner to account locker")

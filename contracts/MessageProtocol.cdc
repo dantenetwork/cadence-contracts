@@ -288,6 +288,10 @@ pub contract MessageProtocol {
 
             return dataBytes;
         }
+
+        pub fun addItem(item: SQoSItem) {
+            self.sqosItems.append(item);
+        }
     }
 
     /// Session
