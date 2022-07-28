@@ -1,66 +1,77 @@
 import fs from 'fs';
 import path from 'path';
 import FlowService from '../flow.mjs';
-import fcl from "@onflow/fcl";
-import types from "@onflow/types";
-import crypto from 'crypto';
+import Web3 from 'web3';
+import Ethereum from '../crosschain/ethereum.js';
 import config from 'config';
-import Util from '../util.mjs';
 
 let signer = config.get('emulator');
 
 if (config.get('network') == 'testnet') {
     signer = config.get('testnet');
 }
-
 const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);
-const authorization = flowService.authorizationFunction();
 
-const util = new Util();
+// init ethereum contract
+const web3 = new Web3('https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161');
+let NFTRawData = fs.readFileSync('./client/crosschain/NFT.json');
+let NFTAbi = JSON.parse(NFTRawData).abi;
 
-async function mintNFT() {
-    // Get sent message 
-    const transaction = fs.readFileSync(
-    path.join(
-      process.cwd(),
-      './transactions/nft/SentMessage.cdc'
-    ),
-    'utf8'
-  );
+const ethPrivateKey = fs.readFileSync("./client/crosschain/.secret").toString().trim();
+const nftContractAddress = config.get('ethereumContract');
+let NFTContract = new web3.eth.Contract(NFTAbi, nftContractAddress);
+const ethereum = new Ethereum();
 
-  var totalSupply = await util.queryTotalSupply();
-  const tokenId = parseInt(totalSupply);
-  console.log('tokenId: ' + tokenId);
+// Mint NFT on Rinkeby
+async function crossChainMint(messageId) {
+    // Query cross chain message from flow to ethereum
+    const script = fs.readFileSync(
+        path.join(
+            process.cwd(),
+            './transactions/nft/QuerySentMessage.cdc'
+        ),
+        'utf8'
+    );
+    const sendMessages = await flowService.executeScript({
+        script: script,
+        args: []
+    });
 
-  // Generate random number
-  let randomNumber = Buffer.from(crypto.randomBytes(32)).toString('hex');
+    // console.log(sendMessages);
 
-  // TODO
-  // for debugging purpose, should be removed on the production environment
-  randomNumber = config.get('randomNumber');
-  console.log('Random number: ' + randomNumber);
+    if(sendMessages.length < messageId){
+        console.log('messageId ' + messageId + ' is not found');
+        return;
+    }
+    // Get message info
+    const message = sendMessages[messageId - 1].msgToSubmit;
+    const tokenId = message.data.items[0].value;
+    const tokenURL = message.data.items[1].value;
+    const receiver = message.data.items[2].value;
+    const hashValue = message.data.items[3].value;
 
-  const hashValue = '0x' + crypto.createHash('sha256').update(randomNumber).digest('hex');
-  console.log('hashValue: ' + hashValue);
+    console.log('tokenId: ' + tokenId);
+    console.log('tokenURL: ' + tokenURL);
+    console.log('receiver: ' + receiver);
+    console.log('hashValue: ' + hashValue);
 
-  const owner = config.get('ethereumReceiver'); 
+    let NFTContract = new web3.eth.Contract(NFTAbi, message.contractName);
+    const isExists = await ethereum.contractCall(NFTContract, 'exists', [tokenId]);
+    console.log('isExists: ' + isExists);
 
-  let response = await flowService.sendTx({
-    transaction,
-    args: [
-      fcl.arg(JSON.stringify(tokenId), types.UInt64),
-      fcl.arg(owner, types.String),
-      fcl.arg(hashValue, types.String)
-    ],
-    proposer: authorization,
-    authorizations: [authorization],
-    payer: authorization
-  });
+    if (!isExists) {
+        console.log('Submit cross chain mint to ethereum');
+        let ret = await ethereum.sendTransaction(NFTContract, message.actionName, ethPrivateKey, [tokenId, receiver, tokenURL, hashValue]);
+        console.log('blockHash: ' + ret.blockHash);
+    }
 
-  console.log('Tx Sent:', response);
+};
 
-  console.log('Waiting for the transaction to be sealed.');
-  await fcl.tx(response).onceSealed();
-  console.log('Transaction sealed.');
+const messageId = process.argv[2];
+console.log('messageId: ' + messageId);
+
+if(messageId && messageId > 0){
+    await crossChainMint(messageId);
+}else{
+    console.log('Please input valid message id');
 }
-await mintNFT();

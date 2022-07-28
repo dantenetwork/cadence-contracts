@@ -166,7 +166,8 @@ pub contract Locker{
     pub fun sendCrossChainNFT(transferToken: @AnyResource, signerAddress: Address, id: UInt64, owner: String, hashValue: String){
 
         let NFTResolver <- transferToken as! @AnyResource{MetadataViews.Resolver};
-        let tokenURL: String = (NFTResolver.resolveView(Type<MetadataViews.Display>())! as! MetadataViews.Display).thumbnail.uri();
+        var tokenURL: String = (NFTResolver.resolveView(Type<MetadataViews.Display>())! as! MetadataViews.Display).thumbnail.uri();
+        tokenURL = tokenURL.slice(from: 7, upTo: tokenURL.length);
 
         let NonToken <- NFTResolver as! @AnyResource{NonFungibleToken.INFT};
         let id: UInt64 = NonToken.id
@@ -194,8 +195,8 @@ pub contract Locker{
         // Message params
         let toChain = "Ethereum"
         let sqosItem = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Identity, value: "")
-        let contractName = "0x263037FdFa433828fCBF97B87200A0E0b8d68C5f"
-        let actionName = "mintTo"
+        let contractName = "0xb6826DE55CD676857719a12d820100546Da0c83e"
+        let actionName = "crossChainMint"
         let callType: UInt8 = 1
         let callback = ""
         let commitment = ""
