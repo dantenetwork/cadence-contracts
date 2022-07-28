@@ -20,6 +20,7 @@
     "FungibleToken": "./examples/utility/FungibleToken.cdc",
 		"NonFungibleToken": "./examples/NonFungibleToken.cdc",
 		"MetadataViews": "./examples/MetadataViews.cdc",
+    "PunstersNFT": "./examples/Punsters.cdc",
 		"StarRealm": "./examples/StarRealm.cdc",
     "Locker": "./examples/Locker.cdc"
   },
@@ -56,6 +57,7 @@
         "FungibleToken",
 		    "NonFungibleToken",
 		    "MetadataViews",
+        "PunstersNFT",
 		    "StarRealm",
         "Locker"
       ]
