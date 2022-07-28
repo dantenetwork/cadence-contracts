@@ -14,9 +14,6 @@ pub contract ReceivedMessageContract{
     
     pub resource interface Callee {
         pub fun callMe(data: MessageProtocol.MessagePayload);
-        pub fun getMessagesLength(): Int;
-        pub fun getAllMessages(): [MessageProtocol.MessagePayload];
-        pub fun claim(id: UInt64, answer: String);
     }
     
     pub struct Content {
