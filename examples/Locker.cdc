@@ -266,7 +266,7 @@ pub contract Locker{
         // Submit received message
         let lockerCapability = locker.getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault)
         if let receivedMessageVaultRef = lockerCapability.borrow(){
-            receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: signer, signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, signature:signature.utf8)    
+            receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: signer, signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, signature:signature.decodeHex())    
         }else{
             panic("Invalid ReceivedMessageVault!")
         }
