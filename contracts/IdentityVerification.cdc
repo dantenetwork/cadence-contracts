@@ -23,10 +23,10 @@ pub contract IdentityVerification {
         log(String.encodeHex(originData));
         log(pubAddr);
         log(String.encodeHex(pubAcct.keys.get(keyIndex: 0)!.publicKey.publicKey));
-        log(signature.decodeHex());
+        log(String.encodeHex(signature));
 
         if (pk.verify(signature: signature,
-                        signedData: originData,
+                        signedData: String.encodeHex(originData).utf8,
                         domainSeparationTag: "",
                         hashAlgorithm: hashAlgorithm)) {
             self.nonce[pubAddr] = nonceV;

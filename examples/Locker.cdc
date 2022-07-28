@@ -128,6 +128,7 @@ pub contract Locker{
             id: UInt64,
             receiver: Address
         ){
+            log(id);
             if let starDockerRef = StarRealm.getStarDockerFromAddress(addr: receiver) {
                 if self.lockedNFTs.containsKey(id) {
                     let v <- starDockerRef.docking(nft: <- self.lockedNFTs.remove(key: id)!);

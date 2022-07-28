@@ -33,5 +33,5 @@ if(tokenId > 0 && randomNumberHash != ''){
     let ret = await ethereum.sendTransaction(NFTContract, 'crossChainTransfer', ethPrivateKey, [tokenId, receiver, randomNumberHash]);
     console.log('blockHash: ' + ret.blockHash);
 }else{
-    console.log('Please input valid NFT id');
+    console.log('Please input valid NFT id and random number hash value');
 }

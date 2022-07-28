@@ -40,5 +40,5 @@ console.log('tokenId: ' + tokenId);
 if(tokenId > 0 && randomNumber != ''){
     await crossChainClaim(tokenId, randomNumber);
 }else{
-    console.log('Please input valid NFT id');
+    console.log('Please input valid NFT id & random number');
 }

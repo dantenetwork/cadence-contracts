@@ -1,5 +1,4 @@
-import ReceivedMessageContract from 0xf8d6e0586b0a20c7;
-import Locker from 0x01cf0e2f2f715450;
+import Locker from 0xf8d6e0586b0a20c7;
 
 transaction(id: UInt64, 
             answer: String
@@ -11,10 +10,6 @@ transaction(id: UInt64,
     }
 
     execute {
-        let calleeRef = getAccount(0x01cf0e2f2f715450).getCapability<&{ReceivedMessageContract.Callee}>(/public/calleeVault).borrow()!;
-        if (nil == calleeRef){
-            panic("invalid callee address or `link`!");
-        }
-        calleeRef.claim(id: id, answer: answer);
+        Locker.claimNFT(id: id, answer: answer);
     }
 }

@@ -14,12 +14,6 @@ if (config.get('network') == 'testnet') {
 const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);
 const authorization = flowService.authorizationFunction();
 
-// TODO
-// for debugging purpose, should be removed on the production environment
-const randomNumber = config.get('randomNumber');
-
-const util = new Util();
-
 // Claim cross chain NFT on FLow
 async function crossChainClaim(){
     // Submit claim message 
@@ -29,12 +23,6 @@ async function crossChainClaim(){
             './transactions/nft/ClaimFlowNFT.cdc'
         ),
         'utf8');
-
-    // Query last NFT id
-    var totalSupply = await util.queryTotalSupply();
-    const tokenId = totalSupply;
-    console.log('tokenId: ' + tokenId);
-    console.log('randomNumber: ' + randomNumber);
 
     let response = await flowService.sendTx({
         transaction,
@@ -54,4 +42,13 @@ async function crossChainClaim(){
     console.log('Transaction sealed.');
 }
 
-await crossChainClaim();
+// Get input params
+const tokenId = process.argv[2];
+const randomNumber = process.argv[3];
+
+console.log('tokenId: ' + tokenId);
+if(tokenId > 0 && randomNumber != ''){
+    await crossChainClaim(tokenId, randomNumber);
+}else{
+    console.log('Please input valid NFT id & random number');
+}

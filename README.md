@@ -71,7 +71,7 @@ node client/nft/lockOpenseaDuanji.mjs 1 0x70e730a085eb1437b29c36d615c78648ef8be1
 node client/nft/ethereumToFlow.mjs 1
 
 # Claim NFT on Flow
-node client/crosschain/flowClaim.js 1
+node client/crosschain/flowClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217
 ```
 
 #### Check NFT on Opensea browser
