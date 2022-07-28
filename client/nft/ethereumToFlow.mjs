@@ -41,14 +41,14 @@ async function queryCrossChainPending(tokenId) {
     console.log(pendingInfo);
 
     if(pendingInfo[0] != '' && pendingInfo[1] != '' && pendingInfo[2] != ''){
-        crossChainMint(pendingInfo[0], pendingInfo[1], pendingInfo[2]);
+        crossChainMint(tokenId, pendingInfo[0], pendingInfo[1], pendingInfo[2]);
     }else{
         console.log('tokenId ' + tokenId + ' is not locked yet');
     }
 }
 
 // cross chain mint NFT from Rinkeby to Flow
-async function crossChainMint(tokenId, receiver, tokenURL, hashValue) {
+async function crossChainMint(tokenId, receiver, tokenURL, randomNumberHash) {
     const fromChain = 'Ethereum';
     const toChain = 'Flow';
     const sqosString = '1';
@@ -79,7 +79,7 @@ async function crossChainMint(tokenId, receiver, tokenURL, hashValue) {
             fcl.arg(tokenId, types.UInt64),
             fcl.arg(receiver, types.String),
             fcl.arg(publicPath, types.String),
-            fcl.arg(hashValue, types.String),
+            fcl.arg(randomNumberHash, types.String),
             fcl.arg(JSON.stringify(sessionId), types.UInt128),
             fcl.arg(JSON.stringify(sessionType), types.UInt8),
             fcl.arg(sessionCallback, types.String),
@@ -135,8 +135,10 @@ async function crossChainMint(tokenId, receiver, tokenURL, hashValue) {
     console.log(response);
 }
 
+// Get input params
 const tokenId = process.argv[2];
 console.log('tokenId: ' + tokenId);
+
 if(tokenId && tokenId > 0){
     await queryCrossChainPending(tokenId);
 }else{

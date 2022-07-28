@@ -22,7 +22,7 @@ async function crossChainClaim(tokenId, randomNumber) {
     setTimeout(async () => {
         // Query NFT owner
         console.log();
-        console.log('Query NFT info on ethereum');
+        console.log('Query NFT info on Rinkeby');
         const ownerOf = await ethereum.contractCall(NFTContract, 'ownerOf', [tokenId]);
         console.log('ownerOf: ' + ownerOf);
 
@@ -32,6 +32,7 @@ async function crossChainClaim(tokenId, randomNumber) {
 
 }
 
+// Get input params
 const tokenId = process.argv[2];
 const randomNumber = process.argv[3];
 

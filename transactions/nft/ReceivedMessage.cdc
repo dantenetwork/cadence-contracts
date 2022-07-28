@@ -24,7 +24,7 @@ transaction(id: UInt128,
     }
 
     execute {
-        Locker.receivedCrossChainMessage(
+        Locker.receivedCrossChainNFT(
             signer: self.signer.address, 
             id: id, 
             fromChain: fromChain, 

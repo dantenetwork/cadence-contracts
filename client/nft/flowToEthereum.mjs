@@ -57,16 +57,17 @@ async function crossChainMint(messageId) {
 
     let NFTContract = new web3.eth.Contract(NFTAbi, message.contractName);
     const isExists = await ethereum.contractCall(NFTContract, 'exists', [tokenId]);
-    console.log('isExists: ' + isExists);
+    console.log('Is NFT exists on Rinkeby? ' + isExists);
 
+    console.log('Submit cross chain mint to Rinkeby');
     if (!isExists) {
-        console.log('Submit cross chain mint to ethereum');
         let ret = await ethereum.sendTransaction(NFTContract, message.actionName, ethPrivateKey, [tokenId, receiver, tokenURL, hashValue]);
         console.log('blockHash: ' + ret.blockHash);
     }
 
 };
 
+// Get input params
 const messageId = process.argv[2];
 console.log('messageId: ' + messageId);
 

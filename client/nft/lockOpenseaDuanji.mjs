@@ -11,9 +11,6 @@ let NFTRawData = fs.readFileSync('./client/crosschain/NFT.json');
 let NFTAbi = JSON.parse(NFTRawData).abi;
 
 const nftContractAddress = config.get('ethereumContract');
-// TODO
-// for debugging purpose, should be removed on the production environment
-const randomNumberHash = config.get('randomNumberHash');
 
 // let NFTContract = new web3.eth.Contract(NFTAbi, currentMessage.content.contractName);
 let NFTContract = new web3.eth.Contract(NFTAbi, nftContractAddress);
@@ -24,10 +21,12 @@ console.log('Initating cross chain sync service...');
 // Get receiver from config/default.json
 let receiver = config.get('emulator').address;
 
+// Get input params
 const tokenId = process.argv[2];
+const randomNumberHash = process.argv[3];
 console.log('tokenId: ' + tokenId);
 
-if(tokenId && tokenId > 0){
+if(tokenId > 0 && randomNumberHash != ''){
     console.log('Submit cross chain transfer to ethereum');
 
     // Submit cross chain transfer from ethereum to flow

@@ -19,6 +19,8 @@ pub contract IdentityVerification {
                             signatureAlgorithm: signatureAlgorithm);
 
         let originData: [UInt8] = pubAddr.toBytes().concat(nonceV.toBigEndianBytes()).concat(rawData);
+        log("rawData: " + rawData)
+        log("toBeSign: " + originData)
 
         if (pk.verify(signature: signature,
                         signedData: String.encodeHex(originData).utf8,

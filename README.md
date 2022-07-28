@@ -40,9 +40,6 @@ flow emulator --verbose
 
 # Deploy & Update contracts
 flow project deploy --update
-
-# Deploy contracts to testnet
-flow project deploy --network testnet
 ```
 
 ## Examples
@@ -68,7 +65,7 @@ node client/crosschain/ethereumClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f
 Rinkeby to Flow
 ```
 # Lock Rinkeby NFT
-node client/nft/lockOpenseaDuanji.mjs 1
+node client/nft/lockOpenseaDuanji.mjs 1 0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217
 
 # Transfer NFT from Rinkeby to Flow
 node client/nft/ethereumToFlow.mjs 1
