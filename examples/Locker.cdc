@@ -1,12 +1,12 @@
 import MessageProtocol from "../contracts/MessageProtocol.cdc"
 import SentMessageContract from "../contracts/SentMessageContract.cdc"
 import ReceivedMessageContract from "../contracts/ReceivedMessageContract.cdc"
-// import MetadataViews from "./MetadataViews.cdc"
-// import NonFungibleToken from "./NonFungibleToken.cdc"
-// import StarRealm from  "./StarRealm.cdc"
-import MetadataViews from 0x1a478a7149935b63
-import NonFungibleToken from 0x1a478a7149935b63
-import StarRealm from  0x1a478a7149935b63
+import MetadataViews from "./MetadataViews.cdc"
+import NonFungibleToken from "./NonFungibleToken.cdc"
+import StarRealm from  "./StarRealm.cdc"
+// import MetadataViews from 0x1a478a7149935b63
+// import NonFungibleToken from 0x1a478a7149935b63
+// import StarRealm from  0x1a478a7149935b63
 
 pub contract Locker{
     init(){
