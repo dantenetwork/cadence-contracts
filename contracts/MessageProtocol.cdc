@@ -279,10 +279,6 @@ pub contract MessageProtocol {
             self.sqosItems = [];
         }
 
-        pub fun addItem(item: SQoSItem) {
-            self.sqosItems.append(item);
-        }
-
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
 
@@ -291,6 +287,10 @@ pub contract MessageProtocol {
             }
 
             return dataBytes;
+        }
+
+        pub fun addItem(item: SQoSItem) {
+            self.sqosItems.append(item);
         }
     }
 
