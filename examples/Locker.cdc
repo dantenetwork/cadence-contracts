@@ -166,7 +166,8 @@ pub contract Locker{
     pub fun sendCrossChainNFT(transferToken: @AnyResource, signerAddress: Address, id: UInt64, owner: String, hashValue: String){
 
         let NFTResolver <- transferToken as! @AnyResource{MetadataViews.Resolver};
-        let tokenURL: String = (NFTResolver.resolveView(Type<MetadataViews.Display>())! as! MetadataViews.Display).thumbnail.uri();
+        var tokenURL: String = (NFTResolver.resolveView(Type<MetadataViews.Display>())! as! MetadataViews.Display).thumbnail.uri();
+        tokenURL = tokenURL.slice(from: 7, upTo: tokenURL.length);
 
         let NonToken <- NFTResolver as! @AnyResource{NonFungibleToken.INFT};
         let id: UInt64 = NonToken.id
