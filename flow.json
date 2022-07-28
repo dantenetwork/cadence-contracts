@@ -20,6 +20,7 @@
     "FungibleToken": "./examples/utility/FungibleToken.cdc",
 		"NonFungibleToken": "./examples/NonFungibleToken.cdc",
 		"MetadataViews": "./examples/MetadataViews.cdc",
+    "PunstersNFT": "./examples/Punsters.cdc",
 		"StarRealm": "./examples/StarRealm.cdc",
     "Locker": "./examples/Locker.cdc"
   },
@@ -39,11 +40,11 @@
       "publicKey": "bb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025",
       "key": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc"
     },
-    "locker-account":{
-      "address": "0x01cf0e2f2f715450",
-      "publicKey": "bb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025",
-      "key": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc"
-    }
+    "testnet-Bob" : {
+			"address": "0x1a478a7149935b63",
+			"Public Key": "df0118a59d779d2a0e6b056e62ede00485152aa1f33068092aadf3deb3f538d88920d0c8f500e9bc643a3de12ce3659a54961d11ade93717523cc9112a582a40",
+			"key": "2da6119819ed8f2a74a4fa9eb36ed81245f7444081e401aa10146670891fbac5"
+		}
   },
   "deployments": {
     "emulator": {
@@ -56,21 +57,18 @@
         "FungibleToken",
 		    "NonFungibleToken",
 		    "MetadataViews",
+        "PunstersNFT",
 		    "StarRealm",
         "Locker"
       ]
     },
     "testnet": {
-      "testnet-account": [
+      "testnet-Bob": [
         "MessageProtocol",
         "IdentityVerification",
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",
-        "FungibleToken",
-		    "NonFungibleToken",
-		    "MetadataViews",
-		    "StarRealm",
         "Locker"
       ]
     }
