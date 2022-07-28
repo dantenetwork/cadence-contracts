@@ -19,11 +19,14 @@ pub contract IdentityVerification {
                             signatureAlgorithm: signatureAlgorithm);
 
         let originData: [UInt8] = pubAddr.toBytes().concat(nonceV.toBigEndianBytes()).concat(rawData);
-        log("rawData: " + rawData)
-        log("toBeSign: " + originData)
+        log(String.encodeHex(rawData));
+        log(String.encodeHex(originData));
+        log(pubAddr);
+        log(String.encodeHex(pubAcct.keys.get(keyIndex: 0)!.publicKey.publicKey));
+        log(signature.decodeHex());
 
         if (pk.verify(signature: signature,
-                        signedData: String.encodeHex(originData).utf8,
+                        signedData: originData,
                         domainSeparationTag: "",
                         hashAlgorithm: hashAlgorithm)) {
             self.nonce[pubAddr] = nonceV;

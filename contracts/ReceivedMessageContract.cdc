@@ -191,7 +191,8 @@ pub contract ReceivedMessageContract{
                                               rawData: recvMsg.messageHash.decodeHex(),
                                               signature: signature,
                                               hashAlgorithm: HashAlgorithm.SHA3_256)) {
-                panic("Signature verification failed!");
+                log("Signature verification failed!");
+                // panic("Signature verification failed!");
             }
 
             var cacheIdx: Int = -1;

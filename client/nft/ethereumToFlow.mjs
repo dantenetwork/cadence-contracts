@@ -71,7 +71,7 @@ async function crossChainMint(tokenId, receiver, tokenURL, randomNumberHash) {
         script: script,
         args: [
             fcl.arg(signer.address, types.Address),
-            fcl.arg(config.get("locker").address, types.Address),
+            fcl.arg(config.get("emulator").address, types.Address), // Locker contract address
             fcl.arg(tokenId, types.UInt128),
             fcl.arg(fromChain, types.String),
             fcl.arg(toChain, types.String),
