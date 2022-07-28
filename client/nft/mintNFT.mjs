@@ -27,12 +27,13 @@ async function mintNFT() {
     'utf8'
   );
 
+  const description = 'Punster Mint Test';
   const tokenURL = 'https://raw.githubusercontent.com/wuyahuang/opensea/main/1';
 
   let response = await flowService.sendTx({
     transaction,
     args: [
-      fcl.arg(flowService.getSignerAddress(), types.Address),
+      fcl.arg(description, types.String),
       fcl.arg(tokenURL, types.String)
     ],
     proposer: authorization,
@@ -45,8 +46,9 @@ async function mintNFT() {
   console.log('The new NFT has been minted, waiting for the transaction to be sealed..');
   await fcl.tx(response).onceSealed();
   console.log('Transaction sealed.');
-  var totalSupply = await util.queryTotalSupply();
-  console.log('totalSupply: ' + totalSupply);
+  
+//   var totalSupply = await util.queryTotalSupply();
+//   console.log('totalSupply: ' + totalSupply);
 }
 
 await mintNFT();
