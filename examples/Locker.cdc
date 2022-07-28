@@ -1,9 +1,12 @@
 import MessageProtocol from "../contracts/MessageProtocol.cdc"
 import SentMessageContract from "../contracts/SentMessageContract.cdc"
 import ReceivedMessageContract from "../contracts/ReceivedMessageContract.cdc"
-import MetadataViews from "./MetadataViews.cdc"
-import NonFungibleToken from "./NonFungibleToken.cdc"
-import StarRealm from  "./StarRealm.cdc"
+// import MetadataViews from "./MetadataViews.cdc"
+// import NonFungibleToken from "./NonFungibleToken.cdc"
+// import StarRealm from  "./StarRealm.cdc"
+import MetadataViews from 0x1a478a7149935b63
+import NonFungibleToken from 0x1a478a7149935b63
+import StarRealm from  0x1a478a7149935b63
 
 pub contract Locker{
     init(){
@@ -85,6 +88,10 @@ pub contract Locker{
 
         pub fun getAllMessages(): [MessageProtocol.MessagePayload]{
             return self.receivedMessages
+        }
+
+        pub fun getLockedNFTs(): [UInt64] {
+            return self.lockedNFTs.keys;
         }
 
         pub fun claim(id: UInt64, answer: String){
@@ -261,5 +268,21 @@ pub contract Locker{
         }else{
             panic("Invalid ReceivedMessageVault!")
         }
+    }
+
+    pub fun claimNFT(id: UInt64, answer: String) {
+        let locker = self.account;
+
+        let calleeVaultRef = locker.borrow<&Locker.CalleeVault>(from: /storage/calleeVault)!;
+
+        calleeVaultRef.claim(id: id, answer: answer);
+    }
+
+    pub fun getLockedNFTs(): [UInt64] {
+        let locker = self.account;
+
+        let calleeVaultRef = locker.borrow<&Locker.CalleeVault>(from: /storage/calleeVault)!;
+
+        return calleeVaultRef.getLockedNFTs();
     }
 }
