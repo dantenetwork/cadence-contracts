@@ -4,11 +4,10 @@ import FlowService from '../flow.mjs';
 import fcl from "@onflow/fcl";
 import types from "@onflow/types";
 import config from 'config';
-import Util from '../util.mjs';
 
 let signer = config.get('emulator');
 if (config.get('network') == 'testnet') {
-    signer = config.get('testnet');
+    signer = config.get('testnet-Bob');
 }
 
 const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);

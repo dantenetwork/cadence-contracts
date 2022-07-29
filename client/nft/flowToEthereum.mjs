@@ -4,12 +4,11 @@ import FlowService from '../flow.mjs';
 import Web3 from 'web3';
 import Ethereum from '../crosschain/ethereum.js';
 import config from 'config';
-import { send } from '@onflow/fcl';
 
 let signer = config.get('emulator');
 
 if (config.get('network') == 'testnet') {
-    signer = config.get('testnet');
+    signer = config.get('testnet-Bob');
 }
 const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);
 

@@ -196,7 +196,7 @@ pub contract Locker{
         // Message params
         let toChain = "Ethereum"
         let sqosItem = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Identity, value: "")
-        let contractName = "0x2FeB2eCe306d6DeCc6a3f87CF23aDcE60D081Da2"
+        let contractName = "0x84c9D1F44770cbe68208d8B1d47961dbaF0e9889"
         let actionName = "crossChainMint"
         let callType: UInt8 = 1
         let callback = ""
