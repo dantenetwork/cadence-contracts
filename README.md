@@ -49,6 +49,13 @@ flow emulator --verbose
 flow project deploy --update
 ```
 
+## Switch emulator to testnet
+```
+vim config/default.json
+# Update network to testnet
+# Update flowContractAddress to testnet contract address
+```
+
 ## Examples
 
 Start Cross Chain Sync Router
