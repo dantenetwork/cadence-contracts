@@ -1,4 +1,4 @@
-import PunstersNFT from "../contracts/Punsters.cdc"
+import PunstersNFT from "../examples/Punsters.cdc"
 
 pub fun main(addr: Address): [PunstersNFT.DuanjiView]? {
     
