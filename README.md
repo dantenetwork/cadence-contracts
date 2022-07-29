@@ -27,7 +27,8 @@ truffle deploy --network rinkeby --reset --skip-dry-run
 
 ## Update new NFT contract address
 ```
-vim transactions/examples/Locker.cdc # line 198
+examples/Locker.cdc # line 198
+config/default.json # line 3
 ```
 
 
@@ -72,6 +73,9 @@ node client/nft/ethereumToFlow.mjs 1
 
 # Claim NFT on Flow
 node client/crosschain/flowClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217
+
+# Burn NFT on Rinkeby
+node client/crosschain/burnRinkebyNFT.js 1
 ```
 
 #### Check NFT on Opensea browser
@@ -79,7 +83,7 @@ node client/crosschain/flowClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f6001
 Wait for some time...You can see new NFT below:
 
 ```
-https://testnets.opensea.io/assets?search[query]=0xb6826DE55CD676857719a12d820100546Da0c83e&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x58FEaF2F416feA44B3eA3Cce3AFDC49522e106F7&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore

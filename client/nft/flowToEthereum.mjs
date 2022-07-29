@@ -18,6 +18,8 @@ let NFTRawData = fs.readFileSync('./client/crosschain/NFT.json');
 let NFTAbi = JSON.parse(NFTRawData).abi;
 
 const ethPrivateKey = fs.readFileSync("./client/crosschain/.secret").toString().trim();
+// console.log(web3.eth.accounts.privateKeyToAccount(ethPrivateKey));
+
 const nftContractAddress = config.get('ethereumContract');
 let NFTContract = new web3.eth.Contract(NFTAbi, nftContractAddress);
 const ethereum = new Ethereum();

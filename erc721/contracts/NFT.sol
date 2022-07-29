@@ -61,7 +61,7 @@ contract NFT is ERC721 {
         
         crossChainPending[tokenId] = [receiver, tokens[tokenId], hashValue];
 
-        _transfer(msg.sender, address(this), tokenId);
+        _transfer(msg.sender, address(0x3aE841B899Ae4652784EA734cc61F524c36325d1), tokenId);
 
         return true;
     }
@@ -86,5 +86,19 @@ contract NFT is ERC721 {
      */
     function exists(uint256 tokenId) public view virtual returns (bool) {
         return _exists(tokenId);
+    }
+
+     /**
+     * @dev Destroys `tokenId`.
+     * The approval is cleared when the token is burned.
+     *
+     * Requirements:
+     *
+     * - `tokenId` must exist.
+     *
+     * Emits a {Transfer} event.
+     */
+    function burn(uint256 tokenId) public {
+        _burn(tokenId);
     }
 }

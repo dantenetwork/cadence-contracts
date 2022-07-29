@@ -24,8 +24,6 @@ const nftContractAddress = config.get('ethereumContract');
 let NFTContract = new web3.eth.Contract(NFTAbi, nftContractAddress);
 const ethereum = new Ethereum();
 
-console.log('Initating cross chain sync service...');
-
 // Get receiver from config/default.json
 let receiver = config.get('emulator');
 

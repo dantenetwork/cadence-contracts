@@ -1,6 +1,6 @@
 {
   "network": "emulator",
-  "ethereumContract":"0xb6826DE55CD676857719a12d820100546Da0c83e",
+  "ethereumContract":"0x9FfA15E582Cf170Af49b7d8c4499aDC01aeEf2D8",
   "randomNumber":"044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217",
   "randomNumberHash":"0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217",
   "ethereumReceiver":"0x3aE841B899Ae4652784EA734cc61F524c36325d1",

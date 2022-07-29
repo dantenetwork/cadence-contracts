@@ -16,7 +16,7 @@ const ethereum = new Ethereum();
 async function crossChainClaim(tokenId, randomNumber) {
     console.log('Submit cross chain claim to Rinkeby');
     console.log('randomNumber: ' + randomNumber);
-    let ret = await ethereum.sendTransaction(NFTContract, 'crossChainClaim', ethPrivateKey, [tokenId, config.get('randomNumber')]);
+    let ret = await ethereum.sendTransaction(NFTContract, 'crossChainClaim', ethPrivateKey, [tokenId, randomNumber]);
     console.log('blockHash: ' + ret.blockHash);
 
     setTimeout(async () => {
