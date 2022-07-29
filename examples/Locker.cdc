@@ -196,7 +196,7 @@ pub contract Locker{
         // Message params
         let toChain = "Ethereum"
         let sqosItem = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Identity, value: "")
-        let contractName = "0x84c9D1F44770cbe68208d8B1d47961dbaF0e9889"
+        let contractName = "0xE8B1F67C9e74E6c0338F6B6229DF9D77F76A6Cf6"
         let actionName = "crossChainMint"
         let callType: UInt8 = 1
         let callback = ""
@@ -259,7 +259,7 @@ pub contract Locker{
         let hashValueItem = MessageProtocol.createMessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)
         data.addItem(item: hashValueItem!)
 
-        let session = MessageProtocol.Session(oId: sessionId, oType: sessionType, callback: sessionCallback, commitment: sessionCommitment.utf8, answer: sessionAnswer.utf8)
+        let session = MessageProtocol.Session(oId: sessionId, oType: sessionType, oCallback: sessionCallback, oc: sessionCommitment.utf8, oa: sessionAnswer.utf8)
 
         let receivedMessageCore = ReceivedMessageContract.ReceivedMessageCore(id: id, fromChain: fromChain, sender: signer.toString(), sqos: sqos, resourceAccount: resourceAccount, link: publicPath, data: data, session: session)
 

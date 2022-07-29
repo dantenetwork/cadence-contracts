@@ -104,5 +104,5 @@ node client/crosschain/burnRinkebyNFT.js 1
 
 Wait for some time...You can see new NFT below:
 ```
-https://testnets.opensea.io/assets?search[query]=0x84c9D1F44770cbe68208d8B1d47961dbaF0e9889&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0xE8B1F67C9e74E6c0338F6B6229DF9D77F76A6Cf6&search[resultModel]=ASSETS
 ```

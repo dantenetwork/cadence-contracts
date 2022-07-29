@@ -45,7 +45,7 @@ pub fun main(
     let hashValueItem = MessageProtocol.createMessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)
     data.addItem(item: hashValueItem!)
 
-    let session = MessageProtocol.Session(oId: sessionId, oType: sessionType, callback: sessionCallback, commitment: sessionCommitment.utf8, answer: sessionAnswer.utf8)
+    let session = MessageProtocol.Session(oId: sessionId, oType: sessionType, oCallback: sessionCallback, oc: sessionCommitment.utf8, oa: sessionAnswer.utf8)
 
     let receivedMessageCore = ReceivedMessageContract.ReceivedMessageCore(id: id, fromChain: fromChain, sender: sender.toString(), sqos: sqos, resourceAccount: resourceAccount, link: publicPath, data: data, session: session)
 
