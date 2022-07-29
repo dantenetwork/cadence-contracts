@@ -28,3 +28,6 @@ flow transactions send ./transactions/CrossChainNFT/sendDuanji2Opensea.cdc "044c
 flow transactions send ./transactions/CrossChainNFT/claimDuanji.cdc 1 "randomNumber"
 
 flow transactions send ./transactions/CrossChainNFT/claimPunster.cdc 1 "randomNumber"
+
+# Testnet
+flow transactions send ./transactions/createNFT/registerPunster.cdc "I'm punster" "https://raw.githubusercontent.com/wuyahuang/opensea/main/1" --signer testnet-Bob -n testnet
