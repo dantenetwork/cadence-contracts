@@ -9,7 +9,7 @@ import config from 'config';
 
 let signer = config.get('emulator');
 if (config.get('network') == 'testnet') {
-    signer = config.get('testnet');
+    signer = config.get('testnet-Bob');
 }
 
 const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);
@@ -29,8 +29,8 @@ let receiver = config.get('emulator');
 let locker = config.get('locker');
 
 if (config.get('network') == 'testnet') {
-    receiver = config.get('testnet');
-    locker = config.get('testnet');
+    receiver = config.get('testnet-Bob');
+    locker = config.get('testnet-Bob');
 }
 
 async function queryReceivedMessageVault(){

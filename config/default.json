@@ -9,9 +9,10 @@
     "privateKey": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc",
     "keyId": 0
   },
-  "testnet": {
+  "flowContractAddress":"0x1a478a7149935b63",
+  "testnet-Bob": {
     "address": "0x1a478a7149935b63",
-    "privateKey": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc",
+    "privateKey": "2da6119819ed8f2a74a4fa9eb36ed81245f7444081e401aa10146670891fbac5",
     "keyId": 0
   },
   "locker":{

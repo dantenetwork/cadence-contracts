@@ -1,5 +1,5 @@
-import PunstersNFT from "../../examples/Punsters.cdc"
-import Locker from "../../examples/Locker.cdc"
+import PunstersNFT from 0x1a478a7149935b63
+import Locker from 0x1a478a7149935b63
 
 transaction(hashValue: String, owner: String, duanjiID: UInt64) {
 
