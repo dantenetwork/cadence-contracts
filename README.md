@@ -18,6 +18,13 @@ This repository contains examples of contracts that are useful when deploying, m
 The private keys included in flow.json & default.json are used for test net debugging only. 
 
 # Ethereum
+
+## Add private key
+```
+vim client/crosschain/.secret
+# Paste your Rinkeby private key
+```
+
 ## Deploy solidity contracts to rinkeby testnet
 ```
 cd erc721
@@ -30,7 +37,6 @@ truffle deploy --network rinkeby --reset --skip-dry-run
 examples/Locker.cdc # line 198
 config/default.json # line 3
 ```
-
 
 # Flow
 
@@ -45,6 +51,15 @@ flow project deploy --update
 
 ## Examples
 
+Start Cross Chain Sync Router
+```
+# Router service responsible for syncing Flow messages to Rinkeby
+node client/nft/flowToEthereum.mjs
+
+# Router service responsible for syncing Rinkeby messages to Flow
+node client/nft/ethereumToFlow.mjs
+```
+
 Flow to Rinkeby
 
 ```
@@ -54,10 +69,7 @@ flow transactions send ./transactions/createNFT/registerPunster.cdc "I'm punster
 flow transactions send ./transactions/createNFT/publishDuanji.cdc "I found the dog is so funny" "https://raw.githubusercontent.com/wuyahuang/opensea/main/1"
 
 # Tranfer Duanji to locker
-flow transactions send ./transactions/CrossChainNFT/sendDuanji2Opensea.cdc 0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217 0x3aE841B899Ae4652784EA734cc61F524c36325d1 1  
-
-# Sync message from Flow to Rinkeby
-node client/nft/flowToEthereum.mjs 1
+flow transactions send ./transactions/CrossChainNFT/sendDuanji2Opensea.cdc 0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217 0x71Fa7558e22Ba5265a1e9069dcd2be7c6735BE23 1  
 
 # Claim Duanji on Rinkeby testnet
 node client/crosschain/ethereumClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217
@@ -67,9 +79,6 @@ Rinkeby to Flow
 ```
 # Lock Rinkeby NFT
 node client/nft/lockOpenseaDuanji.mjs 1 0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217
-
-# Transfer NFT from Rinkeby to Flow
-node client/nft/ethereumToFlow.mjs 1
 
 # Claim NFT on Flow
 node client/crosschain/flowClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217
@@ -81,9 +90,8 @@ node client/crosschain/burnRinkebyNFT.js 1
 #### Check NFT on Opensea browser
 
 Wait for some time...You can see new NFT below:
-
 ```
-https://testnets.opensea.io/assets?search[query]=0x9FfA15E582Cf170Af49b7d8c4499aDC01aeEf2D8&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x2FeB2eCe306d6DeCc6a3f87CF23aDcE60D081Da2&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore

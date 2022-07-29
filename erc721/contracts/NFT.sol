@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract NFT is ERC721 {
     mapping(uint256 => string) tokens;
@@ -10,7 +11,7 @@ contract NFT is ERC721 {
     mapping(uint256 => bytes32) hashValues;
 
     // Cross chain transfer NFT to other blockchain network
-    mapping(uint256 => string[3]) crossChainPending;
+    string[][] public crossChainPending;
 
     constructor() ERC721("FLOW-DANTE", "FLOW-DANTE") {
     }
@@ -58,17 +59,18 @@ contract NFT is ERC721 {
     function crossChainTransfer(uint256 tokenId, string memory receiver, string memory hashValue) public returns (bool){
         // Ensure token is exists
         assert(_exists(tokenId) == true);
-        
-        crossChainPending[tokenId] = [receiver, tokens[tokenId], hashValue];
+ 
+        // crossChainPending[tokenId] = [receiver, tokens[tokenId], hashValue];
+        crossChainPending.push([Strings.toString(tokenId), receiver, tokens[tokenId], hashValue]);
 
-        _transfer(msg.sender, address(0x3aE841B899Ae4652784EA734cc61F524c36325d1), tokenId);
+        _transfer(msg.sender, address(0x71Fa7558e22Ba5265a1e9069dcd2be7c6735BE23 ), tokenId);
 
         return true;
     }
 
     /// @dev Returns cross chain transfer info for a given token ID
-    function queryCrossChainPending(uint256 tokenId) public view virtual returns (string[3] memory){
-        return crossChainPending[tokenId];
+    function queryCrossChainPending() public view virtual returns (string[][] memory){
+        return crossChainPending;
     }
 
     /// @dev Returns an URI for a given token ID

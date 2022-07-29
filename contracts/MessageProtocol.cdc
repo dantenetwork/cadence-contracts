@@ -330,7 +330,7 @@ pub contract MessageProtocol {
     }
 
     init() {
-        self.messageID = 1;
+        self.messageID = 0;
         self.flowTypeNumber = 4;
     }
 

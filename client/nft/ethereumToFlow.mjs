@@ -26,22 +26,59 @@ const ethereum = new Ethereum();
 
 // Get receiver from config/default.json
 let receiver = config.get('emulator');
+let locker = config.get('locker');
 
 if (config.get('network') == 'testnet') {
     receiver = config.get('testnet');
+    locker = config.get('testnet');
+}
+
+async function queryReceivedMessageVault(){
+    // Query cross chain message from ethereum to flow
+    const script = fs.readFileSync(
+        path.join(
+            process.cwd(),
+            './transactions/nft/QueryReceivedMessage.cdc'
+        ),
+        'utf8'
+    );
+
+    const link = 'receivedMessageVault';
+
+    const completeID = await flowService.executeScript({
+        script: script,
+        args: [
+            fcl.arg(locker.address, types.Address),
+            fcl.arg(link, types.String)
+        ]
+    });
+
+    let lastCompleteID  = completeID['Ethereum'];
+    if(!lastCompleteID || lastCompleteID == undefined){
+        // -1 = receivedMessageVault is empty
+        lastCompleteID = 0;
+    }
+    await queryCrossChainPending(lastCompleteID);
 }
 
 // Query locked NFT on Rinkeby
-async function queryCrossChainPending(tokenId) {
+async function queryCrossChainPending(lastCompleteID) {
     // Query cross chain transfer pending info
-    console.log('Query pending cross chain message from Ethereum to Flow');
-    let pendingInfo = await ethereum.contractCall(NFTContract, 'queryCrossChainPending', [tokenId]);
-    console.log(pendingInfo);
+    let messages = await ethereum.contractCall(NFTContract, 'queryCrossChainPending', []);
+    // console.log(messages);
 
-    if(pendingInfo[0] != '' && pendingInfo[1] != '' && pendingInfo[2] != ''){
-        crossChainMint(tokenId, pendingInfo[0], pendingInfo[1], pendingInfo[2]);
+    if(messages.length > lastCompleteID){
+        console.log('lastCompleteID: ' + lastCompleteID);
+        const message = messages[lastCompleteID];
+        console.log(message);
+        console.log('Sync message from Rinkeby to Flow');
+        await crossChainMint(message[0], message[1], message[2], message[3]);
+        await queryReceivedMessageVault();
     }else{
-        console.log('tokenId ' + tokenId + ' is not locked yet');
+        console.log('sleep 3 seconds');
+        setTimeout(async () => {
+            await queryReceivedMessageVault();
+        }, 3000);
     }
 }
 
@@ -133,12 +170,4 @@ async function crossChainMint(tokenId, receiver, tokenURL, randomNumberHash) {
     console.log(response);
 }
 
-// Get input params
-const tokenId = process.argv[2];
-console.log('tokenId: ' + tokenId);
-
-if(tokenId && tokenId > 0){
-    await queryCrossChainPending(tokenId);
-}else{
-    console.log('Please input valid NFT id');
-}
+await queryReceivedMessageVault();

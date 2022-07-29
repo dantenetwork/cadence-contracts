@@ -5,7 +5,7 @@ pub contract ReceivedMessageContract{
     
     // Interface is used for access control.
     pub resource interface ReceivedMessageInterface{
-        pub fun getAllMessages(): {String: [ReceivedMessageCache]};
+        pub fun getCompleteID(): {String: UInt128};
 
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
@@ -274,11 +274,8 @@ pub contract ReceivedMessageContract{
             }
         }
 
-        /**
-          * Query sent cross chain messages
-          */
-        pub fun getAllMessages(): {String: [ReceivedMessageCache]}{
-          return self.message;
+        pub fun getCompleteID(): {String: UInt128}{
+            return self.completedID;
         }
 
         pub fun isOnline(): Bool {
@@ -347,11 +344,11 @@ pub contract ReceivedMessageContract{
         return <- create ReceivedMessageVault();
     }
     
-    // Query messages by identifier
-    pub fun queryMessage(msgSender: Address, link: String): {String: [ReceivedMessageCache]}{
+    // Query completedID by identifier
+    pub fun queryCompletedID(recvAddress: Address, link: String): {String: UInt128}{
       let pubLink = PublicPath(identifier: link);
-      let senderRef = getAccount(msgSender).getCapability<&{ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
-      return senderRef.getAllMessages();
+      let ReceivedMessageVaultRef = getAccount(recvAddress).getCapability<&{ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+      return ReceivedMessageVaultRef.getCompleteID();
     }
 
      /**

@@ -1,6 +1,9 @@
 import ReceivedMessageContract from 0xf8d6e0586b0a20c7;
 import CrossChain from 0xf8d6e0586b0a20c7;
 
-pub fun main():  {String: [ReceivedMessageContract.ReceivedMessageCache]}{
-  return ReceivedMessageContract.queryMessage(msgSender: 0x01cf0e2f2f715450, link: "receivedMessageVault");
+pub fun main(
+    recvAddress: Address,
+    link: String
+): {String: UInt128}{
+  return ReceivedMessageContract.queryCompletedID(recvAddress: recvAddress, link: link);
 }
