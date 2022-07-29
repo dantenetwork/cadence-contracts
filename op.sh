@@ -31,3 +31,5 @@ flow transactions send ./transactions/CrossChainNFT/claimPunster.cdc 1 "randomNu
 
 # Testnet
 flow transactions send ./transactions/createNFT/registerPunster.cdc "I'm punster" "https://raw.githubusercontent.com/wuyahuang/opensea/main/1" --signer testnet-Bob -n testnet
+
+flow scripts execute ./scripts/queryDuanjiFrom.cdc "0x1a478a7149935b63" -n testnet
