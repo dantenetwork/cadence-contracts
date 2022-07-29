@@ -4,6 +4,7 @@ import FlowService from '../flow.mjs';
 import Web3 from 'web3';
 import Ethereum from '../crosschain/ethereum.js';
 import config from 'config';
+import { send } from '@onflow/fcl';
 
 let signer = config.get('emulator');
 
@@ -25,7 +26,7 @@ let NFTContract = new web3.eth.Contract(NFTAbi, nftContractAddress);
 const ethereum = new Ethereum();
 
 // Mint NFT on Rinkeby
-async function crossChainMint(messageId) {
+async function querySentMessageVault() {
     // Query cross chain message from flow to ethereum
     const script = fs.readFileSync(
         path.join(
@@ -39,42 +40,49 @@ async function crossChainMint(messageId) {
         args: []
     });
 
-    // console.log(sendMessages);
-
-    if(sendMessages.length < messageId){
-        console.log('messageId ' + messageId + ' is not found');
-        return;
-    }
-    // Get message info
-    const message = sendMessages[messageId - 1].msgToSubmit;
-    const tokenId = message.data.items[0].value;
-    const tokenURL = message.data.items[1].value;
-    const receiver = message.data.items[2].value;
-    const hashValue = message.data.items[3].value;
-
-    console.log('tokenId: ' + tokenId);
-    console.log('tokenURL: ' + tokenURL);
-    console.log('receiver: ' + receiver);
-    console.log('hashValue: ' + hashValue);
-
-    let NFTContract = new web3.eth.Contract(NFTAbi, message.contractName);
-    const isExists = await ethereum.contractCall(NFTContract, 'exists', [tokenId]);
-    console.log('Is NFT exists on Rinkeby? ' + isExists);
-
-    console.log('Submit cross chain mint to Rinkeby');
-    if (!isExists) {
-        let ret = await ethereum.sendTransaction(NFTContract, message.actionName, ethPrivateKey, [tokenId, receiver, tokenURL, hashValue]);
-        console.log('blockHash: ' + ret.blockHash);
-    }
-
+    await crossChainMint(sendMessages);
 };
 
-// Get input params
-const messageId = process.argv[2];
-console.log('messageId: ' + messageId);
+let currentId = 0;
+async function crossChainMint(sendMessages){
+    if(sendMessages[currentId]){
+        console.log('current time: ' + new Date());
+        console.log(sendMessages[currentId]);
+        // Get message info
+        const message = sendMessages[currentId].msgToSubmit;
+        const tokenId = message.data.items[0].value;
+        const tokenURL = message.data.items[1].value;
+        const receiver = message.data.items[2].value;
+        const hashValue = message.data.items[3].value;
 
-if(messageId && messageId > 0){
-    await crossChainMint(messageId);
-}else{
-    console.log('Please input valid message id');
+        console.log('tokenId: ' + tokenId);
+        console.log('tokenURL: ' + tokenURL);
+        console.log('receiver: ' + receiver);
+        console.log('hashValue: ' + hashValue);
+
+        let NFTContract = new web3.eth.Contract(NFTAbi, message.contractName);
+        // make sure NTF is not exists
+        const isExists = await ethereum.contractCall(NFTContract, 'exists', [tokenId]);
+        console.log('Is NFT exists on Rinkeby? ' + isExists);
+
+        // If hashValues exist, then NFT is already crossChainMint, but not claimed by the user yet
+        const hashValues = await ethereum.contractCall(NFTContract, 'getHashValue', [tokenId]);
+        console.log('hashValue of NTF on Rinkeby: ' + hashValues);
+
+        if (!isExists && hashValues == "0x0000000000000000000000000000000000000000000000000000000000000000") {
+            console.log('Submit cross chain mint to Rinkeby');
+            let ret = await ethereum.sendTransaction(NFTContract, message.actionName, ethPrivateKey, [tokenId, receiver, tokenURL, hashValue]);
+            console.log('blockHash: ' + ret.blockHash);
+        }
+        currentId++;
+        await crossChainMint(sendMessages);
+    }else{
+        console.log('sleep 3 seconds.');
+        setTimeout(async () => {
+            await querySentMessageVault();
+        }, 3000);
+    }
+
 }
+
+await querySentMessageVault();

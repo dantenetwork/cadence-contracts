@@ -15,7 +15,6 @@ const nftContractAddress = config.get('ethereumContract');
 
 let NFTContract = new web3.eth.Contract(NFTAbi, nftContractAddress);
 const ethereum = new Ethereum();
-// 0x3aE841B899Ae4652784EA734cc61F524c36325d1
 
 // Get receiver from config/default.json
 let receiver = config.get('emulator').address;
@@ -30,7 +29,7 @@ if(tokenId > 0 && randomNumberHash != ''){
         const owner = await ethereum.contractCall(NFTContract, 'ownerOf', [tokenId]);
         console.log('NFT owner: ' + owner);
 
-        console.log('Submit cross chain transfer to ethereum');
+        console.log('Submit cross chain transfer to Rinkeby');
 
         console.log('receiver: ' + receiver);
         console.log('randomNumberHash: ' + randomNumberHash);
