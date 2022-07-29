@@ -93,5 +93,3 @@ Wait for some time...You can see new NFT below:
 ```
 https://testnets.opensea.io/assets?search[query]=0x2FeB2eCe306d6DeCc6a3f87CF23aDcE60D081Da2&search[resultModel]=ASSETS
 ```
-
-Made with ❤️ in Singapore
