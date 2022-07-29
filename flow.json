@@ -55,10 +55,10 @@
         "ReceivedMessageContract",
         "CrossChain",
         "FungibleToken",
-		"NonFungibleToken",
-		"MetadataViews",
+		    "NonFungibleToken",
+		    "MetadataViews",
         "PunstersNFT",
-		"StarRealm",
+		    "StarRealm",
         "Locker"
       ]
     },
