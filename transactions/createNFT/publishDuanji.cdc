@@ -1,5 +1,5 @@
-import PunstersNFT from 0x1a478a7149935b63
-import NonFungibleToken from 0x1a478a7149935b63
+import PunstersNFT from "../../examples/Punsters.cdc"
+import NonFungibleToken from "../../examples/NonFungibleToken.cdc"
 
 transaction(description: String, ipfsURL: String) {
 
