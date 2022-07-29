@@ -17,6 +17,7 @@ This repository contains examples of contracts that are useful when deploying, m
 ## Important note
 The private keys included in flow.json & default.json are used for test net debugging only. 
 
+# Ethereum
 ## Deploy solidity contracts to rinkeby testnet
 ```
 cd erc721
@@ -26,46 +27,55 @@ truffle deploy --network rinkeby --reset --skip-dry-run
 
 ## Update new NFT contract address
 ```
-vim transactions/nft/MintNFT.cdc # line 41
+examples/Locker.cdc # line 198
+config/default.json # line 3
 ```
 
-## Mint NFT on rinkeby testnet
-```
-cd erc721
-node scripts/mint.js
-```
+
+# Flow
 
 ## Deploy flow contracts
 ```
-# Generate flow.json for emulator(Local Test Only)
-flow init
-
 # Start local emulator
-flow emulator
+flow emulator --verbose
 
-# Deploy contracts
-flow project deploy
-
-# Update contracts
+# Deploy & Update contracts
 flow project deploy --update
-
-# Deploy contracts to testnet
-flow project deploy --network testnet
 ```
 
 ## Examples
 
-#### Mint NFT
+Flow to Rinkeby
+
 ```
-// Setup account & mint NFT 
-// Success when `Tx Sent: {...` is shown
-node client/nft/MintNFT.mjs
+# Mint Duanji
+flow transactions send ./transactions/createNFT/registerPunster.cdc "I'm punster" "https://raw.githubusercontent.com/wuyahuang/opensea/main/1"
 
-// Query NFT meda data by Node.js
-node client/nft/queryNFT.mjs
+flow transactions send ./transactions/createNFT/publishDuanji.cdc "I found the dog is so funny" "https://raw.githubusercontent.com/wuyahuang/opensea/main/1"
 
-// Query sent cross chain message By Node.js
-node client/nft/querySentMessage.mjs
+# Tranfer Duanji to locker
+flow transactions send ./transactions/CrossChainNFT/sendDuanji2Opensea.cdc 0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217 0x3aE841B899Ae4652784EA734cc61F524c36325d1 1  
+
+# Sync message from Flow to Rinkeby
+node client/nft/flowToEthereum.mjs 1
+
+# Claim Duanji on Rinkeby testnet
+node client/crosschain/ethereumClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217
+```
+
+Rinkeby to Flow
+```
+# Lock Rinkeby NFT
+node client/nft/lockOpenseaDuanji.mjs 1 0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217
+
+# Transfer NFT from Rinkeby to Flow
+node client/nft/ethereumToFlow.mjs 1
+
+# Claim NFT on Flow
+node client/crosschain/flowClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217
+
+# Burn NFT on Rinkeby
+node client/crosschain/burnRinkebyNFT.js 1
 ```
 
 #### Check NFT on Opensea browser
@@ -73,7 +83,7 @@ node client/nft/querySentMessage.mjs
 Wait for some time...You can see new NFT below:
 
 ```
-https://testnets.opensea.io/assets?search[query]=0x263037FdFa433828fCBF97B87200A0E0b8d68C5f&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x9FfA15E582Cf170Af49b7d8c4499aDC01aeEf2D8&search[resultModel]=ASSETS
 ```
 
 Made with ❤️ in Singapore

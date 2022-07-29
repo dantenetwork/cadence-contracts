@@ -5,34 +5,100 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NFT is ERC721 {
-    using Counters for Counters.Counter;
+    mapping(uint256 => string) tokens;
+    mapping(uint256 => address) receivers;
+    mapping(uint256 => bytes32) hashValues;
 
-    Counters.Counter private currentTokenId;
-
-    /// @dev Base token URI used as a prefix by tokenURI().
-    string public baseTokenURI;
+    // Cross chain transfer NFT to other blockchain network
+    mapping(uint256 => string[3]) crossChainPending;
 
     constructor() ERC721("FLOW-DANTE", "FLOW-DANTE") {
-        baseTokenURI = "";
     }
 
-    function mintTo(address recipient) public returns (uint256) {
-        currentTokenId.increment();
-        uint256 newItemId = currentTokenId.current();
-        _safeMint(recipient, newItemId);
-        return newItemId;
+    event show(bytes32 hash);
+    event showString(string hash);
+
+    /// @dev Mint NFT from other blockchains
+    function crossChainMint(uint256 tokenId, address receiver, string memory tokenURL, bytes32 hashValue) public returns (bool){
+        assert(tokenId > 0);
+        // ensure token is not exists
+        assert(_exists(tokenId) == false);
+        assert(receivers[tokenId] == address(0));
+
+        tokens[tokenId] = tokenURL;
+        receivers[tokenId] = receiver;
+        hashValues[tokenId] = hashValue;
+
+        return true;
     }
 
-    /**
-        @dev Returns the total tokens minted so far.
-        1 is always subtracted from the Counter since it tracks the next available tokenId.
-     */
-    function totalSupply() public view returns (uint256) {
-        return currentTokenId.current() - 1;
+    /// @dev Query hash value by tokenId
+    function getHashValue(uint256 tokenId) public view virtual returns (bytes32 hashValue){
+        return hashValues[tokenId];
+    }
+
+    /// @dev Receiver submit random number to claim NFT which was minted by other blockchains
+    function crossChainClaim(uint256 tokenId, string memory anwser) public returns (bool){
+        // Ensure token receiver equals to message sender
+        assert(receivers[tokenId] == msg.sender);
+                
+        // Compare hashed value
+        bytes32 anwserHashValue = sha256(abi.encodePacked(anwser));
+        assert(anwserHashValue == hashValues[tokenId]);
+        
+        _safeMint(receivers[tokenId], tokenId);
+
+        delete receivers[tokenId];
+        delete hashValues[tokenId];
+        
+        return true;
+    }
+
+    /// @dev Lock NFT to contract owner, and push cross chain info into crossChainPending
+    function crossChainTransfer(uint256 tokenId, string memory receiver, string memory hashValue) public returns (bool){
+        // Ensure token is exists
+        assert(_exists(tokenId) == true);
+        
+        crossChainPending[tokenId] = [receiver, tokens[tokenId], hashValue];
+
+        _transfer(msg.sender, address(0x3aE841B899Ae4652784EA734cc61F524c36325d1), tokenId);
+
+        return true;
+    }
+
+    /// @dev Returns cross chain transfer info for a given token ID
+    function queryCrossChainPending(uint256 tokenId) public view virtual returns (string[3] memory){
+        return crossChainPending[tokenId];
     }
 
     /// @dev Returns an URI for a given token ID
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        return "https://raw.githubusercontent.com/wuyahuang/opensea/main/1";
+        return tokens[tokenId];
+    }
+
+    /**
+     * @dev Returns whether `tokenId` exists.
+     *
+     * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
+     *
+     * Tokens start existing when they are minted (`_mint`),
+     * and stop existing when they are burned (`_burn`).
+     */
+    function exists(uint256 tokenId) public view virtual returns (bool) {
+        return _exists(tokenId);
+    }
+
+     /**
+     * @dev Destroys `tokenId`.
+     * The approval is cleared when the token is burned.
+     *
+     * Requirements:
+     *
+     * - `tokenId` must exist.
+     *
+     * Emits a {Transfer} event.
+     */
+    function burn(uint256 tokenId) public {
+        _burn(tokenId);
     }
 }

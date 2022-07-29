@@ -664,5 +664,4 @@ pub contract MetadataViews {
             traits : self.getTraits(viewResolver)
         )
     }
-
 }

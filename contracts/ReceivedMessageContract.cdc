@@ -5,6 +5,8 @@ pub contract ReceivedMessageContract{
     
     // Interface is used for access control.
     pub resource interface ReceivedMessageInterface{
+        pub fun getAllMessages(): {String: [ReceivedMessageCache]};
+
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
         pub fun isOnline(): Bool;
@@ -163,7 +165,7 @@ pub contract ReceivedMessageContract{
             self.executableCount = 10;
             self.completedID = {};
             self.online = true;
-            self.defaultCopyCount = 1;
+            self.defaultCopyCount = 1; // TODO defaultCopyCount = 1, debug only
         }
 
         /**
@@ -194,7 +196,7 @@ pub contract ReceivedMessageContract{
 
             var cacheIdx: Int = -1;
             
-            if (self.message.containsKey(recvMsg.fromChain)) {  
+            if (self.message.containsKey(recvMsg.fromChain)) {
                 let caches: &[ReceivedMessageCache] = &self.message[recvMsg.fromChain]! as &[ReceivedMessageCache];
 
                 var found = false;
@@ -272,6 +274,13 @@ pub contract ReceivedMessageContract{
             }
         }
 
+        /**
+          * Query sent cross chain messages
+          */
+        pub fun getAllMessages(): {String: [ReceivedMessageCache]}{
+          return self.message;
+        }
+
         pub fun isOnline(): Bool {
             return self.online;
         }
@@ -336,6 +345,13 @@ pub contract ReceivedMessageContract{
           * record the resouces' `public/link`
           */
         return <- create ReceivedMessageVault();
+    }
+    
+    // Query messages by identifier
+    pub fun queryMessage(msgSender: Address, link: String): {String: [ReceivedMessageCache]}{
+      let pubLink = PublicPath(identifier: link);
+      let senderRef = getAccount(msgSender).getCapability<&{ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+      return senderRef.getAllMessages();
     }
 
      /**

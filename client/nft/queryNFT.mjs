@@ -3,8 +3,15 @@ import path from 'path';
 import FlowService from '../flow.mjs';
 import fcl from "@onflow/fcl";
 import types from "@onflow/types";
+import config from 'config';
 
-const flowService = new FlowService();
+let signer = config.get('locker');
+
+if (config.get('network') == 'testnet') {
+    signer = config.get('testnet');
+}
+
+const flowService = new FlowService(signer.address, signer.privateKey, signer.keyId);
 
 async function query() {
   const script = fs.readFileSync(
@@ -17,13 +24,14 @@ async function query() {
 
   // Passing in Number as value for UInt64 is deprecated and will cease to work in future releases of @onflow/types.
   // Going forward, use String as value for UInt64.
-  const id = JSON.stringify(0);
+  const owner = config.get('emulator').address;
+  const id = 1;
 
   const result = await flowService.executeScript({
     script: script,
     args: [
-      fcl.arg(flowService.getSignerAddress(), types.Address),
-      fcl.arg(id, types.UInt64)
+      fcl.arg(owner, types.Address),
+      fcl.arg(JSON.stringify(id), types.UInt64)
     ]
   });
   console.log(result);

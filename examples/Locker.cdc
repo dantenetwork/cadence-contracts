@@ -128,6 +128,7 @@ pub contract Locker{
             id: UInt64,
             receiver: Address
         ){
+            log(id);
             if let starDockerRef = StarRealm.getStarDockerFromAddress(addr: receiver) {
                 if self.lockedNFTs.containsKey(id) {
                     let v <- starDockerRef.docking(nft: <- self.lockedNFTs.remove(key: id)!);
@@ -195,8 +196,8 @@ pub contract Locker{
         // Message params
         let toChain = "Ethereum"
         let sqosItem = MessageProtocol.SQoSItem(type: MessageProtocol.SQoSType.Identity, value: "")
-        let contractName = "0x263037FdFa433828fCBF97B87200A0E0b8d68C5f"
-        let actionName = "mintTo"
+        let contractName = "0x9FfA15E582Cf170Af49b7d8c4499aDC01aeEf2D8"
+        let actionName = "crossChainMint"
         let callType: UInt8 = 1
         let callback = ""
         let commitment = ""
@@ -265,7 +266,7 @@ pub contract Locker{
         // Submit received message
         let lockerCapability = locker.getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault)
         if let receivedMessageVaultRef = lockerCapability.borrow(){
-            receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: signer, signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, signature:signature.utf8)    
+            receivedMessageVaultRef.submitRecvMessage(recvMsg:receivedMessageCore, pubAddr: signer, signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, signature:signature.decodeHex())    
         }else{
             panic("Invalid ReceivedMessageVault!")
         }

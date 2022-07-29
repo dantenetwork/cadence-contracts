@@ -1,5 +1,9 @@
 {
   "network": "emulator",
+  "ethereumContract":"0x9FfA15E582Cf170Af49b7d8c4499aDC01aeEf2D8",
+  "randomNumber":"044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217",
+  "randomNumberHash":"0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217",
+  "ethereumReceiver":"0x3aE841B899Ae4652784EA734cc61F524c36325d1",
   "emulator": {
     "address": "0xf8d6e0586b0a20c7",
     "privateKey": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc",
@@ -7,6 +11,11 @@
   },
   "testnet": {
     "address": "0x4f85d5a5afe243d3",
+    "privateKey": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc",
+    "keyId": 0
+  },
+  "locker":{
+    "address":"0x01cf0e2f2f715450",
     "privateKey": "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc",
     "keyId": 0
   }

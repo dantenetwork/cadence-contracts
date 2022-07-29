@@ -265,7 +265,7 @@ pub contract MessageProtocol {
 
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
-            dataBytes = dataBytes.concat([self.t as? UInt8!]);
+            dataBytes = dataBytes.concat([self.t.rawValue as? UInt8!]);
             dataBytes = dataBytes.concat(self.v.utf8);
 
             return dataBytes;
@@ -330,7 +330,7 @@ pub contract MessageProtocol {
     }
 
     init() {
-        self.messageID = 0;
+        self.messageID = 1;
         self.flowTypeNumber = 4;
     }
 
