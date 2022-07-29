@@ -209,7 +209,7 @@ pub contract PunstersNFT: NonFungibleToken {
                         name: "DuanjiNFT".concat(self.id.toString()),
                         description: self.metadata[PunstersNFT.descriptionKey]! as! String,
                         thumbnail: MetadataViews.IPFSFile(
-                            url: self.metadata[PunstersNFT.cidKey]! as! String, path: nil
+                            cid: self.metadata[PunstersNFT.cidKey]! as! String, path: nil
                         )
                     )
                 case Type<MetadataViews.Editions>():
@@ -245,7 +245,7 @@ pub contract PunstersNFT: NonFungibleToken {
                 case Type<MetadataViews.NFTCollectionDisplay>():
                     let media = MetadataViews.Media(
                         file: MetadataViews.IPFSFile(
-                            url: self.metadata[PunstersNFT.cidKey]! as! String, path: nil
+                            cid: self.metadata[PunstersNFT.cidKey]! as! String, path: nil
                         ),
                         mediaType: "image/svg+xml"
                     )
