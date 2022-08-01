@@ -66,13 +66,13 @@ async function queryCrossChainPending(lastCompleteID) {
     // Query cross chain transfer pending info
     let messages = await ethereum.contractCall(NFTContract, 'queryCrossChainPending', []);
     // console.log(messages);
-
+    console.log('message length: ' + messages.length);
     if(messages.length > lastCompleteID){
         console.log('lastCompleteID: ' + lastCompleteID);
         const message = messages[lastCompleteID];
         console.log(message);
         console.log('Sync message from Rinkeby to Flow');
-        await crossChainMint(message[0], message[1], message[2], message[3]);
+        await crossChainMint(lastCompleteID + 1, message[0], message[1], message[2], message[3]);
         await queryReceivedMessageVault();
     }else{
         console.log('sleep 3 seconds');
@@ -83,7 +83,7 @@ async function queryCrossChainPending(lastCompleteID) {
 }
 
 // cross chain mint NFT from Rinkeby to Flow
-async function crossChainMint(tokenId, receiver, tokenURL, randomNumberHash) {
+async function crossChainMint(msgID, tokenId, receiver, tokenURL, randomNumberHash) {
     const fromChain = 'Ethereum';
     const toChain = 'Flow';
     const sqosString = '1';
@@ -148,7 +148,7 @@ async function crossChainMint(tokenId, receiver, tokenURL, randomNumberHash) {
     let response = await flowService.sendTx({
         transaction,
         args: [
-            fcl.arg(tokenId, types.UInt128),
+            fcl.arg(msgID, types.UInt128),
             fcl.arg(fromChain, types.String),
             fcl.arg(toChain, types.String),
             fcl.arg(sqosString, types.String),

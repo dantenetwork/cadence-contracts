@@ -17,7 +17,8 @@ let NFTContract = new web3.eth.Contract(NFTAbi, nftContractAddress);
 const ethereum = new Ethereum();
 
 // Get receiver from config/default.json
-let receiver = config.get('emulator').address;
+// let receiver = config.get('emulator').address;
+let receiver = process.argv[4];
 
 // Get input params
 const tokenId = process.argv[2];
