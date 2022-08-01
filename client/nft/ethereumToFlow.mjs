@@ -67,12 +67,13 @@ async function queryCrossChainPending(lastCompleteID) {
     let messages = await ethereum.contractCall(NFTContract, 'queryCrossChainPending', []);
     // console.log(messages);
     console.log('message length: ' + messages.length);
+    console.log('lastCompleteID: ' + parseInt(lastCompleteID));
+    // console.log('lastCompleteID: ' + (parseInt(lastCompleteID) + 1));
     if(messages.length > lastCompleteID){
-        console.log('lastCompleteID: ' + lastCompleteID);
         const message = messages[lastCompleteID];
         console.log(message);
         console.log('Sync message from Rinkeby to Flow');
-        await crossChainMint(lastCompleteID + 1, message[0], message[1], message[2], message[3]);
+        await crossChainMint(parseInt(lastCompleteID) + 1, message[0], message[1], message[2], message[3]);
         await queryReceivedMessageVault();
     }else{
         console.log('sleep 3 seconds');
@@ -107,7 +108,7 @@ async function crossChainMint(msgID, tokenId, receiver, tokenURL, randomNumberHa
         args: [
             fcl.arg(signer.address, types.Address),
             fcl.arg(config.get("emulator").address, types.Address), // Locker contract address
-            fcl.arg(tokenId, types.UInt128),
+            fcl.arg(msgID, types.UInt128),
             fcl.arg(fromChain, types.String),
             fcl.arg(toChain, types.String),
             fcl.arg(sqosString, types.String),

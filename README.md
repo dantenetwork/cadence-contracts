@@ -104,5 +104,10 @@ node client/crosschain/burnRinkebyNFT.js 1
 
 Wait for some time...You can see new NFT below:
 ```
-https://testnets.opensea.io/assets?search[query]=0xE8B1F67C9e74E6c0338F6B6229DF9D77F76A6Cf6&search[resultModel]=ASSETS
+https://testnets.opensea.io/assets?search[query]=0x5818f70E7468e14a048B63E0211A1f4A5A4534e2&search[resultModel]=ASSETS
+```
+#### Restart Flow emulator
+If emulator on Flow restarts, clear data queue on Rinkeby
+```
+node client/crosschain/clearDataQueue.mjs
 ```

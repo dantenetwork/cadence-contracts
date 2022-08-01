@@ -103,4 +103,9 @@ contract NFT is ERC721 {
     function burn(uint256 tokenId) public {
         _burn(tokenId);
     }
+
+    function clearMsg() public {
+        delete crossChainPending;
+        // crossChainPending = new string [][](0);
+    }
 }
