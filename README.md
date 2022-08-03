@@ -67,7 +67,7 @@ node client/nft/flowToEthereum.mjs
 node client/nft/ethereumToFlow.mjs
 ```
 
-Flow to Rinkeby
+### Flow to Rinkeby
 
 ```
 # Mint Duanji
@@ -85,7 +85,7 @@ flow transactions send ./transactions/CrossChainNFT/sendDuanji2Opensea.cdc 0x70e
 node client/crosschain/ethereumClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217
 ```
 
-Rinkeby to Flow
+### Rinkeby to Flow
 ```
 # Lock Rinkeby NFT
 node client/nft/lockOpenseaDuanji.mjs 1 0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217 0x01cf0e2f2f715450
@@ -100,13 +100,13 @@ flow scripts execute ./scripts/queryDuanjiFrom.cdc 0xf8d6e0586b0a20c7
 node client/crosschain/burnRinkebyNFT.js 1
 ```
 
-#### Check NFT on Opensea browser
+### Check NFT on Opensea browser
 
 Wait for some time...You can see new NFT below:
 ```
 https://testnets.opensea.io/assets?search[query]=0x5818f70E7468e14a048B63E0211A1f4A5A4534e2&search[resultModel]=ASSETS
 ```
-#### Restart Flow emulator
+### Restart Flow emulator
 If emulator on Flow restarts, clear data queue on Rinkeby
 ```
 node client/crosschain/clearDataQueue.mjs
