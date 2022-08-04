@@ -1,5 +1,5 @@
 # Protocol stack for cadence
-Smart contracts that provide some of the basic functions of the dante protocol stack to make dApps on Flow be Omnichain.
+Protocol stack implemented with cadence that provide some of the basic functions of the dante protocol stack to make resources on Flow be Omnichain.
 
 ## Version : 0.0.1
 
