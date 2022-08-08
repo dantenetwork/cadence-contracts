@@ -169,6 +169,7 @@ pub contract Locker{
         let NFTResolver <- transferToken as! @AnyResource{MetadataViews.Resolver};
         var tokenURL: String = (NFTResolver.resolveView(Type<MetadataViews.Display>())! as! MetadataViews.Display).thumbnail.uri();
         tokenURL = tokenURL.slice(from: 7, upTo: tokenURL.length);
+        tokenURL = "http://47.242.71.251:8080/ipfs/".concat(tokenURL);
 
         let NonToken <- NFTResolver as! @AnyResource{NonFungibleToken.INFT};
         let id: UInt64 = NonToken.id
