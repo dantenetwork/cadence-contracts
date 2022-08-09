@@ -2,112 +2,26 @@
 Protocol stack implemented with cadence that provide some of the basic functions of the dante protocol stack to make resources on Flow be Omnichain.
 
 ## Version : 0.0.1
+Dante protocol stack are mainly as below: 
+* [SentMessageContract](./contracts/SentMessageContract.cdc)
+* [ReceivedMessageContract](./contracts/ReceivedMessageContract.cdc)
+* [CrossChain](./contracts/CrossChain.cdc)
+* [IdentityVerification](./contracts/IdentityVerification.cdc)
 
 This repository contains examples of contracts that are useful when deploying, managing, and/or using an DANTE network. They are provided for reference purposes:
+* [Examples](./examples/)
+   * [An cross chain NFT Locker](./examples/Locker.cdc)
 
-   * [SentMessageContract](./contracts/SentMessageContract.cdc)
-   * [ReceivedMessageContract](./contracts/ReceivedMessageContract.cdc)
-   * [CrossChain](./contracts/CrossChain.cdc)
-   * [ExampleNFT](./examples/ExampleNFT.cdc)
+## Coming Soon...
+Currently, you can try Dante Protocol on Flow by reading example [code sources](./examples/Locker.cdc).
 
+We will add tutorials of how to use Dante Protocol to make your dApps on Flow be multi-ecosystems accessed. Recently we are short of staff so this part will come later. We welcome more interested partners to join.  
 
-## Install
-* [Install the Flow CLI](https://docs.onflow.org/flow-cli/install/)
 
 ## Important note
-The private keys included in flow.json & default.json are used for test net debugging only. 
+* The private keys included in flow.json & default.json are used for test net debugging only. 
 
-# Ethereum
+* **Note that if you want to try a demo on Testnet, we recommand you go [here](https://github.com/xiyu1984/one-nft-one-funny/blob/main/Multi-Ecosystems.md) to try it as we have prepared all things.**
 
-## Add private key
-```
-vim client/crosschain/.secret
-# Paste your Rinkeby private key
-```
-
-## Deploy solidity contracts to rinkeby testnet
-```
-cd erc721
-truffle compile
-truffle deploy --network rinkeby --reset --skip-dry-run
-```
-
-## Update new NFT contract address
-```
-examples/Locker.cdc # line 198
-config/default.json # line 3
-```
-
-# Flow
-
-## Deploy flow contracts
-```
-# Start local emulator
-flow emulator --verbose
-
-# Deploy & Update contracts
-flow project deploy --update
-```
-
-## Switch emulator to testnet
-```
-vim config/default.json
-# Update network to testnet
-# Update flowContractAddress to testnet contract address
-```
-
-## Examples
-
-Start Cross Chain Sync Router
-```
-# Router service responsible for syncing Flow messages to Rinkeby
-node client/nft/flowToEthereum.mjs
-
-# Router service responsible for syncing Rinkeby messages to Flow
-node client/nft/ethereumToFlow.mjs
-```
-
-### Flow to Rinkeby
-
-```
-# Mint Duanji
-flow transactions send ./transactions/createNFT/registerPunster.cdc "I'm punster" "https://raw.githubusercontent.com/wuyahuang/opensea/main/1"
-
-flow transactions send ./transactions/createNFT/publishDuanji.cdc "I found the dog is so funny" "https://raw.githubusercontent.com/wuyahuang/opensea/main/1"
-
-# Query NFT on Flow
-flow scripts execute ./scripts/queryDuanjiFrom.cdc 0xf8d6e0586b0a20c7
-
-# Tranfer Duanji to locker
-flow transactions send ./transactions/CrossChainNFT/sendDuanji2Opensea.cdc 0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217 0x71Fa7558e22Ba5265a1e9069dcd2be7c6735BE23 1
-
-# Claim Duanji on Rinkeby testnet
-node client/crosschain/ethereumClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217
-```
-
-### Rinkeby to Flow
-```
-# Lock Rinkeby NFT
-node client/nft/lockOpenseaDuanji.mjs 1 0x70e730a085eb1437b29c36d615c78648ef8be1bc19688b437ecbc1cf89b8b217 0x01cf0e2f2f715450
-
-# Claim NFT on Flow
-node client/crosschain/flowClaim.js 1 044cecaa8c944515dfc8bbab90c34a5973e75f60015bfa2af985176c33a91217
-
-# Query NFT on Flow
-flow scripts execute ./scripts/queryDuanjiFrom.cdc 0xf8d6e0586b0a20c7
-
-# Burn NFT on Rinkeby
-node client/crosschain/burnRinkebyNFT.js 1
-```
-
-### Check NFT on Opensea browser
-
-Wait for some time...You can see new NFT below:
-```
-https://testnets.opensea.io/assets?search[query]=0x5818f70E7468e14a048B63E0211A1f4A5A4534e2&search[resultModel]=ASSETS
-```
-### Restart Flow emulator
-If emulator on Flow restarts, clear data queue on Rinkeby
-```
-node client/crosschain/clearDataQueue.mjs
-```
+## Contact
+* Contact us for more details [here](https://linktr.ee/dantenetwork)
