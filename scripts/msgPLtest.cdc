@@ -10,28 +10,15 @@ pub fun getString(): AnyStruct {
     // return mp.items[0].value as? String
 }
 
-pub fun main(): [AnyStruct?] {
-    let vout: [AnyStruct?] = [];
-
+pub fun main(): [UInt8] {
     let mp = MessageProtocol.MessagePayload();
 
-    let mi = MessageProtocol.createMessageItem(name: "1", type: MessageProtocol.MsgType.cdcString, value: "Hello");
-    mp.addItem(item: mi!);
+    let nums: Int32 = [99, 88, 77];
+    let miNumber = MessageProtocol.createMessageItem(name: "1", type: MessageProtocol.MsgType.cdcVecI32, value: nums);
+    mp.addItem(item: miNumber!);
 
-    let mi2 = MessageProtocol.createMessageItem(name: "2", type: MessageProtocol.MsgType.cdcU64, value: 999 as UInt64);
-    mp.addItem(item: mi2!);
+    let miStr = MessageProtocol.createMessageItem(name: "2", type: MessageProtocol.MsgType.cdcString, value: "Hello Nika");
+    mp.addItem(item: miStr);
 
-    var item = mp.getItem(name: "1")!;
-    vout.append(item.value);
-
-    vout.append(mp.items[0].value as? String);
-
-    item = mp.getItem(name: "2")!;
-    vout.append(item.value);
-
-    let mi3 = MessageProtocol.MessageItem(name: "3", type: MessageProtocol.MsgType.cdcU64, value: 888 as UInt64)
-
-    vout.append(getString());
-
-    return vout;
+    return mp.toBytes();
 }
