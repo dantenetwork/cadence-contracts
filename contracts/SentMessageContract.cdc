@@ -4,17 +4,17 @@ pub contract SentMessageContract{
 
     pub struct msgToSubmit{
         pub let toChain: String;
-        pub let sqos: [MessageProtocol.SQoSItem];
-        pub let contractName: String;
-        pub let actionName: String;
+        pub let sqos: MessageProtocol.SQoS;
+        pub let contractName: [UInt8];
+        pub let actionName: [UInt8];
         pub let data: MessageProtocol.MessagePayload;
         pub let callType: UInt8;
         pub let callback: String?;
         pub let commitment: String?;
         pub let answer: String?;
 
-      init(toChain: String, sqos: [MessageProtocol.SQoSItem], 
-            contractName: String, actionName: String, data: MessageProtocol.MessagePayload,
+      init(toChain: String, sqos: MessageProtocol.SQoS, 
+            contractName: [UInt8], actionName: [UInt8], data: MessageProtocol.MessagePayload,
             callType: UInt8, callback: String?, commitment: String?, answer: String?){
             self.toChain = toChain;
             self.sqos = sqos;
@@ -84,9 +84,16 @@ pub contract SentMessageContract{
         pub let id: UInt128; // message id
         pub let fromChain: String; // FLOW, source chain name
         pub let toChain: String;
-        pub let sender: String; // sender of cross chain message
-        pub let signer: String; // signer of the message call, the same as sender in Flow
-        pub let msgToSubmit: msgToSubmit;
+
+        pub let sqos: MessageProtocol.SQoS;
+        pub let contractName: [UInt8];
+        pub let actionName: [UInt8];
+        pub let data: MessageProtocol.MessagePayload;
+
+        pub let sender: [UInt8]; // sender of cross chain message
+        pub let signer: [UInt8]; // signer of the message call, the same as sender in Flow
+
+        pub let session: MessageProtocol.Session;
 
         init(id: UInt128, toChain: String, sender: String, signer: String, msgToSubmit: msgToSubmit){
             self.id = id;
@@ -96,6 +103,26 @@ pub contract SentMessageContract{
             self.signer = signer;
             self.msgToSubmit = msgToSubmit;
         }
+
+        pub fun toBytes(): [UInt8] {
+            var raw_data: [UInt8] = [];
+
+            raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            raw_data = raw_data.concat(self.fromChain.utf8);
+            raw_data = raw_data.concat(self.toChain.utf8);
+
+            raw_data = raw_data.concat(self.sqos.toBytes());
+            raw_data = raw_data.concat(self.contractName);
+            raw_data = raw_data.concat(self.actionName);
+            raw_data = raw_data.concat(self.data.toBytes());
+            raw_data = raw_data.concat(self.sender);
+            raw_data = raw_data.concat(self.signer);
+
+            raw_data = raw_data.concat(self.session.toBytes());
+                    
+
+            return raw_data;
+      }
     }
 
     // Interface is used for access control.

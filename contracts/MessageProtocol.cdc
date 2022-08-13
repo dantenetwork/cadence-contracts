@@ -83,7 +83,7 @@ pub contract MessageProtocol {
 
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
-            // dataBytes = dataBytes.concat(self.name.utf8);
+            dataBytes = dataBytes.concat(self.name.utf8);
             // dataBytes = dataBytes.concat([self.type.rawValue]);
 
             //Encode `AnyStruct` into `[UInt8]`
