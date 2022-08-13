@@ -246,9 +246,9 @@ pub contract MessageProtocol {
 
     pub struct SQoSItem {
         pub let t: SQoSType;
-        pub let v: String;
+        pub let v: [UInt8];
 
-        init(type: SQoSType, value: String){
+        init(type: SQoSType, value: [UInt8]){
             self.t = type;
             self.v = value;
         }
@@ -256,7 +256,7 @@ pub contract MessageProtocol {
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
             dataBytes = dataBytes.concat([self.t.rawValue as? UInt8!]);
-            dataBytes = dataBytes.concat(self.v.utf8);
+            dataBytes = dataBytes.concat(self.v);
 
             return dataBytes;
         }
