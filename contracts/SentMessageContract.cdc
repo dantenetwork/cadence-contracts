@@ -2,6 +2,8 @@ import MessageProtocol from "./MessageProtocol.cdc"
 
 pub contract SentMessageContract{
 
+    priv var sessionID: UInt128;
+
     pub struct msgToSubmit{
         pub let toChain: String;
         pub let sqos: MessageProtocol.SQoS;
@@ -9,13 +11,13 @@ pub contract SentMessageContract{
         pub let actionName: [UInt8];
         pub let data: MessageProtocol.MessagePayload;
         pub let callType: UInt8;
-        pub let callback: String?;
-        pub let commitment: String?;
-        pub let answer: String?;
+        pub let callback: [UInt8]?;
+        pub let commitment: [UInt8]?;
+        pub let answer: [UInt8]?;
 
       init(toChain: String, sqos: MessageProtocol.SQoS, 
             contractName: [UInt8], actionName: [UInt8], data: MessageProtocol.MessagePayload,
-            callType: UInt8, callback: String?, commitment: String?, answer: String?){
+            callType: UInt8, callback: [UInt8]?, commitment: [UInt8]?, answer: [UInt8]?){
             self.toChain = toChain;
             self.sqos = sqos;
             self.contractName = contractName;
@@ -95,13 +97,26 @@ pub contract SentMessageContract{
 
         pub let session: MessageProtocol.Session;
 
-        init(id: UInt128, toChain: String, sender: String, signer: String, msgToSubmit: msgToSubmit){
+        init(id: UInt128, toChain: String, sender: [UInt8], signer: [UInt8], msgToSubmit: msgToSubmit){
             self.id = id;
             self.fromChain = "FLOW";            
             self.toChain = toChain;
+
+            self.sqos = msgToSubmit.sqos;
+            self.contractName = msgToSubmit.contractName;
+            self.actionName = msgToSubmit.actionName;
+            self.data = msgToSubmit.data;
+
             self.sender = sender;
             self.signer = signer;
-            self.msgToSubmit = msgToSubmit;
+
+            let sess = MessageProtocol.Session(oId: SentMessageContract.applyNextSession(), 
+                                                oType: msgToSubmit.callType, 
+                                                oCallback: msgToSubmit.callback, 
+                                                oc: msgToSubmit.commitment, 
+                                                oa: msgToSubmit.answer);
+            
+            self.session = sess;
         }
 
         pub fun toBytes(): [UInt8] {
@@ -115,6 +130,7 @@ pub contract SentMessageContract{
             raw_data = raw_data.concat(self.contractName);
             raw_data = raw_data.concat(self.actionName);
             raw_data = raw_data.concat(self.data.toBytes());
+
             raw_data = raw_data.concat(self.sender);
             raw_data = raw_data.concat(self.signer);
 
@@ -122,7 +138,7 @@ pub contract SentMessageContract{
                     
 
             return raw_data;
-      }
+        }
     }
 
     // Interface is used for access control.
@@ -170,8 +186,8 @@ pub contract SentMessageContract{
                 
                 self.message.append(SentMessageCore(id: MessageProtocol.getNextMessageID(), 
                                                     toChain: rst.toChain, 
-                                                    sender: submitterAddr.toString(), 
-                                                    signer: submitterAddr.toString(),
+                                                    sender: submitterAddr.toBytes(), 
+                                                    signer: submitterAddr.toBytes(),
                                                     msgToSubmit: rst
                                                     ));
             }else{
@@ -207,6 +223,10 @@ pub contract SentMessageContract{
         }
     }
 
+    init() {
+        self.sessionID = 0;
+    }
+
     // Create recource to store sent message
     pub fun createSentMessageVault(): @SentMessageVault{
         return <- create SentMessageVault();
@@ -225,5 +245,17 @@ pub contract SentMessageContract{
       let pubLink = PublicPath(identifier: link);
       let senderRef = getAccount(msgSender).getCapability<&{SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
       return senderRef.getAllMessages();
+    }
+
+    priv fun applyNextSession(): UInt128 {
+        let id = self.sessionID;
+
+        if self.sessionID == UInt128.max {
+            self.sessionID = 0;
+        } else {
+            self.sessionID = self.sessionID + 1;
+        }
+
+        return id;
     }
 }
