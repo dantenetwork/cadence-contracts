@@ -86,13 +86,7 @@
         "IdentityVerification",
         "SentMessageContract",
         "ReceivedMessageContract",
-        "CrossChain",
-        "FungibleToken",
-		    "NonFungibleToken",
-		    "MetadataViews",
-        "PunstersNFT",
-		    "StarRealm",
-        "Locker"
+        "CrossChain"
       ]
     },
     "testnet": {

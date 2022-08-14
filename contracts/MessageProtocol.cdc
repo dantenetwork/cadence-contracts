@@ -2,22 +2,32 @@ pub contract MessageProtocol {
     access(contract) var messageID: UInt128;
     pub let flowTypeNumber: UInt8;
 
+    pub fun addressFromBytes(addrBytes: [UInt8]): Address? {
+        var rst: UInt64 = 0;
+        var hexVec: [UInt8] = [];
+        if (addrBytes[0] == "0".utf8[0]) && (addrBytes[1] == "x".utf8[0]) {
+            hexVec = addrBytes.slice(from: 2, upTo: addrBytes.length);
+        }else {
+            hexVec = addrBytes;
+        }
+
+        if Int(8) >= hexVec.length {
+            for ele in hexVec {
+                rst = (rst << 8) + UInt64(ele);
+            }
+            return Address(rst);
+        }
+
+        return nil;
+    }
+
     pub struct CDCAddress {
-        pub let addr: String;
+        pub let addr: [UInt8];
         pub let addrType: UInt8;
 
-        init(addr: String, t: UInt8) {
+        init(addr: [UInt8], t: UInt8) {
             if (addr.length < 2) {
                 panic("invalid address length, too short!")
-            }
-
-            // Check if the address is valid if the type is `Flow`
-            if t == MessageProtocol.flowTypeNumber {
-                var hexStr = addr;
-                if (addr[0] == "0") && (addr[1] == "x") {
-                    hexStr = hexStr.slice(from: 2, upTo: addr.length);
-                }
-                let x = hexStr.decodeHex();
             }
 
             self.addr = addr;
@@ -25,17 +35,19 @@ pub contract MessageProtocol {
         }
 
         pub fun toBytes(): [UInt8] {
-            return self.addr.utf8;
+            return self.addr;
         }
 
         pub fun getFlowAddress(): Address? {
             if MessageProtocol.flowTypeNumber == self.addrType {
                 var rst: UInt64 = 0;
-                var hexStr = self.addr;
-                if (self.addr[0] == "0") && (self.addr[1] == "x") {
-                    hexStr = hexStr.slice(from: 2, upTo: self.addr.length);
+                var hexVec: [UInt8] = [];
+                if (self.addr[0] == "0".utf8[0]) && (self.addr[1] == "x".utf8[0]) {
+                    hexVec = self.addr.slice(from: 2, upTo: self.addr.length);
+                } else {
+                    hexVec = self.addr;
                 }
-                let hexVec = hexStr.decodeHex();
+
                 if Int(8) >= hexVec.length {
                     for ele in hexVec {
                         rst = (rst << 8) + UInt64(ele);
@@ -94,7 +106,7 @@ pub contract MessageProtocol {
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
             dataBytes = dataBytes.concat(self.name.utf8);
-            dataBytes = dataBytes.concat([self.type.rawValue]);
+            // dataBytes = dataBytes.concat([self.type.rawValue]);
 
             //Encode `AnyStruct` into `[UInt8]`
             switch self.type {
@@ -256,9 +268,9 @@ pub contract MessageProtocol {
 
     pub struct SQoSItem {
         pub let t: SQoSType;
-        pub let v: String;
+        pub let v: [UInt8];
 
-        init(type: SQoSType, value: String){
+        init(type: SQoSType, value: [UInt8]){
             self.t = type;
             self.v = value;
         }
@@ -266,7 +278,7 @@ pub contract MessageProtocol {
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
             dataBytes = dataBytes.concat([self.t.rawValue as? UInt8!]);
-            dataBytes = dataBytes.concat(self.v.utf8);
+            dataBytes = dataBytes.concat(self.v);
 
             return dataBytes;
         }
@@ -299,11 +311,11 @@ pub contract MessageProtocol {
     pub struct Session {
         pub let id: UInt128;
         pub let type: UInt8;
-        pub let callback: String?;
+        pub let callback: [UInt8]?;
         pub let commitment: [UInt8]?;
         pub let answer: [UInt8]?;
 
-        init(oId: UInt128, oType: UInt8, oCallback: String?, oc: [UInt8]?, oa: [UInt8]?) {
+        init(oId: UInt128, oType: UInt8, oCallback: [UInt8]?, oc: [UInt8]?, oa: [UInt8]?) {
             self.id = oId;
             self.type = oType;
             self.callback = oCallback;
@@ -316,7 +328,7 @@ pub contract MessageProtocol {
             dataBytes = dataBytes.concat(self.id.toBigEndianBytes());
             dataBytes = dataBytes.concat([self.type]);
             if (nil != self.callback) {
-                dataBytes = dataBytes.concat(self.callback!.utf8);
+                dataBytes = dataBytes.concat(self.callback!);
             }
             if (nil != self.commitment) {
                 dataBytes = dataBytes.concat(self.commitment!);
@@ -412,7 +424,11 @@ pub contract MessageProtocol {
 
     pub fun getNextMessageID(): UInt128 {
         let id = self.messageID;
-        self.messageID = self.messageID + 1;
+        if self.messageID == UInt128.max {
+            self.messageID = 0;
+        } else {
+            self.messageID = self.messageID + 1;
+        }
         return id;
     }
 }

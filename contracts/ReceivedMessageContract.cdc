@@ -17,7 +17,9 @@ pub contract ReceivedMessageContract{
     }
     
     pub struct Content {
+        // `accountAddress` needs to be converted from bytes into Address in off-chain router
         pub let accountAddress: Address;
+        // `link` needs to be converted from bytes into Address in off-chain router
         pub let link: String;
         pub let data: MessageProtocol.MessagePayload;
 
@@ -43,37 +45,68 @@ pub contract ReceivedMessageContract{
         pub let id: UInt128; // message id
         pub let fromChain: String; // FLOW, source chain name
         pub let toChain: String; // destination chain name
-        pub let sender: String; // sender of cross chain message
+
+        pub let sender: [UInt8]; // sender of cross chain message
+        pub let signer: [UInt8];
         pub let sqos: MessageProtocol.SQoS;
         pub let content: Content; // message content
         pub let session: MessageProtocol.Session;
         pub let messageHash: String; // message hash value
 
-        init(id: UInt128, fromChain: String, sender: String, sqos: MessageProtocol.SQoS, 
+        init(id: UInt128, fromChain: String, sender: [UInt8], signer: [UInt8], sqos: MessageProtocol.SQoS, 
             resourceAccount: Address, link: String, data: MessageProtocol.MessagePayload,
             session: MessageProtocol.Session){
             self.id = id;
             self.fromChain = fromChain;
             self.toChain = "FLOW";
             self.sender = sender;
+            self.signer = signer;
             self.sqos = sqos;
             self.content = Content(resourceAccount: resourceAccount, link: link, data: data);
             self.session = session;
 
-            // hash message info
-            var originData: [UInt8] = id.toBigEndianBytes();
-            originData = originData.concat(fromChain.utf8);
-            originData = originData.concat(self.toChain.utf8);
-            // originData = originData.concat(sender.utf8);
-            originData = originData.concat(sqos.toBytes());
-            originData = originData.concat(self.content.toBytes());
-            originData = originData.concat(session.toBytes());
-            let digest = HashAlgorithm.SHA2_256.hash(originData);
+            // hash message info, the same as in `toBytes()`
+            var raw_data: [UInt8] = [];
+
+            raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            raw_data = raw_data.concat(self.fromChain.utf8);
+            raw_data = raw_data.concat(self.toChain.utf8);
+
+            raw_data = raw_data.concat(self.sqos.toBytes());
+            // `contractName`, `actionName`, `data` are all in `content`
+            raw_data = raw_data.concat(self.content.toBytes());
+
+            raw_data = raw_data.concat(self.sender);
+            raw_data = raw_data.concat(self.signer);
+
+            raw_data = raw_data.concat(self.session.toBytes());
+
+
+            let digest = HashAlgorithm.SHA2_256.hash(raw_data);
             self.messageHash = String.encodeHex(digest);
         }
 
         pub fun getRecvMessageHash(): [UInt8] {
             return self.messageHash.decodeHex();
+        }
+
+        pub fun toBytes(): [UInt8] {
+            var raw_data: [UInt8] = [];
+
+            raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            raw_data = raw_data.concat(self.fromChain.utf8);
+            raw_data = raw_data.concat(self.toChain.utf8);
+
+            raw_data = raw_data.concat(self.sqos.toBytes());
+            // `contractName`, `actionName`, `data` are all in `content`
+            raw_data = raw_data.concat(self.content.toBytes());
+
+            raw_data = raw_data.concat(self.sender);
+            raw_data = raw_data.concat(self.signer);
+
+            raw_data = raw_data.concat(self.session.toBytes());
+
+            return raw_data;
         }
     }
 
