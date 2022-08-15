@@ -20,12 +20,8 @@ fcl.config().put('0xProfile', '0xf8d6e0586b0a20c7');
 async function exampleHash() {
     const msg2sign = "hello nika";
     console.log(sha256(msg2sign));
-    const sha3_256Hash = (msg) => {
-        const sha = new SHA3(256);
-        sha.update(Buffer.from(msg, 'utf8'));
-        return sha.digest().toString('hex');
-    };
-    console.log(sha3_256Hash(msg2sign))
+    console.log(sha3_256Hash(msg2sign).toString('hex'));
+    console.log(sha3_256FromBytes(Buffer.from(msg2sign, 'utf8')).toString('hex'));
 }
 
 class FlowService {
@@ -114,6 +110,12 @@ const sha3_256Hash = (msg) => {
     return sha.digest();
 };
 
+const sha3_256FromBytes = (msgBytes) => {
+    const sha = new SHA3(256);
+    sha.update(msgBytes);
+    return sha.digest();
+}
+
 function signWithKey(msg) {
 
     const key = ec.keyFromPrivate(Buffer.from("69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc", 'hex'));
@@ -134,8 +136,8 @@ async function testSignature() {
 }
 
 // await createSubmittion();
-// await exampleHash();
-await testSignature();
+await exampleHash();
+// await testSignature();
 
-const signed2 = signWithKey('hello nika');
-console.log(signed2);
+// const signed2 = signWithKey('hello nika');
+// console.log(signed2);
