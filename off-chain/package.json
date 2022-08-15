@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@onflow/fcl": "^1.2.0",
+    "crypto": "^1.0.1",
+    "eccrypto": "^1.1.6",
     "elliptic": "^6.5.4",
     "fs": "^0.0.1-security",
     "js-sha256": "^0.9.0",

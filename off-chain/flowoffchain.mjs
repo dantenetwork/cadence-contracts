@@ -5,6 +5,9 @@ import elliptic from 'elliptic';
 import {sha256} from 'js-sha256';
 import { SHA3 } from 'sha3';
 
+import {createSign, createHash, generateKeyPairSync} from 'node:crypto';
+import * as eccrypto from 'eccrypto';
+
 
 fcl.config().put('accessNode.api', 'http://127.0.0.1:8888');
 fcl.config().put('0xProfile', '0xf8d6e0586b0a20c7');
@@ -16,13 +19,6 @@ fcl.config().put('0xProfile', '0xf8d6e0586b0a20c7');
 // const account = await fcl.account("0xf8d6e0586b0a20c7");
 // console.log(fcl.sansPrefix(account.address));
 // console.log(fcl.withPrefix(account.address));
-
-async function exampleHash() {
-    const msg2sign = "hello nika";
-    console.log(sha256(msg2sign));
-    console.log(sha3_256Hash(msg2sign).toString('hex'));
-    console.log(sha3_256FromBytes(Buffer.from(msg2sign, 'utf8')).toString('hex'));
-}
 
 class FlowService {
     constructor(address, privateKey, keyId, hashFun, curveName) {
@@ -79,7 +75,7 @@ class FlowService {
 
     sign = (msg) => {
         const key = this.ec.keyFromPrivate(Buffer.from(this.signerPrivateKeyHex, 'hex'));
-        const sig = key.sign(this.hashFunc(msg));
+        const sig = key.sign(this.hashFunc(msg), 123456789);
         const n = 32;
         const r = sig.r.toArrayLike(Buffer, 'be', n);
         const s = sig.s.toArrayLike(Buffer, 'be', n);
@@ -104,7 +100,7 @@ async function createSubmittion() {
 
 const ec = new elliptic.ec('p256');
 
-const sha3_256Hash = (msg) => {
+const sha3_256FromString = (msg) => {
     const sha = new SHA3(256);
     sha.update(Buffer.from(msg, 'utf8'));
     return sha.digest();
@@ -129,15 +125,52 @@ function signWithKey(msg) {
 
 async function testSignature() {
     
-    const fService = new FlowService("0xf8d6e0586b0a20c7", "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc", 0, sha3_256Hash, "p256");
+    const fService = new FlowService("0xf8d6e0586b0a20c7", "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc", 0, sha3_256FromString, "p256");
 
     const signed = fService.sign('hello nika');
     console.log(signed);
 }
 
+async function exampleHash() {
+    const msg2sign = "hello nika";
+    console.log(sha256(msg2sign));
+    console.log(sha3_256FromString(msg2sign).toString('hex'));
+    console.log(sha3_256FromBytes(Buffer.from(msg2sign, 'utf8')).toString('hex'));
+}
+
+async function signatureWithCrypto() {
+    const { privateKey, publicKey } = generateKeyPairSync('ec', {
+        namedCurve: 'P-256'
+      });
+
+    const privateKeyStr = privateKey.export({ format: 'pem', type: 'pkcs8' }).toString();
+    console.log(privateKeyStr);
+
+    const sign = createSign('SHA3-256');
+    sign.update('hello nika');
+    sign.end();
+    const signature = sign.sign(privateKey, 'hex');
+
+    console.log(signature);
+}
+
+async function signWithEccrypto() {
+    const privateKey = Buffer.from('69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc', 'hex');
+
+    var msg = createHash("SHA3-256").update('hello nika').digest();
+    // console.log(msg.toString('hex'));
+
+    const signature = await eccrypto.sign(privateKey, msg);
+    console.log(signature.toString('hex'));
+}
+
 // await createSubmittion();
 await exampleHash();
-// await testSignature();
+await testSignature();
+// await signatureWithCrypto();
+await signWithEccrypto();
 
 // const signed2 = signWithKey('hello nika');
 // console.log(signed2);
+
+export default FlowService;

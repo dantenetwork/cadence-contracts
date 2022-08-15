@@ -33,3 +33,16 @@ flow transactions send ./transactions/CrossChainNFT/claimPunster.cdc 1 "randomNu
 flow transactions send ./transactions/createNFT/registerPunster.cdc "I'm punster" "https://raw.githubusercontent.com/wuyahuang/opensea/main/1" --signer testnet-Bob -n testnet
 
 flow scripts execute ./scripts/queryDuanjiFrom.cdc "0x1a478a7149935b63" -n testnet
+
+
+# Multi-Ecosystem signature
+flow keys generate --sig-algo "ECDSA_secp256k1"
+
+flow accounts create --key 023281d6b1c8bfafd70b0d9ffe1f55f61c5844602844e68542655329b33a2c6dffaeccaf987ff08a0df8c57ce58ffee15bbb11361be543106e1600f8927cf2c0 --sig-algo "ECDSA_secp256k1" --hash-algo "SHA2_256"
+
+flow signatures generate "Hello Nika" --signer emulator-Alice
+
+flow signatures verify "hello nika" "77ef43fe4d14c88b6a34b4710557356dc3d02c9139ce20319a61c24b80b4bb4d6775fcd044c69a2d9f710553ce6329d290eb30c739c02669be18ad91c86e8856" 0x906520128060e4a2ca4c126bdb059d23857d99fe51614533f13917adcfd8e3a1d3e0ce05b272b13740f337d47a06eed052d0c0f8c4316cd615d8d06e11ff8e06 --sig-algo "ECDSA_secp256k1" --hash-algo "SHA2_256"
+
+flow signatures verify "hello nika" "e53176d258d1dce1c7695e842b1a140dab81c019491d355cac160f81e26d548407c695ca518ca89976ca7a0ba0eb5ee1c5e8c6310cddf5d873ff4591928fe33a" 0xbb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025
+
