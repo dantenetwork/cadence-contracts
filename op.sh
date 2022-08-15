@@ -2,7 +2,7 @@ pm2 status
 
 pm2 start client/crosschain/crossChainSync.js —name FlowCrossChain
 
-flow signatures generate "f8d6e0586b0a20c700633506677220b0e1c71447ebf1c4b050d44552383501ffdfcb1b46c7a71484f1" --signer emulator-account
+flow signatures generate "hello nika" --signer emulator-account
 
 flow transactions send ./transactions/verifyByIdentity.cdc "633506677220b0e1c71447ebf1c4b050d44552383501ffdfcb1b46c7a71484f1" "5b150258301bd5847e753c37b76bc97178a106ed15edd51683001abb90c0f43a2ca5d6108fc235cb6485f115c2a2e0fee800be6900f35df7cea6733ef9feec87"
 
@@ -12,7 +12,7 @@ flow transactions send ./examples/signatureVerify.cdc
 
 flow scripts execute ./examples/getNonce.cdc
 
-flow signatures verify "f8d6e0586b0a20c700633506677220b0e1c71447ebf1c4b050d44552383501ffdfcb1b46c7a71484f1" "5b150258301bd5847e753c37b76bc97178a106ed15edd51683001abb90c0f43a2ca5d6108fc235cb6485f115c2a2e0fee800be6900f35df7cea6733ef9feec87" 0xbb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025
+flow signatures verify "hello nika" "b8c91eb13af6d08e357de09fac0b500e93e77bf74ca2a474742b67c26ba5eabf1355ca1ac6bdfb45c741f7d8a49201a6b9ab918f9387d1d2594b455c3f3d264d" 0xbb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025
 
 flow transactions send ./transactions/verifyRecvMsgTest.cdc "7a4152dcbcef2d1db8a5754913105a3486b5a651a7cad2f6f7025c5d0414ec014e68bd7323a9c1c165071a5721be16bf3d26b8f5495a8d44b3759d4f61f288c1"
 
@@ -33,3 +33,16 @@ flow transactions send ./transactions/CrossChainNFT/claimPunster.cdc 1 "randomNu
 flow transactions send ./transactions/createNFT/registerPunster.cdc "I'm punster" "https://raw.githubusercontent.com/wuyahuang/opensea/main/1" --signer testnet-Bob -n testnet
 
 flow scripts execute ./scripts/queryDuanjiFrom.cdc "0x1a478a7149935b63" -n testnet
+
+
+# Multi-Ecosystem signature
+flow keys generate --sig-algo "ECDSA_secp256k1"
+
+flow accounts create --key 023281d6b1c8bfafd70b0d9ffe1f55f61c5844602844e68542655329b33a2c6dffaeccaf987ff08a0df8c57ce58ffee15bbb11361be543106e1600f8927cf2c0 --sig-algo "ECDSA_secp256k1" --hash-algo "SHA2_256"
+
+flow signatures generate "Hello Nika" --signer emulator-Alice
+
+flow signatures verify "hello nika" "77ef43fe4d14c88b6a34b4710557356dc3d02c9139ce20319a61c24b80b4bb4d6775fcd044c69a2d9f710553ce6329d290eb30c739c02669be18ad91c86e8856" 0x906520128060e4a2ca4c126bdb059d23857d99fe51614533f13917adcfd8e3a1d3e0ce05b272b13740f337d47a06eed052d0c0f8c4316cd615d8d06e11ff8e06 --sig-algo "ECDSA_secp256k1" --hash-algo "SHA2_256"
+
+flow signatures verify "hello nika" "e53176d258d1dce1c7695e842b1a140dab81c019491d355cac160f81e26d548407c695ca518ca89976ca7a0ba0eb5ee1c5e8c6310cddf5d873ff4591928fe33a" 0xbb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025
+

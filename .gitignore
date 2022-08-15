@@ -1,4 +1,4 @@
-client/node_modules
+node_modules
 client/crosschain/.secret
 erc721/node_modules
 erc721/.secret
