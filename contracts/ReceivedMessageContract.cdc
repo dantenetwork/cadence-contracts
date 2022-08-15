@@ -58,7 +58,7 @@ pub contract ReceivedMessageContract{
             session: MessageProtocol.Session){
             self.id = id;
             self.fromChain = fromChain;
-            self.toChain = "FLOW";
+            self.toChain = "Flow-Test";
             self.sender = sender;
             self.signer = signer;
             self.sqos = sqos;
