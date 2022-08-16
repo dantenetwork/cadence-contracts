@@ -75,7 +75,7 @@ class FlowService {
 
     sign = (msg) => {
         const key = this.ec.keyFromPrivate(Buffer.from(this.signerPrivateKeyHex, 'hex'));
-        const sig = key.sign(this.hashFunc(msg), 123456789);
+        const sig = key.sign(this.hashFunc(msg));
         const n = 32;
         const r = sig.r.toArrayLike(Buffer, 'be', n);
         const s = sig.s.toArrayLike(Buffer, 'be', n);
