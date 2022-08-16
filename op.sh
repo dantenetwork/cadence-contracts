@@ -46,3 +46,7 @@ flow signatures verify "hello nika" "77ef43fe4d14c88b6a34b4710557356dc3d02c9139c
 
 flow signatures verify "hello nika" "e53176d258d1dce1c7695e842b1a140dab81c019491d355cac160f81e26d548407c695ca518ca89976ca7a0ba0eb5ee1c5e8c6310cddf5d873ff4591928fe33a" 0xbb499b3527649d37f86d4a16e83aae2f9bd64de510077cf8c5fcb12eafc96c93a0425ac965ce4eb2cc2dd5a350569f10035b4308aadfc544415ddc812f919025
 
+# The flow CIL does not support hash algorithm `keccak_256``
+# flow signatures verify "hello nika" "e32dd98ca47835a6a3de02f980c54131c62bacc22cf0648056bcf62dc7b3b9ce6f7ca405f64fa52e81ecf1109160fcbb4d6e0e78b722f5be8db9ab0d5f8ad146" 0x906520128060e4a2ca4c126bdb059d23857d99fe51614533f13917adcfd8e3a1d3e0ce05b272b13740f337d47a06eed052d0c0f8c4316cd615d8d06e11ff8e06 --sig-algo "ECDSA_secp256k1" --hash-algo "keccak_256"
+
+flow scripts execute ./scripts/crypto-dev/signatureVerify.cdc 
