@@ -7,6 +7,9 @@ pub contract ReceivedMessageContract{
     pub resource interface ReceivedMessageInterface{
         pub fun getCompleteID(): {String: UInt128};
 
+        // Get the next valid message id to be submitted from source chains by off-chain routers 
+        pub fun getNextMessageID(submitterAddr: Address): {String: UInt128};
+
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
         pub fun isOnline(): Bool;
@@ -311,6 +314,23 @@ pub contract ReceivedMessageContract{
             return self.completedID;
         }
 
+        pub fun getNextMessageID(submitterAddr: Address): {String: UInt128} {
+            let nextIDs = self.completedID;
+
+            for ele in self.message.keys {
+                let recvMsgCache = self.message[ele]!;
+
+                for recvMsgEle in recvMsgCache {
+                    if !recvMsgEle.checkSubmitterExisted(pubAddr: submitterAddr) {
+                        nextIDs[ele] = recvMsgEle.msgID;
+                        break;
+                    }
+                }
+            }
+
+            return nextIDs;
+        }
+
         pub fun isOnline(): Bool {
             return self.online;
         }
@@ -382,6 +402,12 @@ pub contract ReceivedMessageContract{
       let pubLink = PublicPath(identifier: link);
       let ReceivedMessageVaultRef = getAccount(recvAddress).getCapability<&{ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
       return ReceivedMessageVaultRef.getCompleteID();
+    }
+
+    pub fun getRecverRef(recverAddress: Address, link: String): &{ReceivedMessageContract.ReceivedMessageInterface}? {
+        let pubLink = PublicPath(identifier: link);
+        let recver = getAccount(recverAddress).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!);
+        return recver.borrow();
     }
 
      /**

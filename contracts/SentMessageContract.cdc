@@ -147,7 +147,7 @@ pub contract SentMessageContract{
 
         pub fun getAllMessages():[SentMessageCore];
         
-        pub fun getMessageById(mesasageId: Int): SentMessageCore;
+        pub fun getMessageById(messageId: UInt128): SentMessageCore?;
 
         pub fun isOnline(): Bool;
     }
@@ -206,8 +206,14 @@ pub contract SentMessageContract{
           * Query sent cross chain messages by id
           * @param messageId - message id
           */
-        pub fun getMessageById(mesasageId: Int): SentMessageCore{
-            return self.message[mesasageId];
+        pub fun getMessageById(messageId: UInt128): SentMessageCore?{
+            for ele in self.message {
+                if ele.id == messageId {
+                    return ele;
+                }
+            }
+
+            return nil;
         }
 
         pub fun isOnline(): Bool {

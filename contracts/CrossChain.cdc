@@ -20,7 +20,7 @@ pub contract CrossChain {
       */
     pub fun registerRecvAccount(address: Address, link: String): Bool{
         let pubLink = PublicPath(identifier: link);
-        let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+        let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid recver address or `link`!");
         if (!recverRef.isOnline()) {
             panic("The recver is offline!");
         }
@@ -34,7 +34,7 @@ pub contract CrossChain {
     pub fun removeRecvAccount(address: Address, link: String): Bool {
         // Verify the signature
         let pubLink = PublicPath(identifier: link);
-        let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+        let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid recver address or `link`!");
         if (recverRef.isOnline()) {
             panic("The recver is online!");
         }
