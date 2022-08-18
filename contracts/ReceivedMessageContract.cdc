@@ -1,5 +1,6 @@
 import MessageProtocol from "./MessageProtocol.cdc"
 import IdentityVerification from "./IdentityVerification.cdc"
+import SettlementContract from "./Settlement.cdc"
 
 pub contract ReceivedMessageContract{
     
@@ -414,6 +415,12 @@ pub contract ReceivedMessageContract{
         return recver.borrow();
     }
 
+    // Temporary test
+    pub fun testSettlementCall() {
+        SettlementContract.workingNodesTrail();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
      /**
        * The interface of the register for off-chain routers
        * the common sign-verification mechanism or authority call-back submittion mechanis

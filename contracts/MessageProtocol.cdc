@@ -306,6 +306,16 @@ pub contract MessageProtocol {
         }
     }
 
+    pub struct Ssstruct {
+        pub let id: UInt128;
+        // pub let commitment: [UInt8]?;
+
+        init() {
+            self.id = 10;
+            // self.commitment = [];
+        }
+    }
+
     /// Session
     /// Member@type: 0, C-C(Corss-Chain) call requires call_back; 1, C-C call ignores call_back; 2, C-C call_back;
     pub struct Session {

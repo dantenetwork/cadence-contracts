@@ -11,6 +11,7 @@ import * as eccrypto from 'eccrypto';
 
 fcl.config().put('accessNode.api', 'http://127.0.0.1:8888');
 fcl.config().put('0xProfile', '0xf8d6e0586b0a20c7');
+fcl.config().put('Profile', 'f8d6e0586b0a20c7');
 
 // Get block at height (uses builder function)
 // const response = await fcl.send([fcl.getBlock(), fcl.atBlockHeight(1)]).then(fcl.decode);
@@ -29,7 +30,7 @@ class FlowService {
         this.hashFunc = hashFun;
     }
 
-    executeScripts = async (script, args) => {
+    executeScripts = async ({ script, args }) => {
         const response = await fcl.send([fcl.script`${script}`, fcl.args(args)]);
         return await fcl.decode(response);
     }
@@ -174,10 +175,10 @@ async function signWithEccrypto() {
 }
 
 // await createSubmittion();
-await exampleHash();
-await testSignature();
+// await exampleHash();
+// await testSignature();
 // await signatureWithCrypto();
-await signWithEccrypto();
+// await signWithEccrypto();
 
 // const signed2 = signWithKey('hello nika');
 // console.log(signed2);
