@@ -41,7 +41,7 @@ var elliptic = require("elliptic");
 var OmnichainCrypto = /** @class */ (function () {
     function OmnichainCrypto(hashFun, curveName, keyPair) {
         var _this = this;
-        this.sign2string = function (msg) {
+        this.sign2buffer = function (msg) {
             if (_this.priKey.length != 32) {
                 throw ("Invalid private key to sign!");
             }
@@ -50,9 +50,12 @@ var OmnichainCrypto = /** @class */ (function () {
             var n = 32;
             var r = sig.r.toArrayLike(Buffer, 'be', n);
             var s = sig.s.toArrayLike(Buffer, 'be', n);
-            return Buffer.concat([r, s]).toString('hex');
+            return Buffer.concat([r, s]);
         };
-        this.sign2stringrecovery = function (msg) {
+        this.sign2hexstring = function (msg) {
+            return _this.sign2buffer(msg).toString('hex');
+        };
+        this.sign2bufferrecovery = function (msg) {
             if (_this.priKey.length != 32) {
                 throw ("Invalid private key to sign!");
             }
@@ -62,6 +65,9 @@ var OmnichainCrypto = /** @class */ (function () {
             var r = sig.r.toArrayLike(Buffer, 'be', n);
             var s = sig.s.toArrayLike(Buffer, 'be', n);
             return Buffer.concat([r, s, Buffer.from([sig.recoveryParam + 27])]);
+        };
+        this.sign2hexstringrecovery = function (msg) {
+            return _this.sign2bufferrecovery(msg).toString('hex');
         };
         this.sign = function (msg) {
             if (_this.priKey.length != 32) {

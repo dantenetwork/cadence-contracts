@@ -42,7 +42,7 @@ async function testkeccak256andsecp256k1() {
 
     console.log('Public Key: \n'+ await oc.publicKeyCompress(keyPair[0]));
 
-    const signature = testOC.sign2stringrecovery(toSignStr);
+    const signature = testOC.sign2bufferrecovery(toSignStr);
     console.log(signature.toString('hex'));
     console.log(Array.from(signature));
 

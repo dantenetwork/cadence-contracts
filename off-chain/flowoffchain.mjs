@@ -67,19 +67,28 @@ class FlowService {
                 return {
                 addr: fcl.withPrefix(user.address),
                 keyId: Number(key.index),
-                signature: this.sign(signable.message)
+                signature: this.sign2string(signable.message)
                 }
             }
         }
     }
 
-    sign = (msg) => {
+    sign2string = (msg) => {
         const key = this.ec.keyFromPrivate(Buffer.from(this.signerPrivateKeyHex, 'hex'));
         const sig = key.sign(this.hashFunc(msg));
         const n = 32;
         const r = sig.r.toArrayLike(Buffer, 'be', n);
         const s = sig.s.toArrayLike(Buffer, 'be', n);
         return Buffer.concat([r, s]).toString('hex');
+    };
+
+    sign2buffer = (msg) => {
+        const key = this.ec.keyFromPrivate(Buffer.from(this.signerPrivateKeyHex, 'hex'));
+        const sig = key.sign(this.hashFunc(msg));
+        const n = 32;
+        const r = sig.r.toArrayLike(Buffer, 'be', n);
+        const s = sig.s.toArrayLike(Buffer, 'be', n);
+        return Buffer.concat([r, s]);
     };
 }
 
@@ -127,7 +136,7 @@ async function testSignature() {
     
     const fService = new FlowService("0xf8d6e0586b0a20c7", "69e7e51ead557351ade7a575e947c4d4bd19dd8a6cdf00c51f9c7f6f721b72dc", 0, sha3_256FromString, "p256");
 
-    const signed = fService.sign('hello nika');
+    const signed = fService.sign2string('hello nika');
     console.log(signed);
 }
 

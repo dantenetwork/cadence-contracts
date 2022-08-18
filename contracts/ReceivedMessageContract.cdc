@@ -1,5 +1,5 @@
 import MessageProtocol from "./MessageProtocol.cdc"
-import IdentityVerification from "IdentityVerification.cdc"
+import IdentityVerification from "./IdentityVerification.cdc"
 
 pub contract ReceivedMessageContract{
     
@@ -85,7 +85,7 @@ pub contract ReceivedMessageContract{
             raw_data = raw_data.concat(self.session.toBytes());
 
 
-            let digest = HashAlgorithm.SHA2_256.hash(raw_data);
+            let digest = HashAlgorithm.KECCAK_256.hash(raw_data);
             self.messageHash = String.encodeHex(digest);
         }
 
@@ -309,13 +309,17 @@ pub contract ReceivedMessageContract{
                 }
             }
         }
-
+ 
         pub fun getCompleteID(): {String: UInt128}{
             return self.completedID;
         }
 
         pub fun getNextMessageID(submitterAddr: Address): {String: UInt128} {
             let nextIDs = self.completedID;
+
+            for key in nextIDs.keys {
+                nextIDs[key] = nextIDs[key]! + 1;
+            }
 
             for ele in self.message.keys {
                 let recvMsgCache = self.message[ele]!;

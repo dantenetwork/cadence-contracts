@@ -33,7 +33,7 @@ export class OmnichainCrypto {
         }
     }
 
-    sign2string = (msg: string | Buffer): string => {
+    sign2buffer= (msg: string | Buffer): Buffer => {
         if (this.priKey.length != 32) {
             throw("Invalid private key to sign!");
         }
@@ -43,10 +43,14 @@ export class OmnichainCrypto {
         const n = 32;
         const r = sig.r.toArrayLike(Buffer, 'be', n);
         const s = sig.s.toArrayLike(Buffer, 'be', n);
-        return Buffer.concat([r, s]).toString('hex');
+        return Buffer.concat([r, s]);
     };
 
-    sign2stringrecovery = (msg: string | Buffer): Buffer => {
+    sign2hexstring = (msg: string | Buffer): string => {
+        return this.sign2buffer(msg).toString('hex');
+    };
+
+    sign2bufferrecovery = (msg: string | Buffer): Buffer => {
         if (this.priKey.length != 32) {
             throw("Invalid private key to sign!");
         }
@@ -59,6 +63,10 @@ export class OmnichainCrypto {
         return Buffer.concat([r, s, Buffer.from([sig.recoveryParam + 27])]);
     };
 
+    sign2hexstringrecovery = (msg: string | Buffer): string => {
+        return this.sign2bufferrecovery(msg).toString('hex');
+    }
+ 
     sign = (msg: string | Buffer): elliptic.ec.Signature => {
         if (this.priKey.length != 32) {
             throw("Invalid private key to sign!");

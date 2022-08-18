@@ -1,5 +1,5 @@
 pub contract MessageProtocol {
-    access(contract) var messageID: UInt128;
+    access(contract) var messageID: {String: UInt128};
     pub let flowTypeNumber: UInt8;
 
     pub fun addressFromBytes(addrBytes: [UInt8]): Address? {
@@ -342,7 +342,7 @@ pub contract MessageProtocol {
     }
 
     init() {
-        self.messageID = 1;
+        self.messageID = {};
         self.flowTypeNumber = 4;
     }
 
@@ -422,13 +422,21 @@ pub contract MessageProtocol {
         }
     }
 
-    pub fun getNextMessageID(): UInt128 {
-        let id = self.messageID;
-        if self.messageID == UInt128.max {
-            self.messageID = 0;
+    pub fun getNextMessageID(toChain: String): UInt128 {
+        if self.messageID.containsKey(toChain) {
+            let id = self.messageID[toChain]!;
+            if id == UInt128.max {
+                self.messageID[toChain] = 1;
+            } else {
+                self.messageID[toChain] = id + 1;
+            }
+
+            return id;
+
         } else {
-            self.messageID = self.messageID + 1;
+            let id: UInt128 = 1;
+            self.messageID[toChain] = id;
+            return id;
         }
-        return id;
     }
 }
