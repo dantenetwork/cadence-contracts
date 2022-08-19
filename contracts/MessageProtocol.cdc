@@ -306,13 +306,28 @@ pub contract MessageProtocol {
         }
     }
 
-    pub struct Ssstruct {
-        pub let id: UInt128;
-        // pub let commitment: [UInt8]?;
+    pub struct InputSQoSItem {
+        pub let t: UInt8;
+        pub let v: [UInt8];
 
-        init() {
-            self.id = 10;
-            // self.commitment = [];
+        init(type: UInt8, value: [UInt8]) {
+            if (type > SQoSType.CrossVerify.rawValue) || (type < SQoSType.Reveal.rawValue) {
+                panic("Invalid input type!");
+            }
+            self.t = type;
+            self.v = value;
+        }
+
+        pub fun to_SQoSItem(): SQoSItem {
+            return SQoSItem(type: SQoSType(rawValue: self.t)!, value: self.v);
+        }
+    }
+
+    pub struct InputSQoSArray {
+        pub let v: [InputSQoSItem];
+
+        init(value: [InputSQoSItem]) {
+            self.v = value;
         }
     }
 
