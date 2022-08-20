@@ -24,9 +24,9 @@ export class SQoSItem {
         this.t = type;
         this.v = value;
         if (moduleAddress.startsWith('0x')) {
-            this.id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.InputSQoSItem';
+            this.id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.SQoSItem';
         } else {
-            this.id = 'A.' + moduleAddress + '.MessageProtocol.InputSQoSItem';
+            this.id = 'A.' + moduleAddress + '.MessageProtocol.SQoSItem';
         }
     }
 
@@ -62,9 +62,9 @@ export class SQoSItem {
     static type_trait(moduleAddress: string) {
         var id;
         if (moduleAddress.startsWith('0x')) {
-            id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.InputSQoSItem';
+            id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.SQoSItem';
         } else {
-            id = 'A.' + moduleAddress + '.MessageProtocol.InputSQoSItem';
+            id = 'A.' + moduleAddress + '.MessageProtocol.SQoSItem';
         }
 
         return types.Struct(id, [
@@ -81,9 +81,9 @@ export class SQoSItemArray {
     constructor(value: [SQoSItem], moduleAddress: string) {
         this.v = value;
         if (moduleAddress.startsWith('0x')) {
-            this.id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.InputSQoSArray';
+            this.id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.SQoS';
         } else {
-            this.id = 'A.' + moduleAddress + '.MessageProtocol.InputSQoSArray';
+            this.id = 'A.' + moduleAddress + '.MessageProtocol.SQoS';
         }
     }
 
@@ -93,10 +93,10 @@ export class SQoSItemArray {
 
         return fcl.arg({
             fields: [
-              {name: "v", value: values},
+              {name: "sqosItems", value: values},
             ]
         },types.Struct(this.id, [
-            {name: "v", value: types.Array(SQoSItem.type_trait(this.id.slice(2, 2 + 16)))},
+            {name: "sqosItems", value: types.Array(SQoSItem.type_trait(this.id.slice(2, 2 + 16)))},
         ]));
     }
 
@@ -105,29 +105,123 @@ export class SQoSItemArray {
 
         return {
                     fields: [
-                        {name: "v", value: values},
+                        {name: "sqosItems", value: values},
                     ]
                 }
     }
 
     get_type() {
         return types.Struct(this.id, [
-            {name: "v", value: types.Array(SQoSItem.type_trait(this.id))},
+            {name: "sqosItems", value: types.Array(SQoSItem.type_trait(this.id))},
         ]);
     }
 
     static type_trait(moduleAddress: string) {
         var id;
         if (moduleAddress.startsWith('0x')) {
-            id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.InputSQoSArray';
+            id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.SQoS';
         } else {
-            id = 'A.' + moduleAddress + '.MessageProtocol.InputSQoSArray';
+            id = 'A.' + moduleAddress + '.MessageProtocol.SQoS';
         }
 
         return types.Struct(id, [
-            {name: "v", value: types.Array(SQoSItem.type_trait(id))},
+            {name: "sqosItems", value: types.Array(SQoSItem.type_trait(id))},
         ]);
     }
 }
 
+export enum MsgType {
+    cdcString = 0,
+    cdcU8,
+    cdcU16,
+    cdcU32,
+    cdcU64,
+    cdcU128,
+    cdcI8,
+    cdcI16,
+    cdcI32,
+    cdcI64,
+    cdcI128,
+    cdcVecString,
+    cdcVecU8,
+    cdcVecU16,
+    cdcVecU32,
+    cdcVecU64,
+    cdcVecU128,
+    cdcVecI8,
+    cdcVecI16,
+    cdcVecI32,
+    cdcVecI64,
+    cdcVecI128,
+    cdcAddress,
+};
+
+export class CDCAddress {
+    addr: Uint8Array;
+    addrType: number;
+    id: string;
+
+    constructor(addr: Uint8Array, t: number, moduleAddress: string) {
+        this.addr = addr;
+        this.addrType = t;
+        if (moduleAddress.startsWith('0x')) {
+            this.id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.CDCAddress';
+        } else {
+            this.id = 'A.' + moduleAddress + '.MessageProtocol.CDCAddress';
+        }
+    }
+
+    get_fcl_arg() {
+        return fcl.arg({
+            fields: [
+              {name: "addr", value: Array.from(this.addr).map(num => {return String(num);})},
+              {name: "addrType", value: String(this.addrType)}
+            ]
+        },types.Struct(this.id, [
+            {name: "addr", value: types.Array(types.UInt8)},
+            {name: "addrType", value: types.UInt8}
+        ]));
+    }
+
+    get_value() {
+        return {
+                    fields: [
+                        {name: "addr", value: Array.from(this.addr).map(num => {return String(num);})},
+                        {name: "addrType", value: String(this.addrType)}
+                    ]
+            }
+    }
+
+    get_type() {
+        return types.Struct(this.id, [
+            {name: "addr", value: types.Array(types.UInt8)},
+            {name: "addrType", value: types.UInt8}
+        ]);
+    }
+
+    static type_trait(moduleAddress: string) {
+        var id;
+        if (moduleAddress.startsWith('0x')) {
+            id = 'A.' + moduleAddress.slice(2) + '.MessageProtocol.CDCAddress';
+        } else {
+            id = 'A.' + moduleAddress + '.MessageProtocol.CDCAddress';
+        }
+
+        return types.Struct(id, [
+            {name: "addr", value: types.Array(types.UInt8)},
+            {name: "addrType", value: types.UInt8}
+        ]);
+    }
+}
+
+export class MessageItem {
+    name: string;
+    type: MsgType;
+    value: string | Array<string> | number | Uint8Array | Uint16Array | Uint32Array | BigUint64Array | Array<number> | 
+            Int8Array | Int16Array | Int32Array | BigInt64Array  
+
+    constructor(name: String, type: MsgType, value: any) {
+
+    }
+}
 

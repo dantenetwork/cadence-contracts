@@ -94,12 +94,12 @@ pub contract MessageProtocol {
 
     pub struct MessageItem {
         pub let name: String;
-        pub let type: MsgType;
+        pub let type: UInt8;
         pub let value: AnyStruct;
 
         access(contract) init(name: String, type: MsgType, value: AnyStruct){
             self.name = name;
-            self.type = type;
+            self.type = type.rawValue;
             self.value = value;
         }
 
@@ -109,7 +109,7 @@ pub contract MessageProtocol {
             // dataBytes = dataBytes.concat([self.type.rawValue]);
 
             //Encode `AnyStruct` into `[UInt8]`
-            switch self.type {
+            switch MsgType(rawValue: self.type) {
                 case MsgType.cdcString:
                     dataBytes = dataBytes.concat(self.value as? String!.utf8);
                     break;
@@ -267,17 +267,17 @@ pub contract MessageProtocol {
     }
 
     pub struct SQoSItem {
-        pub let t: SQoSType;
+        pub let t: UInt8;
         pub let v: [UInt8];
 
         init(type: SQoSType, value: [UInt8]){
-            self.t = type;
+            self.t = type.rawValue;
             self.v = value;
         }
 
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
-            dataBytes = dataBytes.concat([self.t.rawValue as? UInt8!]);
+            dataBytes = dataBytes.concat([self.t]);
             dataBytes = dataBytes.concat(self.v);
 
             return dataBytes;
@@ -303,31 +303,6 @@ pub contract MessageProtocol {
 
         pub fun addItem(item: SQoSItem) {
             self.sqosItems.append(item);
-        }
-    }
-
-    pub struct InputSQoSItem {
-        pub let t: UInt8;
-        pub let v: [UInt8];
-
-        init(type: UInt8, value: [UInt8]) {
-            if (type > SQoSType.CrossVerify.rawValue) || (type < SQoSType.Reveal.rawValue) {
-                panic("Invalid input type!");
-            }
-            self.t = type;
-            self.v = value;
-        }
-
-        pub fun to_SQoSItem(): SQoSItem {
-            return SQoSItem(type: SQoSType(rawValue: self.t)!, value: self.v);
-        }
-    }
-
-    pub struct InputSQoSArray {
-        pub let v: [InputSQoSItem];
-
-        init(value: [InputSQoSItem]) {
-            self.v = value;
         }
     }
 

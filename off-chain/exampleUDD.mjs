@@ -108,5 +108,27 @@ async function testSQoS() {
     console.log(rstData);
 }
 
-await testSession();
-await testSQoS();
+async function testCDCAddress() {
+    const cdcAddress = new mtonflow.CDCAddress([0x11, 0x22, 0x33, 0x44], 4, await fcl.config.get('Profile'));
+
+    const script = fs.readFileSync(
+        path.join(
+            process.cwd(),
+            '../test/scripts/testCDCAddress.cdc'
+        ),
+        'utf8'
+    );
+
+    let rstData = await flowService.executeScripts({
+        script: script,
+        args: [
+            cdcAddress.get_fcl_arg()
+        ]    
+    });
+
+    console.log(rstData);
+}
+
+// await testSession();
+// await testSQoS();
+await testCDCAddress();
