@@ -17,6 +17,7 @@
     "SentMessageContract": "./contracts/SentMessageContract.cdc",
     "ReceivedMessageContract": "./contracts/ReceivedMessageContract.cdc",
     "CrossChain": "./contracts/CrossChain.cdc",
+    "SettlementContract": "./contracts/Settlement.cdc",
     "FungibleToken": "./examples/utility/FungibleToken.cdc",
 	"NonFungibleToken": "./examples/NonFungibleToken.cdc",
 	"MetadataViews": "./examples/MetadataViews.cdc",
@@ -86,7 +87,8 @@
         "IdentityVerification",
         "SentMessageContract",
         "ReceivedMessageContract",
-        "CrossChain"
+        "CrossChain",
+        "SettlementContract"
       ]
     },
     "testnet": {
@@ -96,7 +98,7 @@
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",
-        "Locker"
+        "SettlementContract"
       ]
     }
   }

@@ -1,5 +1,5 @@
 pub contract MessageProtocol {
-    access(contract) var messageID: UInt128;
+    access(contract) var messageID: {String: UInt128};
     pub let flowTypeNumber: UInt8;
 
     pub fun addressFromBytes(addrBytes: [UInt8]): Address? {
@@ -94,12 +94,12 @@ pub contract MessageProtocol {
 
     pub struct MessageItem {
         pub let name: String;
-        pub let type: MsgType;
+        pub let type: UInt8;
         pub let value: AnyStruct;
 
         access(contract) init(name: String, type: MsgType, value: AnyStruct){
             self.name = name;
-            self.type = type;
+            self.type = type.rawValue;
             self.value = value;
         }
 
@@ -109,7 +109,7 @@ pub contract MessageProtocol {
             // dataBytes = dataBytes.concat([self.type.rawValue]);
 
             //Encode `AnyStruct` into `[UInt8]`
-            switch self.type {
+            switch MsgType(rawValue: self.type) {
                 case MsgType.cdcString:
                     dataBytes = dataBytes.concat(self.value as? String!.utf8);
                     break;
@@ -267,17 +267,17 @@ pub contract MessageProtocol {
     }
 
     pub struct SQoSItem {
-        pub let t: SQoSType;
+        pub let t: UInt8;
         pub let v: [UInt8];
 
         init(type: SQoSType, value: [UInt8]){
-            self.t = type;
+            self.t = type.rawValue;
             self.v = value;
         }
 
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
-            dataBytes = dataBytes.concat([self.t.rawValue as? UInt8!]);
+            dataBytes = dataBytes.concat([self.t]);
             dataBytes = dataBytes.concat(self.v);
 
             return dataBytes;
@@ -342,7 +342,7 @@ pub contract MessageProtocol {
     }
 
     init() {
-        self.messageID = 1;
+        self.messageID = {};
         self.flowTypeNumber = 4;
     }
 
@@ -422,13 +422,21 @@ pub contract MessageProtocol {
         }
     }
 
-    pub fun getNextMessageID(): UInt128 {
-        let id = self.messageID;
-        if self.messageID == UInt128.max {
-            self.messageID = 0;
+    pub fun getNextMessageID(toChain: String): UInt128 {
+        if self.messageID.containsKey(toChain) {
+            let id = self.messageID[toChain]!;
+            if id == UInt128.max {
+                self.messageID[toChain] = 1;
+            } else {
+                self.messageID[toChain] = id + 1;
+            }
+
+            return id;
+
         } else {
-            self.messageID = self.messageID + 1;
+            let id: UInt128 = 1;
+            self.messageID[toChain] = id;
+            return id;
         }
-        return id;
     }
 }

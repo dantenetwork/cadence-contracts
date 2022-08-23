@@ -184,7 +184,7 @@ pub contract SentMessageContract{
             if let submittorRef = submittorLink.borrow(){
                 let rst = submittorRef.getHookedContent();
                 
-                self.message.append(SentMessageCore(id: MessageProtocol.getNextMessageID(), 
+                self.message.append(SentMessageCore(id: MessageProtocol.getNextMessageID(toChain: rst.toChain), 
                                                     toChain: rst.toChain, 
                                                     sender: submitterAddr.toBytes(), 
                                                     signer: submitterAddr.toBytes(),
@@ -251,6 +251,12 @@ pub contract SentMessageContract{
       let pubLink = PublicPath(identifier: link);
       let senderRef = getAccount(msgSender).getCapability<&{SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
       return senderRef.getAllMessages();
+    }
+
+    pub fun getSenderRef(senderAddress: Address, link: String): &{SentMessageContract.SentMessageInterface}? {
+        let pubLink = PublicPath(identifier: link);
+        let sender = getAccount(senderAddress).getCapability<&{SentMessageContract.SentMessageInterface}>(pubLink!);
+        return sender.borrow();
     }
 
     priv fun applyNextSession(): UInt128 {

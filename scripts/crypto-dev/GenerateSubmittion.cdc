@@ -3,10 +3,11 @@ import MessageProtocol from "../../contracts/MessageProtocol.cdc"
 import IdentityVerification from "../../contracts/IdentityVerification.cdc"
 
 pub struct createdData {
-    pub let rawData: String;
+    pub let originMessage: ReceivedMessageContract.ReceivedMessageCore;
     pub let toBeSign: String;
 
-    init(rawData: String, toBeSign: String) {
+    init(srcMessage: ReceivedMessageContract.ReceivedMessageCore, rawData: String, toBeSign: String) {
+        self.originMessage = srcMessage;
         self.rawData = rawData;
         self.toBeSign = toBeSign;
     }
@@ -42,5 +43,5 @@ pub fun main(
     let originData: [UInt8] = msgSubmitter.toBytes().concat(n.toBigEndianBytes()).concat(recvMsg.getRecvMessageHash());
 
     // return createdDatarawData: receivedMessageCore.messageHash, toBeSign: String.encodeHex(originData));
-    return createdData(rawData: recvMsg.messageHash, toBeSign: String.encodeHex(originData));
+    return createdData(srcMessage: recvMsg, toBeSign: String.encodeHex(originData));
 }
