@@ -439,4 +439,80 @@ pub contract MessageProtocol {
             return id;
         }
     }
+
+    // // to big endian bytes according to type length
+    // // 16
+    // pub fun to_be_bytes(number: UInt16): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 2 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // pub fun to_be_bytes(number: Int16): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 2 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // // 32
+    // pub fun to_be_bytes(number: UInt32): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 4 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // pub fun to_be_bytes(number: Int32): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 4 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // // 64
+    // pub fun to_be_bytes(number: UInt64): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 8 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // pub fun to_be_bytes(number: Int64): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 8 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // UInt128, Int128, and UInt256 need to be specially processed!
+    //128
+    pub fun to_be_bytes_u128(number: UInt128): [UInt8] {
+        var output = number.toBigEndianBytes();
+        while output.length < 16 {
+            output = [UInt8(0)].concat(output);
+        }
+
+        return output;
+    }
+
+    pub fun to_be_bytes_i128(number: Int128): [UInt8] {
+        var output = number.toBigEndianBytes();
+        while output.length < 16 {
+            output = [UInt8(0)].concat(output);
+        }
+
+        return output;
+    }
+
+    // 256
+    pub fun to_be_bytes_u256(number: UInt256): [UInt8] {
+        var output = number.toBigEndianBytes();
+        while output.length < 32 {
+            output = [UInt8(0)].concat(output);
+        }
+
+        return output;
+    }
 }

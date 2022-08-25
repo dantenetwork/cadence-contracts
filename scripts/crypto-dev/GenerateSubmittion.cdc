@@ -6,9 +6,9 @@ pub struct createdData {
     pub let originMessage: ReceivedMessageContract.ReceivedMessageCore;
     pub let toBeSign: String;
 
-    init(srcMessage: ReceivedMessageContract.ReceivedMessageCore, rawData: String, toBeSign: String) {
+    init(srcMessage: ReceivedMessageContract.ReceivedMessageCore, toBeSign: String) {
         self.originMessage = srcMessage;
-        self.rawData = rawData;
+        // self.rawData = rawData;
         self.toBeSign = toBeSign;
     }
 }

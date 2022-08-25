@@ -361,10 +361,11 @@ pub contract ReceivedMessageContract{
           * Make sure that every message saved in ReceivedMessageArray is consistent
           * @param messageId - message id
           */
-        // pub fun messageVerify(messageId: Int): Bool{
-        //   // TODO
-        //     return true;
-        // }
+        pub fun messageVerify(messageCache: ReceivedMessageCache): ReceivedMessageCore? {
+            
+            
+            return nil;
+        }
 
         /**
           * Called from `messageVerify` to get the credibilities of validators to take weighted aggregation verification of messages
