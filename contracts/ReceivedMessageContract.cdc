@@ -72,7 +72,8 @@ pub contract ReceivedMessageContract{
             // hash message info, the same as in `toBytes()`
             var raw_data: [UInt8] = [];
 
-            raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            // raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            raw_data = raw_data.concat(MessageProtocol.to_be_bytes_u128(self.id));
             raw_data = raw_data.concat(self.fromChain.utf8);
             raw_data = raw_data.concat(self.toChain.utf8);
 
@@ -97,7 +98,8 @@ pub contract ReceivedMessageContract{
         pub fun toBytes(): [UInt8] {
             var raw_data: [UInt8] = [];
 
-            raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            // raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            raw_data = raw_data.concat(MessageProtocol.to_be_bytes_u128(self.id));
             raw_data = raw_data.concat(self.fromChain.utf8);
             raw_data = raw_data.concat(self.toChain.utf8);
 
