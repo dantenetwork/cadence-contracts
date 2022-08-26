@@ -27,7 +27,7 @@ pub contract IdentityVerification {
         log(String.encodeHex(signature));
 
         if (pk.verify(signature: signature,
-                        signedData: String.encodeHex(originData).utf8,
+                        signedData: originData,
                         domainSeparationTag: "",
                         hashAlgorithm: hashAlgorithm)) {
             self.nonce[pubAddr] = nonceV;
