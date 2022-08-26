@@ -231,7 +231,11 @@ pub contract ReceivedMessageContract{
                                               signature: signature,
                                               hashAlgorithm: HashAlgorithm.SHA3_256)) {
                 panic("Signature verification failed!");
-            }
+            } 
+            //else {
+            //    log("Signature verification success!");
+            //    return;
+            //}
 
             var cacheIdx: Int = -1;
             
@@ -440,3 +444,4 @@ pub contract ReceivedMessageContract{
     //  }
 }
 
+ 
