@@ -99,7 +99,7 @@ pub contract SentMessageContract{
 
         init(id: UInt128, toChain: String, sender: [UInt8], signer: [UInt8], msgToSubmit: msgToSubmit){
             self.id = id;
-            self.fromChain = "FLOW";            
+            self.fromChain = "FLOWTEST";            
             self.toChain = toChain;
 
             self.sqos = msgToSubmit.sqos;
