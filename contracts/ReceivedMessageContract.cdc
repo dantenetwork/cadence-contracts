@@ -217,12 +217,10 @@ pub contract ReceivedMessageContract{
         **/
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]){
-            // TODO
-            /*
-                * the submitter of the message should be verified
-                * this can be done by the signature and public keys routers registered(`ReceivedMessageContract.registerRouter`)
-                * This can be substituted with the mechanism of resource `router`. This will be implemented later
-            */
+            // Verify the submitter
+            if (!SettlementContract.isSelected(recvAddr: self.owner!.address, router: pubAddr)) {
+                panic("Invalid Validator. Unregistered or Currently Not Selected")
+            }
 
             // Verify the signature
             if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
@@ -424,7 +422,7 @@ pub contract ReceivedMessageContract{
 
     // Temporary test
     pub fun testSettlementCall() {
-        SettlementContract.workingNodesTrail();
+        SettlementContract.workingNodesTrail(honest: [], evil: []);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

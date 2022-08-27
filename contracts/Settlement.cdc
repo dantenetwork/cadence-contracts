@@ -23,12 +23,22 @@ pub contract SettlementContract {
     }
 
     pub struct SelectView {
-        pub var selectedRouters: [Validator];
+        pub(set) var selectedRouters: [Validator];
         pub let lastSelectTime: UFix64;
 
         init() {
             self.selectedRouters = [];
             self.lastSelectTime = getCurrentBlock().timestamp;
+        }
+
+        pub fun contains(_ identifier: Address): Bool {
+            for ele in self.selectedRouters {
+                if ele.address == identifier {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
@@ -73,12 +83,49 @@ pub contract SettlementContract {
         return self.routers;
     }
 
-    access(account) fun workingNodesTrail() {
-        
+    // Real selection of validators
+    priv fun select(): [Validator] {
+        // TODO: randomly sampling selection according to credibility and staking
+        return self.routers;
     }
 
-    pub fun getCredibility(): UFix64 {
-        return 0.0;
+    pub fun reSelect(recvAddr: Address) {
+        if self.selectedValidators.containsKey(recvAddr) {
+            if (getCurrentBlock().timestamp - self.selectedValidators[recvAddr]!.lastSelectTime) > self.timePeriod {
+                let newView = SelectView();
+                newView.selectedRouters = self.select();
+                self.selectedValidators[recvAddr] = newView;
+            }
+        } else {
+            let newView = SelectView();
+            newView.selectedRouters = self.select();
+            self.selectedValidators[recvAddr] = newView;
+        }
+    }
+
+    access(account) fun getSelectedValidator(recvAddr: Address): [Validator]{
+        self.reSelect(recvAddr: recvAddr);
+        return self.selectedValidators[recvAddr]!.selectedRouters;
+    }
+
+    access(account) fun isSelected(recvAddr: Address, router: Address): Bool {
+        self.reSelect(recvAddr: recvAddr);
+        return self.selectedValidators[recvAddr]!.contains(router);
+    }
+
+    pub fun getCredibility(router: Address): UFix64? {
+        for ele in self.routers {
+            if ele.address == router {
+                return ele.coe;
+            }
+        }
+
+        return nil;
+    }
+
+    // Update working routers' credibility 
+    access(account) fun workingNodesTrail(honest: [Address], evil: [Address]) {
+        // TODO
     }
 
     priv fun do_evil() {
