@@ -14,11 +14,11 @@ pub contract SettlementContract {
 
     pub struct Validator {
         pub let address: Address;
-        pub let coe: UFix64;
+        pub let crd: UFix64;
 
         init(address: Address) {
             self.address = address;
-            self.coe = 0.0;
+            self.crd = 0.0;
         }
     }
 
@@ -47,10 +47,30 @@ pub contract SettlementContract {
 
     priv var selectedValidators: {Address: SelectView};
 
+    // coefficients
+    pub let minCredibility: UFix64;
+    pub let maxCredibility: UFix64;
+    pub let rangeCredibility: UFix64;
+    pub let middleCredbility: UFix64;
+
+    pub let evilStep: UFix64;
+    pub let honestStep: UFix64;
+
+
     init() {
         self.routers = [];
         self.timePeriod = 3600.0 * 24.0 * 3.5;
         self.selectedValidators = {};
+
+        // coefficients
+        self.minCredibility = 0.0;
+        self.maxCredibility = 100.0;
+        self.rangeCredibility = self.maxCredibility - self.minCredibility;
+        self.middleCredbility = self.minCredibility + self.rangeCredibility / 2.0;
+
+        
+        self.evilStep = 2.0;
+        self.honestStep = 1.0;
     }
 
     pub fun registerRouter(pubAddr: Address, 
@@ -116,7 +136,7 @@ pub contract SettlementContract {
     pub fun getCredibility(router: Address): UFix64? {
         for ele in self.routers {
             if ele.address == router {
-                return ele.coe;
+                return ele.crd;
             }
         }
 
@@ -128,12 +148,26 @@ pub contract SettlementContract {
         // TODO
     }
 
-    priv fun do_evil() {
+    priv fun do_evil(crd: UFix64): UFix64 {
 
+        let credibility_value: UFix64 = crd - self.evilStep * (crd - self.minCredibility) / self.rangeCredibility;
+        return credibility_value;
     }
 
-    priv fun do_honest() {
+    priv fun do_honest(crd: UFix64): UFix64 {
+        var credibility_value: UFix64 = 0.0;
 
+        if crd < self.middleCredbility {
+            credibility_value = crd + self.honestStep
+                                        * (crd - self.minCredibility)
+                                        / self.rangeCredibility;
+        } else {
+            credibility_value = crd + self.honestStep
+                                        * (self.maxCredibility - crd)
+                                        / self.rangeCredibility;
+        }
+
+        return credibility_value;
     }
 }
 
