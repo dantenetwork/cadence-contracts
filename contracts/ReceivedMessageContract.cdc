@@ -119,12 +119,12 @@ pub contract ReceivedMessageContract{
     pub struct messageCopy {
         pub let messageInfo: ReceivedMessageCore;
         pub let submitters: [Address];
-        pub var credibility: UInt128;
+        pub(set) var credibility: UFix64;
 
         init(om: ReceivedMessageCore) {
             self.messageInfo = om;
             self.submitters = [];
-            self.credibility = 0;
+            self.credibility = 0.0;
         }
 
         pub fun addSubmitter(submitter: Address) {
@@ -219,7 +219,7 @@ pub contract ReceivedMessageContract{
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]){
             // Verify the submitter
             if (!SettlementContract.isSelected(recvAddr: self.owner!.address, router: pubAddr)) {
-                panic("Invalid Validator. Unregistered or Currently Not Selected")
+                panic("Invalid Validator. Unregistered or Currently not Selected.")
             }
 
             // Verify the signature
@@ -366,9 +366,58 @@ pub contract ReceivedMessageContract{
           * @param messageId - message id
           */
         pub fun messageVerify(messageCache: ReceivedMessageCache): ReceivedMessageCore? {
+            var honest: [Address] = [];
+            var evil: [Address] = [];
+            var exception: {Address: UFix64} = {};
             
+            if messageCache.msgInstance.values.length == 1 {
+                SettlementContract.workingNodesTrail(honest: messageCache.msgInstance.values[0].submitters, evil: [], exception: {});
+                return messageCache.msgInstance.values[0].messageInfo;
+            }
             
-            return nil;
+            var crdSum = 0.0;
+            // Calculate credibilities of `messageCopy`
+            for k in messageCache.msgInstance.keys {
+                if let msgCopyRef: &messageCopy = &messageCache.msgInstance[k] as &messageCopy? {
+                    for submitter in msgCopyRef.submitters {
+                        msgCopyRef.credibility = msgCopyRef.credibility + (SettlementContract.getCredibility(router: submitter) ?? panic("submitter not existed."));
+                    }
+
+                    crdSum = crdSum + msgCopyRef.credibility;
+                }
+            }
+
+            var recvMsgCore: ReceivedMessageCore? = nil;
+            // var maxCopyKey: String = "";
+            // var maxCredibility = 0.0;
+            // Normalization and check the verification threshold
+            for k in messageCache.msgInstance.keys {
+                if let msgCopyRef: &messageCopy = &messageCache.msgInstance[k] as &messageCopy? {
+                    msgCopyRef.credibility = msgCopyRef.credibility / crdSum;
+                    // if msgCopyRef.credibility > maxCredibility {
+                    //     maxCredibility = msgCopyRef.credibility;
+                    //     maxCopyKey = k;
+                    // }
+                    if msgCopyRef.credibility >= ReceivedMessageContract.vfThreshold {
+                        recvMsgCore = msgCopyRef.messageInfo;
+                        honest = msgCopyRef.submitters;
+                    } else {
+                        for ele in msgCopyRef.submitters {
+                            exception[ele] = msgCopyRef.credibility;
+                        }
+                    }
+                }
+            }
+
+            // no message copy has enough credibility
+            if recvMsgCore == nil {
+                SettlementContract.workingNodesTrail(honest: [], evil: [], exception: exception);
+            } else {
+                evil = exception.keys;
+                SettlementContract.workingNodesTrail(honest: honest, evil: evil, exception: {});
+            }
+
+            return recvMsgCore;
         }
 
         /**
@@ -394,8 +443,13 @@ pub contract ReceivedMessageContract{
         // }
     }
 
-    init() {
+    // Temporarily, verification threshold is setted to be 0.7 when contract deployed
+    // This will be moved to Resource `ReceivedMessageVault` when developing `SQoS` features
+    // This value must be larger than 0.5
+    pub let vfThreshold: UFix64;
 
+    init() {
+        self.vfThreshold = 0.7;
     }
 
     // Create recource to store received message
@@ -422,7 +476,7 @@ pub contract ReceivedMessageContract{
 
     // Temporary test
     pub fun testSettlementCall() {
-        SettlementContract.workingNodesTrail(honest: [], evil: []);
+        SettlementContract.workingNodesTrail(honest: [], evil: [], exception: {});
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

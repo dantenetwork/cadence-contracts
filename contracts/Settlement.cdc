@@ -14,16 +14,16 @@ pub contract SettlementContract {
 
     pub struct Validator {
         pub let address: Address;
-        pub let crd: UFix64;
+        pub(set) var crd: UFix64;
 
         init(address: Address) {
             self.address = address;
-            self.crd = 0.0;
+            self.crd = 10.0;
         }
     }
 
     pub struct SelectView {
-        pub(set) var selectedRouters: [Validator];
+        pub(set) var selectedRouters: [Address];
         pub let lastSelectTime: UFix64;
 
         init() {
@@ -32,17 +32,11 @@ pub contract SettlementContract {
         }
 
         pub fun contains(_ identifier: Address): Bool {
-            for ele in self.selectedRouters {
-                if ele.address == identifier {
-                    return true;
-                }
-            }
-
-            return false;
+            return self.selectedRouters.contains(identifier);
         }
     }
 
-    priv var routers: [Validator];
+    priv var routers: {Address: Validator};
     priv let timePeriod: UFix64;
 
     priv var selectedValidators: {Address: SelectView};
@@ -55,10 +49,11 @@ pub contract SettlementContract {
 
     pub let evilStep: UFix64;
     pub let honestStep: UFix64;
+    pub let exceptionStep: UFix64;
 
 
     init() {
-        self.routers = [];
+        self.routers = {};
         self.timePeriod = 3600.0 * 24.0 * 3.5;
         self.selectedValidators = {};
 
@@ -71,6 +66,7 @@ pub contract SettlementContract {
         
         self.evilStep = 2.0;
         self.honestStep = 1.0;
+        self.exceptionStep = 1.0;
     }
 
     pub fun registerRouter(pubAddr: Address, 
@@ -86,27 +82,19 @@ pub contract SettlementContract {
             panic("registry signature verification failed!");
         }
 
-        var found = false;
-        for ele in self.routers {
-            if (ele.address == pubAddr) {
-                found = true;
-                break;
-            }
-        }
-
-        if !found {
-            self.routers.append(Validator(address: pubAddr));
+        if !self.routers.containsKey(pubAddr) {
+            self.routers[pubAddr] = Validator(address: pubAddr);
         }
     }
 
     pub fun getRegisteredRouters(): [Validator] {
-        return self.routers;
+        return self.routers.values;
     }
 
     // Real selection of validators
-    priv fun select(): [Validator] {
+    priv fun select(): [Address] {
         // TODO: randomly sampling selection according to credibility and staking
-        return self.routers;
+        return self.routers.keys;
     }
 
     pub fun reSelect(recvAddr: Address) {
@@ -123,7 +111,7 @@ pub contract SettlementContract {
         }
     }
 
-    access(account) fun getSelectedValidator(recvAddr: Address): [Validator]{
+    access(account) fun getSelectedValidator(recvAddr: Address): [Address]{
         self.reSelect(recvAddr: recvAddr);
         return self.selectedValidators[recvAddr]!.selectedRouters;
     }
@@ -134,27 +122,44 @@ pub contract SettlementContract {
     }
 
     pub fun getCredibility(router: Address): UFix64? {
-        for ele in self.routers {
-            if ele.address == router {
-                return ele.crd;
-            }
+        if let validator = self.routers[router] {
+            return validator.crd;
         }
 
         return nil;
     }
 
     // Update working routers' credibility 
-    access(account) fun workingNodesTrail(honest: [Address], evil: [Address]) {
-        // TODO
+    access(account) fun workingNodesTrail(honest: [Address], evil: [Address], exception: {Address: UFix64}) {
+        // honest
+        for ele in honest {
+            if let validatorRef: &SettlementContract.Validator = &self.routers[ele] as &SettlementContract.Validator? {
+                validatorRef.crd = self.do_honest(crd: validatorRef.crd);
+            }
+        }
+
+        // evil
+        for ele in evil {
+            if let validatorRef: &SettlementContract.Validator = &self.routers[ele] as &SettlementContract.Validator? {
+                validatorRef.crd = self.do_evil(crd: validatorRef.crd);
+            }
+        }
+
+        //exception
+        for ele in exception.keys {
+            if let validatorRef: &SettlementContract.Validator = &self.routers[ele] as &SettlementContract.Validator? {
+                validatorRef.crd = self.make_exception(crd: validatorRef.crd, crdWeight: exception[ele]!);
+            }
+        }
     }
 
-    priv fun do_evil(crd: UFix64): UFix64 {
+    pub fun do_evil(crd: UFix64): UFix64 {
 
         let credibility_value: UFix64 = crd - self.evilStep * (crd - self.minCredibility) / self.rangeCredibility;
         return credibility_value;
     }
 
-    priv fun do_honest(crd: UFix64): UFix64 {
+    pub fun do_honest(crd: UFix64): UFix64 {
         var credibility_value: UFix64 = 0.0;
 
         if crd < self.middleCredbility {
@@ -166,6 +171,14 @@ pub contract SettlementContract {
                                         * (self.maxCredibility - crd)
                                         / self.rangeCredibility;
         }
+
+        return credibility_value;
+    }
+
+    pub fun make_exception(crd: UFix64, crdWeight: UFix64): UFix64 {
+        let credibility_value: UFix64 = crd - self.exceptionStep * (crd - self.minCredibility)
+                            / self.rangeCredibility
+                            * (1.0 - crdWeight);
 
         return credibility_value;
     }
