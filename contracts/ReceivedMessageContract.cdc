@@ -281,7 +281,13 @@ pub contract ReceivedMessageContract{
             if (cacheIdx >= 0) {
                 if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
                     // TODO: do verification
-                    let msgContent = recvMsg.content;
+                    let msgVerified = self.messageVerify(messageCache: self.message[recvMsg.fromChain]![cacheIdx]);
+                    
+                    if msgVerified == nil {
+                        return;
+                    }
+
+                    let msgContent = msgVerified!.content;
 
                     // TODO: call destination
                     let pubLink = PublicPath(identifier: msgContent.link);
