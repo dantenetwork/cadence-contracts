@@ -68,3 +68,4 @@ flow scripts execute ./scripts/getRouters.cdc
 # Recver
 flow transactions send ./transactions/initRecver.cdc 
 
+flow transactions send ./transactions/destroyRecver.cdc 
