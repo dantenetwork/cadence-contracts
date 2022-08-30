@@ -215,10 +215,13 @@ pub contract SettlementContract {
                 walkedDistance = nextDistance;
             }
 
-            // clear selected validators
-            for idxEle in selectedIdxs {
+            // clear selected validators. We shold delete the larger index first
+            var idxEle = selectedIdxs.length - 1;
+            while idxEle >= 0 {
                 itvlRange = itvlRange - validValidators[idxEle].crd;
                 validValidators.remove(at: idxEle);
+
+                idxEle = idxEle - 1;
             }
         }
 
