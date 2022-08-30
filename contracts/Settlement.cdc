@@ -334,6 +334,14 @@ pub contract SettlementContract {
     }
 
     // Test funcions. To be deleted
-
+    pub fun testRegisterRouters(routers: [Address]) {
+        for router in routers {
+            if !self.routers.containsKey(router) {
+                let validator = Validator(address: router);
+                validator.crd = UFix64(unsafeRandom() % 100);
+                self.routers[router] = validator;
+            }
+        }
+    }
 }
 

@@ -69,3 +69,8 @@ flow scripts execute ./scripts/getRouters.cdc
 flow transactions send ./transactions/initRecver.cdc 
 
 flow transactions send ./transactions/destroyRecver.cdc 
+
+# Selector
+flow scripts execute ./scripts/test/randTest.cdc 
+
+flow transactions send ./transactions/test/testRegisterRouter.cdc 1 --gas-limit 10000
