@@ -75,4 +75,4 @@ flow scripts execute ./scripts/test/randTest.cdc
 
 flow scripts execute ./scripts/test/testSelectStatistic.cdc 
 
-flow transactions send ./transactions/test/testRegisterRouter.cdc 1 --gas-limit 10000
+flow transactions send ./transactions/test/testRegisterRouter.cdc 11 --gas-limit 10000

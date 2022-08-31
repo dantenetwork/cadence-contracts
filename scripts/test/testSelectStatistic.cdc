@@ -16,15 +16,17 @@ pub struct SelectStatistic {
     }
 }
 
-pub fun main() {
+pub fun main(): [[UFix64; 2]]{
+    /*
     var addr: UInt64 = 0x01;
     let routers: [Address] = [];
     while addr < 100 {
         routers.append(Address(addr));
         addr = addr + 1;
     }
-
+    
     SettlementContract.testRegisterRouters(routers: routers);
+    */
 
     let validators = SettlementContract.getRegisteredRouters();
 
@@ -37,7 +39,7 @@ pub fun main() {
     }
 
     var loops = 0;
-    while loops < 50 {
+    while loops < 300 {
         let slctedValidators = SettlementContract.select();
 
         for ele in slctedValidators {
@@ -46,4 +48,14 @@ pub fun main() {
 
         loops = loops + 1;
     }
+
+    let rst: [[UFix64; 2]] = [];
+    for ele in staticHolder.values {
+        let c = ele.crd / sumCrd;
+        let s = UFix64(ele.selected) / 300.0 / 7.0;
+
+        rst.append([c, s]);
+    }
+
+    return rst;
 }

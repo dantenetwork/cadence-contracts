@@ -156,6 +156,8 @@ pub contract SettlementContract {
             }
         }
 
+        // log(itvlRange);
+
         if UInt32(validValidators.length) <= self.sys_validatorNumber {
             for ele in validValidators {
                 selected.append(ele.address);
@@ -173,8 +175,8 @@ pub contract SettlementContract {
             crdRatio = self.selectCrdUpper;
         }
 
-        let crdNumber: UInt32 = UInt32(UFix64(self.sys_validatorNumber) * crdRatio);
-        // let randNumber: UInt32 = self.sys_validatorNumber - crdNumber;
+        // let crdNumber: UInt32 = UInt32(UFix64(self.sys_validatorNumber) * crdRatio);
+        let crdNumber = self.sys_validatorNumber;
 
         // select according to credibility
         while UInt32(selected.length) < crdNumber {
@@ -183,6 +185,9 @@ pub contract SettlementContract {
             let ratio =  itvlRange / UFix64(UInt32.max);
             let point1 = UFix64(randTwo[0]) * ratio;
             let point2 = UFix64(randTwo[1]) * ratio;
+
+            //let point1 = UFix64(randTwo[0] % UInt32(itvlRange));
+            //let point2 = UFix64(randTwo[1] % UInt32(itvlRange));
 
             let points = [point1, point2];
 
@@ -218,8 +223,8 @@ pub contract SettlementContract {
             // clear selected validators. We shold delete the larger index first
             var idxEle = selectedIdxs.length - 1;
             while idxEle >= 0 {
-                itvlRange = itvlRange - validValidators[idxEle].crd;
-                validValidators.remove(at: idxEle);
+                itvlRange = itvlRange - validValidators[selectedIdxs[idxEle]].crd;
+                validValidators.remove(at: selectedIdxs[idxEle]);
 
                 idxEle = idxEle - 1;
             }
