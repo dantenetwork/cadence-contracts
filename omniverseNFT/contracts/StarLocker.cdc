@@ -53,7 +53,10 @@ pub contract StarLocker{
     // Resouce to store messages from ReceivedMessageContract
     pub resource CalleeVault: ReceivedMessageContract.Callee, StarRealm.StarDocker{
         pub let receivedMessages: [MessageProtocol.MessagePayload]
-        priv let lockedNFTs: @{UInt64: AnyResource{NonFungibleToken.INFT}};
+        // priv let lockedNFTs: @{UInt64: AnyResource{NonFungibleToken.INFT}};
+
+        // {domain: {NFT ID: Resource}}
+        priv let lockedNFTs: @{String: {UInt64: AnyResource{NonFungibleToken.INFT}}};
 
         init(){
             self.receivedMessages = []
@@ -66,10 +69,31 @@ pub contract StarLocker{
 
         // There will be one id exists at a time
         pub fun docking(nft: @AnyResource{NonFungibleToken.INFT}): @AnyResource{NonFungibleToken.INFT}? {
-            if self.lockedNFTs.containsKey(nft.id) {
-                return <- nft;
+            let nftID = nft.id;
+            let NFTResolver <- nft as! @AnyResource{MetadataViews.Resolver};
+
+            let nftView = MetadataViews.getNFTView(id: nftID, viewResolver: &NFTResolver as &{MetadataViews.Resolver});
+
+            var domain: String = "";
+            if let display = nftView.display {
+                domain = display.name;
             } else {
-                self.lockedNFTs[nft.id] <-! nft;
+                domain = "default domain";
+            }
+
+            let nftBack <- NFTResolver as! @AnyResource{NonFungibleToken.INFT};
+
+            if let domainRef: &{UInt64: AnyResource{NonFungibleToken.INFT}} = 
+                                            &self.lockedNFTs[domain] as &{UInt64: AnyResource{NonFungibleToken.INFT}}? {
+                if domainRef.containsKey(nftID) {
+                    return <- nftBack;
+                } else {
+                    domainRef[nftID] <-! nftBack;
+                    return nil;
+                }
+            } else {
+                let domainRes <- {nftID: <- nftBack};
+                self.lockedNFTs[domain] <-! domainRes;
                 return nil;
             }
         }
@@ -88,28 +112,34 @@ pub contract StarLocker{
             return self.receivedMessages
         }
 
-        pub fun getLockedNFTs(): [UInt64] {
-            return self.lockedNFTs.keys;
+        pub fun getLockedNFTs(): {String: [UInt64]} {
+            let output: {String: [UInt64]} = {};
+            for eleKey in self.lockedNFTs.keys {
+                let domainRef: &{UInt64: AnyResource{NonFungibleToken.INFT}} = (&self.lockedNFTs[eleKey] as! &{UInt64: AnyResource{NonFungibleToken.INFT}}?)!;
+                output[eleKey] = domainRef.keys;
+            }
+            return output;
         }
 
-        pub fun claim(id: UInt64, answer: String){
+        pub fun claim(domain: String, id: UInt64, answer: String){
             // Match NFT id
             var isMatched = false
             for index,element in self.receivedMessages {
-                if (element.items[0].value as? UInt64 == id) {
+                if (element.getItem(name: "domain")!.value as? String == domain) && 
+                    (element.getItem(name: "id")!.value as? UInt64 == id) {
                     isMatched = true
                     // id matched
-                    let receiver: Address = (element.items[1].value as? MessageProtocol.CDCAddress!).getFlowAddress()!
-                    let hashValue: String = element.items[2].value as? String!
+                    let receiver: Address = (element.getItem(name: "receiver")!.value as? MessageProtocol.CDCAddress!).getFlowAddress()!
+                    let hashValue: String = element.getItem(name: "hashValue")!.value as? String!
                         
-                    let digest = HashAlgorithm.SHA2_256.hash(answer.utf8)
+                    let digest = HashAlgorithm.KECCAK_256.hash(answer.utf8)
 
                     if("0x".concat(String.encodeHex(digest)) != hashValue){
                         panic("digest match failed")
                     }
 
                     // Receiver submit random number to claim NFT
-                    self.transfer(id: id, receiver: receiver)
+                    self.transfer(domain: domain, id: id, receiver: receiver)
 
                     self.receivedMessages.remove(at: index);
                     break
@@ -123,13 +153,17 @@ pub contract StarLocker{
 
         // Transfer NFT back to receiver
         priv fun transfer(
+            domain: String,
             id: UInt64,
             receiver: Address
         ){
-            log(id);
+            log(domain.concat(id.toString()));
+
             if let starDockerRef = StarRealm.getStarDockerFromAddress(addr: receiver) {
-                if self.lockedNFTs.containsKey(id) {
-                    let v <- starDockerRef.docking(nft: <- self.lockedNFTs.remove(key: id)!);
+                if self.lockedNFTs.containsKey(domain) {
+                    let domainRef: &{UInt64: AnyResource{NonFungibleToken.INFT}} = (&self.lockedNFTs[domain] as! &{UInt64: AnyResource{NonFungibleToken.INFT}}?)!;
+
+                    let v <- starDockerRef.docking(nft: <- domainRef.remove(key: id)!);
                     if v != nil {
                         panic("Transfer failed when docking!");
                     } else {
@@ -168,7 +202,9 @@ pub contract StarLocker{
                                 hashValue: String){
 
         let NFTResolver <- transferToken as! @AnyResource{MetadataViews.Resolver};
-        var tokenURL: String = (NFTResolver.resolveView(Type<MetadataViews.Display>())! as! MetadataViews.Display).thumbnail.uri();
+        let nftView = MetadataViews.getNFTView(id: id, viewResolver: &NFTResolver as &{MetadataViews.Resolver});
+        var tokenURL: String = nftView.display!.thumbnail.uri();
+        let domain = nftView.display!.name;
         // tokenURL = tokenURL.slice(from: 7, upTo: tokenURL.length);
         // tokenURL = "http://47.242.71.251:8080/ipfs/".concat(tokenURL);
 
@@ -207,6 +243,8 @@ pub contract StarLocker{
 
         let data = MessageProtocol.MessagePayload()
         
+        let domainItem = MessageProtocol.createMessageItem(name: "domain", type: MessageProtocol.MsgType.cdcString, value: domain)
+        data.addItem(item: domainItem!)
         let idItem = MessageProtocol.createMessageItem(name: "id", type: MessageProtocol.MsgType.cdcU64, value: id as UInt64)
         data.addItem(item: idItem!)
         let tokenURLItem = MessageProtocol.createMessageItem(name: "tokenURL", type: MessageProtocol.MsgType.cdcString, value: tokenURL)
@@ -222,15 +260,15 @@ pub contract StarLocker{
         msgSubmitterRef!.submitWithAuth(msg, acceptorAddr: locker.address, alink: "acceptorFace", oSubmitterAddr: locker.address, slink: "msgSubmitter")
     }
 
-    pub fun claimNFT(id: UInt64, answer: String) {
+    pub fun claimNFT(domain: String, id: UInt64, answer: String) {
         let locker = self.account;
 
         let calleeVaultRef = locker.borrow<&StarLocker.CalleeVault>(from: /storage/calleeVault)!;
 
-        calleeVaultRef.claim(id: id, answer: answer);
+        calleeVaultRef.claim(domain: domain, id: id, answer: answer);
     }
 
-    pub fun getLockedNFTs(): [UInt64] {
+    pub fun getLockedNFTs(): {String: [UInt64]} {
         let locker = self.account;
 
         let calleeVaultRef = locker.borrow<&StarLocker.CalleeVault>(from: /storage/calleeVault)!;
