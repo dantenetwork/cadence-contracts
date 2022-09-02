@@ -1,6 +1,7 @@
 import MessageProtocol from "../../contracts/MessageProtocol.cdc"
 import SentMessageContract from "../../contracts/SentMessageContract.cdc"
 import ReceivedMessageContract from "../../contracts/ReceivedMessageContract.cdc"
+import CrossChain from "../../contracts/CrossChain.cdc"
 
 import MetadataViews from "./MetadataViews.cdc"
 import NonFungibleToken from "./NonFungibleToken.cdc"
@@ -26,7 +27,8 @@ pub contract StarLocker{
         // save message as resource
         self.account.save(<-receivedMessageVault, to: /storage/receivedMessageVault)
         self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault, target: /storage/receivedMessageVault)
-    
+        CrossChain.registerRecvAccount(address: self.account.address, link: "receivedMessageVault");
+
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // create cross chain sent message resource
         let sentMessageVault <-SentMessageContract.createSentMessageVault()
@@ -35,6 +37,7 @@ pub contract StarLocker{
         self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/sentMessageVault, target: /storage/sentMessageVault)
         // add acceptor link
         self.account.link<&{SentMessageContract.AcceptorFace}>(/public/acceptorFace, target: /storage/sentMessageVault)
+        CrossChain.registerSendAccount(address: self.account.address, link: "sentMessageVault");
 
         // add message submitter
         let msgSubmitter <- SentMessageContract.createMessageSubmitter()
@@ -196,15 +199,13 @@ pub contract StarLocker{
     }
 
     // This is a temporary solutions
-    pub fun sendCrossChainNFT(transferToken: @AnyResource, 
-                                id: UInt64, 
-                                owner: String, 
-                                hashValue: String){
+    pub fun sendoutNFT(transferToken: @AnyResource, receiver: String, hashValue: String){
 
         let NFTResolver <- transferToken as! @AnyResource{MetadataViews.Resolver};
-        let nftView = MetadataViews.getNFTView(id: id, viewResolver: &NFTResolver as &{MetadataViews.Resolver});
-        var tokenURL: String = nftView.display!.thumbnail.uri();
-        let domain = nftView.display!.name;
+        // let nftView = MetadataViews.getNFTView(id: id, viewResolver: &NFTResolver as &{MetadataViews.Resolver});
+        let nftDisplay = MetadataViews.getDisplay(&NFTResolver as & {MetadataViews.Resolver});
+        var tokenURL: String = nftDisplay!.thumbnail.uri();
+        let domain = nftDisplay!.name;
         // tokenURL = tokenURL.slice(from: 7, upTo: tokenURL.length);
         // tokenURL = "http://47.242.71.251:8080/ipfs/".concat(tokenURL);
 
@@ -249,7 +250,7 @@ pub contract StarLocker{
         data.addItem(item: idItem!)
         let tokenURLItem = MessageProtocol.createMessageItem(name: "tokenURL", type: MessageProtocol.MsgType.cdcString, value: tokenURL)
         data.addItem(item: tokenURLItem!)
-        let ownerItem = MessageProtocol.createMessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: owner)
+        let ownerItem = MessageProtocol.createMessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: receiver)
         data.addItem(item: ownerItem!)
         let hashValueItem = MessageProtocol.createMessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)
         data.addItem(item: hashValueItem!)

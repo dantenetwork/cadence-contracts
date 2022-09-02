@@ -341,6 +341,7 @@ pub contract SettlementContract {
         return [high32, lower32];
     }
 
+    ////////////////////////////////////////////////////////////////////////
     // Test funcions. To be deleted
     pub fun testRegisterRouters(routers: [Address]) {
         for router in routers {

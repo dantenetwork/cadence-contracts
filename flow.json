@@ -21,7 +21,7 @@
     "FungibleToken": "./omniverseNFT/contracts/utility/FungibleToken.cdc",
 	  "NonFungibleToken": "./omniverseNFT/contracts/NonFungibleToken.cdc",
 	  "MetadataViews": "./omniverseNFT/contracts/MetadataViews.cdc",
-    "ExampleNFT": "./omniverseNFT/contracts/Punsters.cdc",
+    "ExampleNFT": "./omniverseNFT/contracts/ExampleNFT.cdc",
 	  "StarRealm": "./omniverseNFT/contracts/StarRealm.cdc",
     "StarLocker": "./omniverseNFT/contracts/StarLocker.cdc"
   },
@@ -93,7 +93,8 @@
         "NonFungibleToken",
         "MetadataViews",
         "StarRealm",
-        "StarLocker"
+        "StarLocker",
+        "ExampleNFT"
       ]
     },
     "testnet": {

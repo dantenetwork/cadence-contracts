@@ -11,6 +11,7 @@
 
 import NonFungibleToken from "./NonFungibleToken.cdc"
 import MetadataViews from "./MetadataViews.cdc"
+import StarRealm from "./StarRealm.cdc"
 
 pub contract ExampleNFT: NonFungibleToken {
 
@@ -150,9 +151,11 @@ pub contract ExampleNFT: NonFungibleToken {
                     "Cannot borrow ExampleNFT reference: the ID of the returned reference is incorrect"
             }
         }
+
+        pub fun docking(nft: @AnyResource{NonFungibleToken.INFT}): @AnyResource{NonFungibleToken.INFT}?;
     }
 
-    pub resource Collection: ExampleNFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
+    pub resource Collection: StarRealm.StarDocker, ExampleNFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an `UInt64` ID field
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
@@ -165,7 +168,7 @@ pub contract ExampleNFT: NonFungibleToken {
         pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
             let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 
-            emit Withdraw(id: token.id, from: self.owner?.address)
+            // emit Withdraw(id: token.id, from: self.owner?.address)
 
             return <-token
         }
@@ -180,9 +183,17 @@ pub contract ExampleNFT: NonFungibleToken {
             // add the new token to the dictionary which removes the old one
             let oldToken <- self.ownedNFTs[id] <- token
 
-            emit Deposit(id: id, to: self.owner?.address)
+            // emit Deposit(id: id, to: self.owner?.address)
 
             destroy oldToken
+        }
+
+        pub fun docking(nft: @AnyResource{NonFungibleToken.INFT}): @AnyResource{NonFungibleToken.INFT}? {
+            let nftoken: @NonFungibleToken.NFT <- nft as! @NonFungibleToken.NFT;
+
+            self.deposit(token: <- nftoken);
+
+            return nil;
         }
 
         // getIDs returns an array of the IDs that are in the collection
@@ -285,6 +296,18 @@ pub contract ExampleNFT: NonFungibleToken {
         let minter <- create NFTMinter()
         self.account.save(<-minter, to: self.MinterStoragePath)
 
-        emit ContractInitialized()
+        // emit ContractInitialized()
+    }
+
+    pub fun getCollectionPublic(addr: Address): &{NonFungibleToken.CollectionPublic} {
+        let pubAcct = getAccount(addr);
+        let cpRef = pubAcct.getCapability<&{NonFungibleToken.CollectionPublic}>(self.CollectionPublicPath).borrow()!;
+        return cpRef;
+    }
+
+    pub fun getExamplePubblic(addr: Address): &{ExampleNFTCollectionPublic} {
+        let pubAcct = getAccount(addr);
+        let cpRef = pubAcct.getCapability<&{ExampleNFTCollectionPublic}>(self.CollectionPublicPath).borrow()!;
+        return cpRef;
     }
 }
