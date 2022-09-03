@@ -2,6 +2,8 @@ pm2 status
 
 pm2 start client/crosschain/crossChainSync.js —name FlowCrossChain
 
+flow project deploy --update
+
 flow signatures generate "hello nika" --signer emulator-account
 
 flow transactions send ./transactions/verifyByIdentity.cdc "633506677220b0e1c71447ebf1c4b050d44552383501ffdfcb1b46c7a71484f1" "5b150258301bd5847e753c37b76bc97178a106ed15edd51683001abb90c0f43a2ca5d6108fc235cb6485f115c2a2e0fee800be6900f35df7cea6733ef9feec87"

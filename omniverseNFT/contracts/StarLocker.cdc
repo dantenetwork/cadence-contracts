@@ -199,7 +199,12 @@ pub contract StarLocker{
     }
 
     // This is a temporary solutions
-    pub fun sendoutNFT(transferToken: @AnyResource, receiver: String, hashValue: String){
+    pub fun sendoutNFT(transferToken: @AnyResource, 
+                        toChain: String,
+                        contractName: [UInt8],
+                        actionName: [UInt8],
+                        receiver: MessageProtocol.CDCAddress, 
+                        hashValue: String){
 
         let NFTResolver <- transferToken as! @AnyResource{MetadataViews.Resolver};
         // let nftView = MetadataViews.getNFTView(id: id, viewResolver: &NFTResolver as &{MetadataViews.Resolver});
@@ -233,10 +238,7 @@ pub contract StarLocker{
         log("NFT transferred from owner to account locker")
 
         // Message params
-        let toChain = "Ethereum"
         let sqos = MessageProtocol.SQoS()
-        let contractName: [UInt8] = []
-        let actionName: [UInt8] = []
         let callType: UInt8 = 1
         let callback: [UInt8] = []
         let commitment: [UInt8] = []
@@ -250,7 +252,7 @@ pub contract StarLocker{
         data.addItem(item: idItem!)
         let tokenURLItem = MessageProtocol.createMessageItem(name: "tokenURL", type: MessageProtocol.MsgType.cdcString, value: tokenURL)
         data.addItem(item: tokenURLItem!)
-        let ownerItem = MessageProtocol.createMessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcString, value: receiver)
+        let ownerItem = MessageProtocol.createMessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcAddress, value: receiver)
         data.addItem(item: ownerItem!)
         let hashValueItem = MessageProtocol.createMessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)
         data.addItem(item: hashValueItem!)

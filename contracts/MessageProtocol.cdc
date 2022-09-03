@@ -21,6 +21,10 @@ pub contract MessageProtocol {
         return nil;
     }
 
+    pub fun addressFromHexString(addrHexStr: String): Address? {
+        return self.addressFromBytes(addrBytes: addrHexStr.decodeHex());
+    }
+
     pub struct CDCAddress {
         pub let addr: [UInt8];
         pub let addrType: UInt8;
