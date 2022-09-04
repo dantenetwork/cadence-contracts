@@ -1,7 +1,7 @@
 import SettlementContract from "../../contracts/Settlement.cdc";
 
-pub fun main(): [[UFix64]] {
-    let output: [[UFix64]] = [];
+pub fun main() {
+    //let output: [[UFix64]] = [];
 
     var loops: Int = 0;
 
@@ -34,10 +34,18 @@ pub fun main(): [[UFix64]] {
         loops = loops + 1;
     }
 
-    //log(honestRst.length);
-    output.append(honestRst);
-    output.append(evilRst);
-    output.append(exceptionRst);
+    //output.append(honestRst);
+    log("----------------------------------------------------------------")
+    log("Simulate doing honest: ");
+    log(honestRst);
 
-    return output;
+    //output.append(evilRst);
+    log("----------------------------------------------------------------")
+    log("Simulate doing evil: ");
+    log(evilRst);
+
+    //output.append(exceptionRst);
+    log("----------------------------------------------------------------")
+    log("Simulate exception: ");
+    log(exceptionRst);
 }

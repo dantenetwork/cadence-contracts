@@ -85,5 +85,8 @@ flow scripts execute ./omniverseNFT/scripts/SendNFToutTest.cdc 0xf8d6e0586b0a20c
 # message verification
 flow scripts execute ./scripts/test/MessageVerificationTest.cdc
 
+# router evaluation
+flow scripts execute ./scripts/test/crdTest.cdc
+
 # refresh random seed
 flow transactions send ./test/transactions/empty.cdc
