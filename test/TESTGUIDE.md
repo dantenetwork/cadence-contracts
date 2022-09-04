@@ -29,7 +29,7 @@ node performance.js
 # the result will in the csv file ./data/<newest timestamp>selection.csv
 ```
 If everything is OK, we will get the following statistic results:
-
+![flowstatistic](https://user-images.githubusercontent.com/83746881/188304733-bd1535d1-319e-4a19-85fe-342379cb191b.png)
 
 ## Message Verification
 
@@ -60,6 +60,6 @@ Note that the test process is executed in the scripts environment and the on-cha
 
 Here is the [source code](../omniverseNFT/scripts/SendNFToutTest.cdc) of this test case.
 If everything is OK, we will get the following results:
-
+![1662279873281](https://user-images.githubusercontent.com/83746881/188304532-1df3bb23-d0af-43c8-b539-915cfbe44259.png)
 
 ## SDK test
