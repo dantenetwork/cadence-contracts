@@ -4,6 +4,12 @@ pm2 start client/crosschain/crossChainSync.js —name FlowCrossChain
 
 flow project deploy --update
 
+flow accounts create --key 81262aa27f1630ccf1293300e8e1d9a6ba542dffa796b860d53873867175e9d31bd7b7581d2f200f9c3dfdbc10ae912ff036946981e3d8996a14f186d20e3e2f
+
+# transfer Flow Token
+flow transactions send ./transaction/test/transferFlow.cdc 100.0 0x01cf0e2f2f715450
+
+
 flow signatures generate "hello nika" --signer emulator-account
 
 flow transactions send ./transactions/verifyByIdentity.cdc "633506677220b0e1c71447ebf1c4b050d44552383501ffdfcb1b46c7a71484f1" "5b150258301bd5847e753c37b76bc97178a106ed15edd51683001abb90c0f43a2ca5d6108fc235cb6485f115c2a2e0fee800be6900f35df7cea6733ef9feec87"

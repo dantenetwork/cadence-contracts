@@ -8,7 +8,7 @@
   "testnet": {
     "default": {
       "port": 9000,
-      "serviceAccount": "testnet-acount"
+      "serviceAccount": "testnet-account"
     }
   },
   "contracts": {
@@ -78,6 +78,16 @@
 			"address": "0x5f37faed5f558aca",
 			"Public Key": "0d7ebc326d4b8df0b0290135688ad3822db1d41899a290d138c39d2ff990d7e1c524b015ecacd3c309b7c13f4a879c56c6f735e7904c601503ab4613b29efec3",
 			"key": "89c292ef9656a3767f4867befc355fd445ad90be8ceeef358ed84d829d2ecffd"
+		},
+    "testnet-Frank" : {
+			"address": "0x3c03aba355023006",
+			"key": {
+				"type": "hex",
+				"index": 0,
+				"privateKey": "d9fb0917e1d83e2d42f14f6ac5588e755901150f0aa0953bbf529752e786f50c",
+				"signatureAlgorithm": "ECDSA_secp256k1",
+				"hashAlgorithm": "SHA2_256"
+			}
 		}
   },
   "deployments": {
@@ -98,13 +108,19 @@
       ]
     },
     "testnet": {
-      "testnet-Bob": [
+      "testnet-Davy": [
         "MessageProtocol",
         "IdentityVerification",
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",
-        "SettlementContract"
+        "SettlementContract", 
+        "FungibleToken", 
+        "NonFungibleToken",
+        "MetadataViews",
+        "StarRealm",
+        "StarLocker",
+        "ExampleNFT"
       ]
     }
   }
