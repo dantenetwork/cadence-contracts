@@ -400,10 +400,9 @@ pub contract ReceivedMessageContract{
             for k in messageCache.msgInstance.keys {
                 if let msgCopyRef: &messageCopy = &messageCache.msgInstance[k] as &messageCopy? {
                     msgCopyRef.credibility = msgCopyRef.credibility / crdSum;
-                    // if msgCopyRef.credibility > maxCredibility {
-                    //     maxCredibility = msgCopyRef.credibility;
-                    //     maxCopyKey = k;
-                    // }
+                    
+                    log("Message copy hash: ".concat(msgCopyRef.messageInfo.messageHash).concat(". Credibility: ").concat(msgCopyRef.credibility.toString()));
+
                     if msgCopyRef.credibility >= ReceivedMessageContract.vfThreshold {
                         recvMsgCore = msgCopyRef.messageInfo;
                         honest = msgCopyRef.submitters;

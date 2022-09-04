@@ -65,8 +65,20 @@ pub fun main() {
     log("simulate 10 routers submitting 3 different message copies..."); 
     let receivedCache = simulateMessageSet(routers: routers);
     for ele in receivedCache.msgInstance.values {
-        log(ele.messageInfo.messageHash);
+        log("Message copy hash: ".concat(ele.messageInfo.messageHash));
+        log("Submitters: ");
         log(ele.submitters);
     }
     log("----------------------------------------------------------------")
+
+    ///////////////////////////////////////////////////
+    // make verification
+    let recver <- ReceivedMessageContract.createReceivedMessageVault();
+    log("Verification result: ");
+    if let verifiedMessage = recver.messageVerify(messageCache: receivedCache){
+        log("Success: ".concat(verifiedMessage.messageHash));
+    } else {
+        log("Verification failed as none of the message copy get enough credibility!");
+    }
+    destroy recver;
 }
