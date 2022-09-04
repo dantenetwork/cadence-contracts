@@ -77,7 +77,7 @@ flow scripts execute ./scripts/test/randTest.cdc
 
 flow scripts execute ./scripts/test/testSelectStatistic.cdc 
 
-flow transactions send ./transactions/test/testRegisterRouter.cdc 11 --gas-limit 10000
+flow transactions send ./transactions/test/testRegisterRouter.cdc 101 --gas-limit 10000
 
 # omniverseNFT
 flow scripts execute ./omniverseNFT/scripts/SendNFToutTest.cdc 0xf8d6e0586b0a20c7

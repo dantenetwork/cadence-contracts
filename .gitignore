@@ -7,3 +7,4 @@ erc721/build
 client/package-lock.json
 package-lock.json
 .secret
+data
