@@ -81,3 +81,9 @@ flow transactions send ./transactions/test/testRegisterRouter.cdc 101 --gas-limi
 
 # omniverseNFT
 flow scripts execute ./omniverseNFT/scripts/SendNFToutTest.cdc 0xf8d6e0586b0a20c7
+
+# message verification
+flow scripts execute ./scripts/test/MessageVerificationTest.cdc
+
+# refresh random seed
+flow transactions send ./test/transactions/empty.cdc

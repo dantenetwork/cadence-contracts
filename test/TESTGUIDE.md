@@ -28,11 +28,34 @@ npm install
 node performance.js
 # the result will in the csv file ./data/<newest timestamp>selection.csv
 ```
+Note that we send an empty transaction to refresh the random seed between each epoch.
+
 If everything is OK, we will get the following statistic results:
 ![flowstatistic](https://user-images.githubusercontent.com/83746881/188304733-bd1535d1-319e-4a19-85fe-342379cb191b.png)
 
 ## Message Verification
+```sh
+cd ..
 
+# start the emulator
+flow emulator --verbose
+
+# deploy
+flow project deploy --update
+
+# execute the test of message verification
+flow scripts execute ./scripts/test/MessageVerificationTest.cdc
+
+# Check the result in emulator log out
+
+# If the result is not what you want, send an empty transaction to refresh the random seed
+flow transactions send ./test/transactions/empty.cdc
+```
+
+If everything is OK, we will get the following result:
+### Success
+
+### failed as none of the message copy get enough credibility
 
 ## Routers evaluation
 
