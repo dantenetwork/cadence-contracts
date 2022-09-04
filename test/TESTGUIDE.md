@@ -54,8 +54,9 @@ flow transactions send ./test/transactions/empty.cdc
 
 If everything is OK, we will get the following result:
 ### Success
-
+![1662288359059](https://user-images.githubusercontent.com/83746881/188309763-d4da4e7e-d910-4635-9b41-1707e26817d2.png)
 ### failed as none of the message copy get enough credibility
+![1662288815215](https://user-images.githubusercontent.com/83746881/188309783-d8b525fd-7690-40f6-b024-11819bbb2836.png)
 
 ## Routers evaluation
 
