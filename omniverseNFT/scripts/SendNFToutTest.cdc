@@ -132,7 +132,6 @@ pub fun main(address: Address) {
     var loop = 0;
     while loop < 10 {
         minterRef.mintNFT(recipient: collectionPublicRef,
-            name: "Example Series",
             description: "Hello Kitty",
             thumbnail: "ipfsurl",
             royalties: []);
@@ -166,8 +165,8 @@ pub fun main(address: Address) {
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // Test receive NFT and unlock
-    let nextIDs = queryNextMessageIDtoSubmit(routerAddr: address);
-    log(nextIDs);
+    var nextIDs = queryNextMessageIDtoSubmit(routerAddr: address);
+    // log(nextIDs);
 
     var nextID: UInt128 = 1;
 
@@ -182,7 +181,8 @@ pub fun main(address: Address) {
 
     // log(SettlementContract.getRegisteredRouters());
 
-    // generate submittion
+    // generate submittion. Use the content of `sentMsg` to simulate the receiving messages
+    // toChain and fromChain are exchanged
     let tobeSubmitted = generateSubmittion(
             id: nextID, 
             fromChain: sentMsg.toChain,
@@ -198,9 +198,9 @@ pub fun main(address: Address) {
 
     //log(String.encodeHex(sentMsg.toBytes()));
     //log(String.encodeHex(tobeSubmitted.originMessage.toBytes()));
-    log(tobeSubmitted.toBeSign);
+    //log(tobeSubmitted.toBeSign);
 
-    // signature of message to submit
+    // signature of message to submit. The following signature is signed by off-chain js
     let submitSignature = "7b1dac2f4cad20bc4dc2829ef659079a674b47ca730071cea259d669ea44751fa9445c243a7c30b8347122dd4a7252296ca2a38674ebe286d7c44ceac366bd3e";
 
     if let recverRef = ReceivedMessageContract.getRecverRef(recverAddress: address, link: "receivedMessageVault") {
@@ -214,6 +214,13 @@ pub fun main(address: Address) {
         panic("Invalid `resourceAccount` or `link`!");
     }
 
-    
+    //nextIDs = queryNextMessageIDtoSubmit(routerAddr: address);
+    //log(nextIDs);
+
+    // log(StarLocker.queryMessage());
+
+    log(examplePublicRef.getIDs());
+    StarLocker.claimNFT(domain: ExampleNFT.domainName, id: 3, answer: answer);
+    log(examplePublicRef.getIDs());
 }
  

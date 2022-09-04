@@ -15,6 +15,8 @@ import StarRealm from "./StarRealm.cdc"
 
 pub contract ExampleNFT: NonFungibleToken {
 
+    pub let domainName: String
+
     pub var totalSupply: UInt64
 
     pub event ContractInitialized()
@@ -36,14 +38,13 @@ pub contract ExampleNFT: NonFungibleToken {
     
         init(
             id: UInt64,
-            name: String,
             description: String,
             thumbnail: String,
             royalties: [MetadataViews.Royalty],
             metadata: {String: AnyStruct},
         ) {
             self.id = id
-            self.name = name
+            self.name = ExampleNFT.domainName
             self.description = description
             self.thumbnail = thumbnail
             self.royalties = royalties
@@ -242,7 +243,6 @@ pub contract ExampleNFT: NonFungibleToken {
         // and deposit it in the recipients collection using their collection reference
         pub fun mintNFT(
             recipient: &{NonFungibleToken.CollectionPublic},
-            name: String,
             description: String,
             thumbnail: String,
             royalties: [MetadataViews.Royalty]
@@ -259,7 +259,6 @@ pub contract ExampleNFT: NonFungibleToken {
             // create a new NFT
             var newNFT <- create NFT(
                 id: ExampleNFT.totalSupply,
-                name: name,
                 description: description,
                 thumbnail: thumbnail,
                 royalties: royalties,
@@ -274,6 +273,9 @@ pub contract ExampleNFT: NonFungibleToken {
     }
 
     init() {
+
+        self.domainName = "Example Series"
+
         // Initialize the total supply
         self.totalSupply = 0
 
@@ -291,6 +293,8 @@ pub contract ExampleNFT: NonFungibleToken {
             self.CollectionPublicPath,
             target: self.CollectionStoragePath
         )
+
+        self.account.link<&{StarRealm.StarDocker}>(StarRealm.DockerPublicPath, target: self.CollectionStoragePath)
 
         // Create a Minter resource and save it to storage
         let minter <- create NFTMinter()

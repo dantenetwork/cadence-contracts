@@ -50,11 +50,11 @@ pub contract StarLocker{
         // save vault as resource
         self.account.save(<-create StarLocker.createEmptyCalleeVault(), to: /storage/calleeVault)
         self.account.link<&{ReceivedMessageContract.Callee}>(/public/calleeVault, target: /storage/calleeVault)
-        self.account.link<&{StarRealm.StarDocker}>(/public/lockerDocker, target: /storage/calleeVault)
+        // self.account.link<&{StarRealm.StarDocker}>(/public/LockerDocker, target: /storage/calleeVault)
     }
 
     // Resouce to store messages from ReceivedMessageContract
-    pub resource CalleeVault: ReceivedMessageContract.Callee, StarRealm.StarDocker{
+    pub resource CalleeVault: ReceivedMessageContract.Callee{
         pub let receivedMessages: [MessageProtocol.MessagePayload]
         // priv let lockedNFTs: @{UInt64: AnyResource{NonFungibleToken.INFT}};
 
@@ -71,7 +71,7 @@ pub contract StarLocker{
         }
 
         // There will be one id exists at a time
-        pub fun docking(nft: @AnyResource{NonFungibleToken.INFT}): @AnyResource{NonFungibleToken.INFT}? {
+        pub fun locking(nft: @AnyResource{NonFungibleToken.INFT}): @AnyResource{NonFungibleToken.INFT}? {
             let nftID = nft.id;
             let NFTResolver <- nft as! @AnyResource{MetadataViews.Resolver};
 
@@ -137,7 +137,7 @@ pub contract StarLocker{
                         
                     let digest = HashAlgorithm.KECCAK_256.hash(answer.utf8)
 
-                    if("0x".concat(String.encodeHex(digest)) != hashValue){
+                    if(String.encodeHex(digest) != hashValue){
                         panic("digest match failed")
                     }
 
@@ -160,7 +160,7 @@ pub contract StarLocker{
             id: UInt64,
             receiver: Address
         ){
-            log(domain.concat(id.toString()));
+            // log(domain.concat(id.toString()));
 
             if let starDockerRef = StarRealm.getStarDockerFromAddress(addr: receiver) {
                 if self.lockedNFTs.containsKey(domain) {
@@ -222,12 +222,10 @@ pub contract StarLocker{
 
         // Get the Collection reference for the locker
         // getting the public capability and borrowing a reference from it
-        let lockerRef = locker.getCapability(/public/lockerDocker)
-            .borrow<&{StarRealm.StarDocker}>()
-            ?? panic("Could not get locker reference to the NFT Collection")
+        let lockerRef = locker.borrow<&CalleeVault>(from: /storage/calleeVault) ?? panic("Could not get locker reference to the StarRealm")
 
         // Deposit the NFT in the locker collection
-        let v <- lockerRef.docking(nft: <- NonToken);
+        let v <- lockerRef.locking(nft: <- NonToken);
 
         if v != nil {
             panic("NFT docking failed, the `id` exists!")
