@@ -62,7 +62,7 @@ pub contract ReceivedMessageContract{
             session: MessageProtocol.Session){
             self.id = id;
             self.fromChain = fromChain;
-            self.toChain = "Flow-Test";
+            self.toChain = "FLOWTEST";
             self.sender = sender;
             self.signer = signer;
             self.sqos = sqos;
@@ -72,7 +72,8 @@ pub contract ReceivedMessageContract{
             // hash message info, the same as in `toBytes()`
             var raw_data: [UInt8] = [];
 
-            raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            // raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            raw_data = raw_data.concat(MessageProtocol.to_be_bytes_u128(self.id));
             raw_data = raw_data.concat(self.fromChain.utf8);
             raw_data = raw_data.concat(self.toChain.utf8);
 
@@ -97,7 +98,8 @@ pub contract ReceivedMessageContract{
         pub fun toBytes(): [UInt8] {
             var raw_data: [UInt8] = [];
 
-            raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            // raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            raw_data = raw_data.concat(MessageProtocol.to_be_bytes_u128(self.id));
             raw_data = raw_data.concat(self.fromChain.utf8);
             raw_data = raw_data.concat(self.toChain.utf8);
 
@@ -117,12 +119,12 @@ pub contract ReceivedMessageContract{
     pub struct messageCopy {
         pub let messageInfo: ReceivedMessageCore;
         pub let submitters: [Address];
-        pub var credibility: UInt128;
+        pub(set) var credibility: UFix64;
 
         init(om: ReceivedMessageCore) {
             self.messageInfo = om;
             self.submitters = [];
-            self.credibility = 0;
+            self.credibility = 0.0;
         }
 
         pub fun addSubmitter(submitter: Address) {
@@ -215,12 +217,10 @@ pub contract ReceivedMessageContract{
         **/
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]){
-            // TODO
-            /*
-                * the submitter of the message should be verified
-                * this can be done by the signature and public keys routers registered(`ReceivedMessageContract.registerRouter`)
-                * This can be substituted with the mechanism of resource `router`. This will be implemented later
-            */
+            // Verify the submitter
+            if (!SettlementContract.isSelected(recvAddr: self.owner!.address, router: pubAddr)) {
+                panic("Invalid Validator. Unregistered or Currently not Selected.")
+            }
 
             // Verify the signature
             if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
@@ -229,7 +229,11 @@ pub contract ReceivedMessageContract{
                                               signature: signature,
                                               hashAlgorithm: HashAlgorithm.SHA3_256)) {
                 panic("Signature verification failed!");
-            }
+            } 
+            //else {
+            //    log("Signature verification success!");
+            //    return;
+            //}
 
             var cacheIdx: Int = -1;
             
@@ -277,7 +281,13 @@ pub contract ReceivedMessageContract{
             if (cacheIdx >= 0) {
                 if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
                     // TODO: do verification
-                    let msgContent = recvMsg.content;
+                    let msgVerified = self.messageVerify(messageCache: self.message[recvMsg.fromChain]![cacheIdx]);
+                    
+                    if msgVerified == nil {
+                        return;
+                    }
+
+                    let msgContent = msgVerified!.content;
 
                     // TODO: call destination
                     let pubLink = PublicPath(identifier: msgContent.link);
@@ -361,10 +371,60 @@ pub contract ReceivedMessageContract{
           * Make sure that every message saved in ReceivedMessageArray is consistent
           * @param messageId - message id
           */
-        // pub fun messageVerify(messageId: Int): Bool{
-        //   // TODO
-        //     return true;
-        // }
+        pub fun messageVerify(messageCache: ReceivedMessageCache): ReceivedMessageCore? {
+            var honest: [Address] = [];
+            var evil: [Address] = [];
+            var exception: {Address: UFix64} = {};
+            
+            if messageCache.msgInstance.values.length == 1 {
+                SettlementContract.workingNodesTrail(honest: messageCache.msgInstance.values[0].submitters, evil: [], exception: {});
+                return messageCache.msgInstance.values[0].messageInfo;
+            }
+            
+            var crdSum = 0.0;
+            // Calculate credibilities of `messageCopy`
+            for k in messageCache.msgInstance.keys {
+                if let msgCopyRef: &messageCopy = &messageCache.msgInstance[k] as &messageCopy? {
+                    for submitter in msgCopyRef.submitters {
+                        msgCopyRef.credibility = msgCopyRef.credibility + (SettlementContract.getCredibility(router: submitter) ?? panic("submitter not existed."));
+                    }
+
+                    crdSum = crdSum + msgCopyRef.credibility;
+                }
+            }
+
+            var recvMsgCore: ReceivedMessageCore? = nil;
+            // var maxCopyKey: String = "";
+            // var maxCredibility = 0.0;
+            // Normalization and check the verification threshold
+            for k in messageCache.msgInstance.keys {
+                if let msgCopyRef: &messageCopy = &messageCache.msgInstance[k] as &messageCopy? {
+                    msgCopyRef.credibility = msgCopyRef.credibility / crdSum;
+                    // if msgCopyRef.credibility > maxCredibility {
+                    //     maxCredibility = msgCopyRef.credibility;
+                    //     maxCopyKey = k;
+                    // }
+                    if msgCopyRef.credibility >= ReceivedMessageContract.vfThreshold {
+                        recvMsgCore = msgCopyRef.messageInfo;
+                        honest = msgCopyRef.submitters;
+                    } else {
+                        for ele in msgCopyRef.submitters {
+                            exception[ele] = msgCopyRef.credibility;
+                        }
+                    }
+                }
+            }
+
+            // no message copy has enough credibility
+            if recvMsgCore == nil {
+                SettlementContract.workingNodesTrail(honest: [], evil: [], exception: exception);
+            } else {
+                evil = exception.keys;
+                SettlementContract.workingNodesTrail(honest: honest, evil: evil, exception: {});
+            }
+
+            return recvMsgCore;
+        }
 
         /**
           * Called from `messageVerify` to get the credibilities of validators to take weighted aggregation verification of messages
@@ -389,8 +449,13 @@ pub contract ReceivedMessageContract{
         // }
     }
 
-    init() {
+    // Temporarily, verification threshold is setted to be 0.7 when contract deployed
+    // This will be moved to Resource `ReceivedMessageVault` when developing `SQoS` features
+    // This value must be larger than 0.5
+    pub let vfThreshold: UFix64;
 
+    init() {
+        self.vfThreshold = 0.7;
     }
 
     // Create recource to store received message
@@ -417,7 +482,7 @@ pub contract ReceivedMessageContract{
 
     // Temporary test
     pub fun testSettlementCall() {
-        SettlementContract.workingNodesTrail();
+        SettlementContract.workingNodesTrail(honest: [], evil: [], exception: {});
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -437,3 +502,4 @@ pub contract ReceivedMessageContract{
     //  }
 }
 
+ 

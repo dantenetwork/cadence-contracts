@@ -21,6 +21,10 @@ pub contract MessageProtocol {
         return nil;
     }
 
+    pub fun addressFromHexString(addrHexStr: String): Address? {
+        return self.addressFromBytes(addrBytes: addrHexStr.decodeHex());
+    }
+
     pub struct CDCAddress {
         pub let addr: [UInt8];
         pub let addrType: UInt8;
@@ -109,7 +113,7 @@ pub contract MessageProtocol {
             // dataBytes = dataBytes.concat([self.type.rawValue]);
 
             //Encode `AnyStruct` into `[UInt8]`
-            switch MsgType(rawValue: self.type) {
+            switch MsgType(rawValue: self.type)! {
                 case MsgType.cdcString:
                     dataBytes = dataBytes.concat(self.value as? String!.utf8);
                     break;
@@ -126,7 +130,8 @@ pub contract MessageProtocol {
                     dataBytes = dataBytes.concat(self.value as? UInt64!.toBigEndianBytes());
                     break;
                 case MsgType.cdcU128: 
-                    dataBytes = dataBytes.concat(self.value as? UInt128!.toBigEndianBytes());
+                    // dataBytes = dataBytes.concat(self.value as? UInt128!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(MessageProtocol.to_be_bytes_u128(self.value as? UInt128!));
                     break;
                 case MsgType.cdcI8: 
                     dataBytes = dataBytes.concat(self.value as? Int8!.toBigEndianBytes());
@@ -141,7 +146,8 @@ pub contract MessageProtocol {
                     dataBytes = dataBytes.concat(self.value as? Int64!.toBigEndianBytes());
                     break;
                 case MsgType.cdcI128: 
-                    dataBytes = dataBytes.concat(self.value as? Int128!.toBigEndianBytes());
+                    // dataBytes = dataBytes.concat(self.value as? Int128!.toBigEndianBytes());
+                    dataBytes = dataBytes.concat(MessageProtocol.to_be_bytes_i128(self.value as? Int128!));
                     break;
                 case MsgType.cdcVecString: 
                     for ele in self.value as? [String]! {
@@ -168,7 +174,8 @@ pub contract MessageProtocol {
                     break;
                 case MsgType.cdcVecU128: 
                     for ele in self.value as? [UInt128]! {
-                        dataBytes = dataBytes.concat(ele.toBigEndianBytes());
+                        // dataBytes = dataBytes.concat(ele.toBigEndianBytes());
+                        dataBytes = dataBytes.concat(MessageProtocol.to_be_bytes_u128(ele));
                     }
                     break;
                 case MsgType.cdcVecI8: 
@@ -193,7 +200,8 @@ pub contract MessageProtocol {
                     break;
                 case MsgType.cdcVecI128: 
                     for ele in self.value as? [Int128]! {
-                        dataBytes = dataBytes.concat(ele.toBigEndianBytes());
+                        // dataBytes = dataBytes.concat(ele.toBigEndianBytes());
+                        dataBytes = dataBytes.concat(MessageProtocol.to_be_bytes_i128(ele));
                     }
                     break;
                 case MsgType.cdcAddress:
@@ -325,7 +333,8 @@ pub contract MessageProtocol {
 
         pub fun toBytes(): [UInt8] {
             var dataBytes: [UInt8] = [];
-            dataBytes = dataBytes.concat(self.id.toBigEndianBytes());
+            // dataBytes = dataBytes.concat(self.id.toBigEndianBytes());
+            dataBytes = dataBytes.concat(MessageProtocol.to_be_bytes_u128(self.id));
             dataBytes = dataBytes.concat([self.type]);
             if (nil != self.callback) {
                 dataBytes = dataBytes.concat(self.callback!);
@@ -438,5 +447,81 @@ pub contract MessageProtocol {
             self.messageID[toChain] = id;
             return id;
         }
+    }
+
+    // // to big endian bytes according to type length
+    // // 16
+    // pub fun to_be_bytes(_ number: UInt16): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 2 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // pub fun to_be_bytes(_ number: Int16): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 2 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // // 32
+    // pub fun to_be_bytes(_ number: UInt32): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 4 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // pub fun to_be_bytes(_ number: Int32): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 4 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // // 64
+    // pub fun to_be_bytes(_ number: UInt64): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 8 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // pub fun to_be_bytes(_ number: Int64): [UInt8] {
+    //     var output = number.toBigEndianBytes();
+    //     while output.length < 8 {
+    //         output = [UInt8(0)].concat(output);
+    //     }
+    // }
+
+    // UInt128, Int128, and UInt256 need to be specially processed!
+    //128
+    pub fun to_be_bytes_u128(_ number: UInt128): [UInt8] {
+        var output = number.toBigEndianBytes();
+        while output.length < 16 {
+            output = [UInt8(0)].concat(output);
+        }
+
+        return output;
+    }
+
+    pub fun to_be_bytes_i128(_ number: Int128): [UInt8] {
+        var output = number.toBigEndianBytes();
+        while output.length < 16 {
+            output = [UInt8(0)].concat(output);
+        }
+
+        return output;
+    }
+
+    // 256
+    pub fun to_be_bytes_u256(_ number: UInt256): [UInt8] {
+        var output = number.toBigEndianBytes();
+        while output.length < 32 {
+            output = [UInt8(0)].concat(output);
+        }
+
+        return output;
     }
 }

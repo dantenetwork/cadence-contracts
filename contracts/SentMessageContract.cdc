@@ -99,7 +99,7 @@ pub contract SentMessageContract{
 
         init(id: UInt128, toChain: String, sender: [UInt8], signer: [UInt8], msgToSubmit: msgToSubmit){
             self.id = id;
-            self.fromChain = "FLOW";            
+            self.fromChain = "FLOWTEST";            
             self.toChain = toChain;
 
             self.sqos = msgToSubmit.sqos;
@@ -122,7 +122,8 @@ pub contract SentMessageContract{
         pub fun toBytes(): [UInt8] {
             var raw_data: [UInt8] = [];
 
-            raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            // raw_data = raw_data.concat(self.id.toBigEndianBytes());
+            raw_data = raw_data.concat(MessageProtocol.to_be_bytes_u128(self.id));
             raw_data = raw_data.concat(self.fromChain.utf8);
             raw_data = raw_data.concat(self.toChain.utf8);
 

@@ -19,6 +19,7 @@ pub contract CrossChain {
       * @param address - address of account
       */
     pub fun registerRecvAccount(address: Address, link: String): Bool{
+        // log("registering receiver...");
         let pubLink = PublicPath(identifier: link);
         let recverRef = getAccount(address).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid recver address or `link`!");
         if (!recverRef.isOnline()) {
@@ -55,6 +56,7 @@ pub contract CrossChain {
       * @param address - address of account
       */
     pub fun registerSendAccount(address: Address, link: String): Bool{
+        // log("registering sender...");
         let pubLink = PublicPath(identifier: link);
         let senderRef = getAccount(address).getCapability<&{SentMessageContract.SentMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
         if (!senderRef.isOnline()) {

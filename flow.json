@@ -18,12 +18,12 @@
     "ReceivedMessageContract": "./contracts/ReceivedMessageContract.cdc",
     "CrossChain": "./contracts/CrossChain.cdc",
     "SettlementContract": "./contracts/Settlement.cdc",
-    "FungibleToken": "./examples/utility/FungibleToken.cdc",
-	"NonFungibleToken": "./examples/NonFungibleToken.cdc",
-	"MetadataViews": "./examples/MetadataViews.cdc",
-    "PunstersNFT": "./examples/Punsters.cdc",
-	"StarRealm": "./examples/StarRealm.cdc",
-    "Locker": "./examples/Locker.cdc"
+    "FungibleToken": "./omniverseNFT/contracts/utility/FungibleToken.cdc",
+	  "NonFungibleToken": "./omniverseNFT/contracts/NonFungibleToken.cdc",
+	  "MetadataViews": "./omniverseNFT/contracts/MetadataViews.cdc",
+    "ExampleNFT": "./omniverseNFT/contracts/ExampleNFT.cdc",
+	  "StarRealm": "./omniverseNFT/contracts/StarRealm.cdc",
+    "StarLocker": "./omniverseNFT/contracts/StarLocker.cdc"
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
@@ -88,7 +88,13 @@
         "SentMessageContract",
         "ReceivedMessageContract",
         "CrossChain",
-        "SettlementContract"
+        "SettlementContract", 
+        "FungibleToken", 
+        "NonFungibleToken",
+        "MetadataViews",
+        "StarRealm",
+        "StarLocker",
+        "ExampleNFT"
       ]
     },
     "testnet": {
