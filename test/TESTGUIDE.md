@@ -59,7 +59,25 @@ If everything is OK, we will get the following result:
 ![1662288815215](https://user-images.githubusercontent.com/83746881/188309783-d8b525fd-7690-40f6-b024-11819bbb2836.png)
 
 ## Routers evaluation
+```sh
+cd ..
 
+# start the emulator
+flow emulator --verbose
+
+# deploy
+flow project deploy --update
+
+# execute the test of the router evaluation algorithm
+flow scripts execute ./scripts/test/crdTest.cdc
+
+# Check the result in emulator log out
+```
+If everything is OK, we will get the following result:
+![1662289349264](https://user-images.githubusercontent.com/83746881/188310050-401c247e-61dc-4940-ad7b-d9cbe7bd762f.png)  
+
+The curves of the trend are as follows:  
+![1662289487999](https://user-images.githubusercontent.com/83746881/188310117-ec5de22b-05a6-4d39-be6e-52c7b4bab3db.png)
 
 ## Omniverse NFT infrastructure test
 
