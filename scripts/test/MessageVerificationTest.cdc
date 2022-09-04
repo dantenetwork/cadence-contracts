@@ -15,6 +15,16 @@ pub fun registerRouter(addrCount: UInt64) {
     SettlementContract.testRegisterRouters(routers: routers);
 }
 
+pub fun printRouters(routers: [SettlementContract.Validator]): {Address: UFix64} {
+    let output: {Address: UFix64} = {};
+
+    for router in routers {
+        output[router.address] = router.crd;
+    }
+
+    return output;
+}
+
 ///////////////////////////////////////////////////////////////////////
 // simulate message set `ReceivedMessageCache`
 pub fun simulateMessageSet(routers: [SettlementContract.Validator]): ReceivedMessageContract.ReceivedMessageCache {
@@ -47,13 +57,16 @@ pub fun main() {
     log("Register 10 test routers with random credibility: ");
     registerRouter(addrCount: 10);
     let routers = SettlementContract.getRegisteredRouters();
-    log(routers);
+    log(printRouters(routers: routers));
     log("----------------------------------------------------------------")
 
     ///////////////////////////////////////////////////
     // Construct a simulated message copies set `ReceivedMessageCache`
     log("simulate 10 routers submitting 3 different message copies..."); 
     let receivedCache = simulateMessageSet(routers: routers);
-    log(receivedCache.msgInstance.length);
+    for ele in receivedCache.msgInstance.values {
+        log(ele.messageInfo.messageHash);
+        log(ele.submitters);
+    }
     log("----------------------------------------------------------------")
 }
