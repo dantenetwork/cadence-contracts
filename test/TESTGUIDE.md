@@ -105,6 +105,7 @@ If everything is OK, we will get the following results:
 ![1662279873281](https://user-images.githubusercontent.com/83746881/188304532-1df3bb23-d0af-43c8-b539-915cfbe44259.png)
 
 ## SDK test
+### Prepare
 Note that if you want to use the SDK in `emulator`, do the following steps for preparing.  
 After started the emulator, create an account and transfer some simu-Flow to it for gas as follows:
 ```sh
