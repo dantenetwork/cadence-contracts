@@ -1,4 +1,4 @@
-import SettlementContract from "../../contracts/Settlement.cdc";
+import SettlementContract from 0xProfile;
 
 pub struct SelectStatistic {
     pub let router: Address;
@@ -16,7 +16,7 @@ pub struct SelectStatistic {
     }
 }
 
-pub fun main(): [[UFix64; 2]]{
+pub fun main(loops: Int): {Address: SelectStatistic}{
     /*
     var addr: UInt64 = 0x01;
     let routers: [Address] = [];
@@ -38,24 +38,16 @@ pub fun main(): [[UFix64; 2]]{
         sumCrd = sumCrd + ele.crd;
     }
 
-    var loops = 0;
-    while loops < 300 {
+    var loop = 0;
+    while loop < loops {
         let slctedValidators = SettlementContract.select();
 
         for ele in slctedValidators {
             staticHolder[ele]!.addSelected();
         }
 
-        loops = loops + 1;
+        loop = loop + 1;
     }
 
-    let rst: [[UFix64; 2]] = [];
-    for ele in staticHolder.values {
-        let c = ele.crd / sumCrd;
-        let s = UFix64(ele.selected) / 300.0 / 7.0;
-
-        rst.append([c, s]);
-    }
-
-    return rst;
+    return staticHolder;
 }

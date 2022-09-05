@@ -1,8 +1,15 @@
 pm2 status
 
 pm2 start client/crosschain/crossChainSync.js —name FlowCrossChain
+flow project deploy --update -n testnet
 
 flow project deploy --update
+
+flow accounts create --key 81262aa27f1630ccf1293300e8e1d9a6ba542dffa796b860d53873867175e9d31bd7b7581d2f200f9c3dfdbc10ae912ff036946981e3d8996a14f186d20e3e2f
+
+# transfer Flow Token
+flow transactions send ./transactions/test/transferFlow.cdc 100.0 0x01cf0e2f2f715450
+
 
 flow signatures generate "hello nika" --signer emulator-account
 
@@ -77,7 +84,19 @@ flow scripts execute ./scripts/test/randTest.cdc
 
 flow scripts execute ./scripts/test/testSelectStatistic.cdc 
 
-flow transactions send ./transactions/test/testRegisterRouter.cdc 11 --gas-limit 10000
+flow transactions send ./transactions/test/testRegisterRouter.cdc 101 --gas-limit 10000
 
 # omniverseNFT
 flow scripts execute ./omniverseNFT/scripts/SendNFToutTest.cdc 0xf8d6e0586b0a20c7
+
+# message verification
+flow scripts execute ./scripts/test/MessageVerificationTest.cdc
+
+# router evaluation
+flow scripts execute ./scripts/test/crdTest.cdc
+
+# refresh random seed
+flow transactions send ./test/transactions/empty.cdc
+
+# query messages to be sent
+flow scripts execute ./scripts/send-recv-message/querySendMessages.cdc 

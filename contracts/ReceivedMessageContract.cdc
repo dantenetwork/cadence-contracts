@@ -194,7 +194,7 @@ pub contract ReceivedMessageContract{
     pub resource ReceivedMessageVault: ReceivedMessageInterface{
         pub let message: {String: [ReceivedMessageCache]};
         pub let executableCount: Int;
-        pub var completedID: {String: UInt128};   //TODO: check this tommorow!
+        // pub var completedID: {String: UInt128};   
         priv var online: Bool;
         priv var defaultCopyCount: Int;
         // TODO: context
@@ -202,7 +202,7 @@ pub contract ReceivedMessageContract{
         init(){
             self.message = {};
             self.executableCount = 10;
-            self.completedID = {};
+            //self.completedID = {};
             self.online = true;
             self.defaultCopyCount = 1; // TODO defaultCopyCount = 1, debug only
         }
@@ -253,10 +253,10 @@ pub contract ReceivedMessageContract{
                 
                 if (!found) {
                     var completedID: UInt128 = 0;
-                    if let var = self.completedID[recvMsg.fromChain] {
-                        completedID = var;
+                    if let cplID = ReceivedMessageContract.completedID[recvMsg.fromChain] {
+                        completedID = cplID;
                     } else {
-                        self.completedID[recvMsg.fromChain] = 0;
+                        ReceivedMessageContract.completedID[recvMsg.fromChain] = 0;
                     }
 
                     if (recvMsg.id > completedID) {
@@ -272,10 +272,21 @@ pub contract ReceivedMessageContract{
                 }
 
             } else {
-                let mcache = ReceivedMessageCache(id: recvMsg.id);
-                mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
-                self.message[recvMsg.fromChain] = [mcache];
-                cacheIdx = 0;
+                var completedID: UInt128 = 0;
+                if let cplID = ReceivedMessageContract.completedID[recvMsg.fromChain] {
+                    completedID = cplID;
+                } else {
+                    ReceivedMessageContract.completedID[recvMsg.fromChain] = 0;
+                }
+
+                if recvMsg.id > completedID {
+                    let mcache = ReceivedMessageCache(id: recvMsg.id);
+                    mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
+                    self.message[recvMsg.fromChain] = [mcache];
+                    cacheIdx = 0;
+                } else {
+                    panic("Invalid `recvMsg` ID!");
+                }
             }
 
             if (cacheIdx >= 0) {
@@ -310,23 +321,23 @@ pub contract ReceivedMessageContract{
                     //     self.completedID[recvMsg.fromChain] = recvMsg.id;
                     // }
 
-                    if let cplID = self.completedID[recvMsg.fromChain] {
+                    if let cplID = ReceivedMessageContract.completedID[recvMsg.fromChain] {
                         if (cplID < recvMsg.id) {
-                            self.completedID[recvMsg.fromChain] = recvMsg.id;
+                            ReceivedMessageContract.completedID[recvMsg.fromChain] = recvMsg.id;
                         }
                     } else {
-                        self.completedID[recvMsg.fromChain] = recvMsg.id;
+                        ReceivedMessageContract.completedID[recvMsg.fromChain] = recvMsg.id;
                     }
                 }
             }
         }
  
         pub fun getCompleteID(): {String: UInt128}{
-            return self.completedID;
+            return ReceivedMessageContract.completedID;
         }
 
         pub fun getNextMessageID(submitterAddr: Address): {String: UInt128} {
-            let nextIDs = self.completedID;
+            let nextIDs = ReceivedMessageContract.completedID;
 
             for key in nextIDs.keys {
                 nextIDs[key] = nextIDs[key]! + 1;
@@ -400,10 +411,9 @@ pub contract ReceivedMessageContract{
             for k in messageCache.msgInstance.keys {
                 if let msgCopyRef: &messageCopy = &messageCache.msgInstance[k] as &messageCopy? {
                     msgCopyRef.credibility = msgCopyRef.credibility / crdSum;
-                    // if msgCopyRef.credibility > maxCredibility {
-                    //     maxCredibility = msgCopyRef.credibility;
-                    //     maxCopyKey = k;
-                    // }
+                    
+                    log("Message copy hash: ".concat(msgCopyRef.messageInfo.messageHash).concat(". Credibility: ").concat(msgCopyRef.credibility.toString()));
+
                     if msgCopyRef.credibility >= ReceivedMessageContract.vfThreshold {
                         recvMsgCore = msgCopyRef.messageInfo;
                         honest = msgCopyRef.submitters;
@@ -454,8 +464,11 @@ pub contract ReceivedMessageContract{
     // This value must be larger than 0.5
     pub let vfThreshold: UFix64;
 
+    access(contract) let completedID: {String: UInt128}; 
+
     init() {
         self.vfThreshold = 0.7;
+        self.completedID = {};
     }
 
     // Create recource to store received message
@@ -468,10 +481,11 @@ pub contract ReceivedMessageContract{
     }
     
     // Query completedID by identifier
-    pub fun queryCompletedID(recvAddress: Address, link: String): {String: UInt128}{
-      let pubLink = PublicPath(identifier: link);
-      let ReceivedMessageVaultRef = getAccount(recvAddress).getCapability<&{ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
-      return ReceivedMessageVaultRef.getCompleteID();
+    pub fun queryCompletedID(): {String: UInt128}{
+      //let pubLink = PublicPath(identifier: link);
+      //let ReceivedMessageVaultRef = getAccount(recvAddress).getCapability<&{ReceivedMessageInterface}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+      //return ReceivedMessageVaultRef.getCompleteID();
+      return self.completedID;
     }
 
     pub fun getRecverRef(recverAddress: Address, link: String): &{ReceivedMessageContract.ReceivedMessageInterface}? {

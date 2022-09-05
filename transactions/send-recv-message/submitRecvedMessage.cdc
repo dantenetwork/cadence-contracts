@@ -33,7 +33,7 @@ transaction(id: UInt128,
             recverRef.submitRecvMessage(
                 recvMsg: recvMsg, 
                 pubAddr: msgSubmitter, 
-                signatureAlgorithm: SignatureAlgorithm.ECDSA_secp256k1, 
+                signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, 
                 signature: signature.decodeHex()
             );
         } else {

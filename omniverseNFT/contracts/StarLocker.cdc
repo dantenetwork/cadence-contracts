@@ -34,9 +34,9 @@ pub contract StarLocker{
         let sentMessageVault <-SentMessageContract.createSentMessageVault()
         // save message as resource
         self.account.save(<-sentMessageVault, to: /storage/sentMessageVault)
-        self.account.link<&{SentMessageContract.SentMessageInterface}>(/public/sentMessageVault, target: /storage/sentMessageVault)
+        self.account.link<&{SentMessageContract.SentMessageInterface, SentMessageContract.AcceptorFace}>(/public/sentMessageVault, target: /storage/sentMessageVault)
         // add acceptor link
-        self.account.link<&{SentMessageContract.AcceptorFace}>(/public/acceptorFace, target: /storage/sentMessageVault)
+        // self.account.link<&{SentMessageContract.AcceptorFace}>(/public/acceptorFace, target: /storage/sentMessageVault)
         CrossChain.registerSendAccount(address: self.account.address, link: "sentMessageVault");
 
         // add message submitter
@@ -258,7 +258,7 @@ pub contract StarLocker{
         // Send cross chain message
         let msgSubmitterRef  = locker.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter)
         let msg = SentMessageContract.msgToSubmit(toChain: toChain, sqos: sqos, contractName: contractName, actionName: actionName, data: data, callType: callType, callback: callback, commitment: commitment, answer: answer)
-        msgSubmitterRef!.submitWithAuth(msg, acceptorAddr: locker.address, alink: "acceptorFace", oSubmitterAddr: locker.address, slink: "msgSubmitter")
+        msgSubmitterRef!.submitWithAuth(msg, acceptorAddr: locker.address, alink: "sentMessageVault", oSubmitterAddr: locker.address, slink: "msgSubmitter")
     }
 
     pub fun claimNFT(domain: String, id: UInt64, answer: String) {

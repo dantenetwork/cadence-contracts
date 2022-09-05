@@ -119,6 +119,7 @@ pub fun main(address: Address) {
     // log(CrossChain.registeredSendAccounts);
     // log(CrossChain.queryRegisteredRecvAccount());
 
+    log("Initiallizing...");
     let authAccount = getAuthAccount(address);
 
     let collectionRef = authAccount.borrow<&ExampleNFT.Collection>(from: ExampleNFT.CollectionStoragePath)!;
@@ -128,6 +129,9 @@ pub fun main(address: Address) {
 
     let examplePublicRef = ExampleNFT.getExamplePubblic(addr: address);
     let collectionPublicRef = ExampleNFT.getCollectionPublic(addr: address);
+
+    log("Mint 10 NFTs to operator account: ".concat(address.toString()));
+    log("----------------------------------------------------------------")
 
     var loop = 0;
     while loop < 10 {
@@ -139,8 +143,10 @@ pub fun main(address: Address) {
         loop = loop + 1;
     }
     
-    // log(examplePublicRef.getIDs());
-
+    log("NFT: ");
+    log(examplePublicRef.getIDs());
+    log(" are minted to account: ".concat(address.toString()));
+    log("----------------------------------------------------------------")
     /////////////////////////////////////////////////////////////////////////////////////////
     // Test Send NFT out
     let nft2sendout <- collectionRef.withdraw(withdrawID: 3);
@@ -157,7 +163,12 @@ pub fun main(address: Address) {
                                 receiver: MessageProtocol.CDCAddress(addr: address.toBytes(), t: 4), 
                                 hashValue: hashValue);
 
-    // log(StarLocker.getLockedNFTs());
+    log("After sending out the NFT of id 3, the operator account has NFTs: ")
+    log(examplePublicRef.getIDs());
+
+    log("And the locked NFTs are: ")
+    log(StarLocker.getLockedNFTs());
+    log("----------------------------------------------------------------")
     
     let sentMsg = querySendMessageByID(messageID: 1)!;
     //log(SentMessageContract.QueryMessage(msgSender: address, link: "sentMessageVault"));
@@ -171,7 +182,7 @@ pub fun main(address: Address) {
     var nextID: UInt128 = 1;
 
     // Register router
-    log(createRouterData(pubAddr: address));
+    // log(createRouterData(pubAddr: address));
     let routerRegisterSignature = "4f85f9bb8bfc466d13cd90368517f1e461bd05c1040c83f2b316a1a4714dab3a896a12e19d699fd7b28a14088f12f47f0a55d37a98962979e586ac52e97938c7";
 
     SettlementContract.registerRouter(pubAddr: address, 
@@ -179,10 +190,12 @@ pub fun main(address: Address) {
                                             signature: routerRegisterSignature.decodeHex(), 
                                             hashAlgorithm: HashAlgorithm.SHA3_256);
 
-    // log(SettlementContract.getRegisteredRouters());
-
+    log("Register a router to prepare receiving messages, now we have routers: ")
+    log(SettlementContract.getRegisteredRouters());
+    log("----------------------------------------------------------------")
     // generate submittion. Use the content of `sentMsg` to simulate the receiving messages
     // toChain and fromChain are exchanged
+    log("Simulate receiving messages from a chain named `Nika` and submitting the message on to Flow...");
     let tobeSubmitted = generateSubmittion(
             id: nextID, 
             fromChain: sentMsg.toChain,
@@ -217,10 +230,13 @@ pub fun main(address: Address) {
     //nextIDs = queryNextMessageIDtoSubmit(routerAddr: address);
     //log(nextIDs);
 
-    // log(StarLocker.queryMessage());
+    log("This message means there is an NFT transferred from outside, and an NFT locked and sent out before could be released if some input a correct hash-locked answer: ")
+    log(StarLocker.queryMessage());
+    log("----------------------------------------------------------------")
 
+    log("Before claiming out, the NFTs the operator has are: ")
     log(examplePublicRef.getIDs());
     StarLocker.claimNFT(domain: ExampleNFT.domainName, id: 3, answer: answer);
+    log("After claiming out, the NFTs the operator has are: ")
     log(examplePublicRef.getIDs());
 }
- 
