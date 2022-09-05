@@ -108,7 +108,7 @@
       ]
     },
     "testnet": {
-      "testnet-Davy": [
+      "testnet-Eason": [
         "MessageProtocol",
         "IdentityVerification",
         "SentMessageContract",
