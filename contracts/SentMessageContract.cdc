@@ -185,7 +185,7 @@ pub contract SentMessageContract{
             if let submittorRef = submittorLink.borrow(){
                 let rst = submittorRef.getHookedContent();
                 
-                self.message.append(SentMessageCore(id: MessageProtocol.getNextMessageID(toChain: rst.toChain), 
+                self.message.append(SentMessageCore(id: MessageProtocol.getNextMessageID(), 
                                                     toChain: rst.toChain, 
                                                     sender: submitterAddr.toBytes(), 
                                                     signer: submitterAddr.toBytes(),

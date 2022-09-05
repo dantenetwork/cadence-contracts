@@ -8,7 +8,7 @@ flow project deploy --update
 flow accounts create --key 81262aa27f1630ccf1293300e8e1d9a6ba542dffa796b860d53873867175e9d31bd7b7581d2f200f9c3dfdbc10ae912ff036946981e3d8996a14f186d20e3e2f
 
 # transfer Flow Token
-flow transactions send ./transaction/test/transferFlow.cdc 100.0 0x01cf0e2f2f715450
+flow transactions send ./transactions/test/transferFlow.cdc 100.0 0x01cf0e2f2f715450
 
 
 flow signatures generate "hello nika" --signer emulator-account
@@ -97,3 +97,6 @@ flow scripts execute ./scripts/test/crdTest.cdc
 
 # refresh random seed
 flow transactions send ./test/transactions/empty.cdc
+
+# query messages to be sent
+flow scripts execute ./scripts/send-recv-message/querySendMessages.cdc 
