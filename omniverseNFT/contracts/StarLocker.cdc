@@ -103,7 +103,7 @@ pub contract StarLocker{
 
         // This is a temporary solutions
         // Receive message from ReceivedMessageContract
-        pub fun callMe(data: MessageProtocol.MessagePayload){
+        pub fun callMe(data: MessageProtocol.MessagePayload, contextID: String){
             self.receivedMessages.append(data)
         }
 

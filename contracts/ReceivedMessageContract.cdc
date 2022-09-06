@@ -1,6 +1,7 @@
-import MessageProtocol from "./MessageProtocol.cdc"
-import IdentityVerification from "./IdentityVerification.cdc"
-import SettlementContract from "./Settlement.cdc"
+import MessageProtocol from "./MessageProtocol.cdc";
+import IdentityVerification from "./IdentityVerification.cdc";
+import SettlementContract from "./Settlement.cdc";
+import ContextKeeper from "./ContextKeeper.cdc";
 
 pub contract ReceivedMessageContract{
     
@@ -17,7 +18,7 @@ pub contract ReceivedMessageContract{
     }
     
     pub resource interface Callee {
-        pub fun callMe(data: MessageProtocol.MessagePayload);
+        pub fun callMe(data: MessageProtocol.MessagePayload, contextID: String);
     }
     
     pub struct Content {
@@ -314,7 +315,18 @@ pub contract ReceivedMessageContract{
                         self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
                         panic("invalid callee address or `link`!");
                     }
-                    calleeRef!.callMe(data: msgContent.data);
+
+                    // TODO: concrete invocations need to be move out to a special cache, 
+                    // and be invocated by off-chain nodes
+                    let contextID = msgVerified!.fromChain.concat(msgVerified!.id.toString());
+                    ContextKeeper.setContext(contextID: contextID, context: ContextKeeper.Context(id: msgVerified!.id,
+                                                                                                fromChain: msgVerified!.fromChain,
+                                                                                                sender: msgVerified!.sender,
+                                                                                                signer: msgVerified!.signer,
+                                                                                                sqos: msgVerified!.sqos,
+                                                                                                session: msgVerified!.session));
+                    calleeRef!.callMe(data: msgContent.data, contextID: contextID);
+                    ContextKeeper.clearContext(contextID: contextID);
 
                     self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
                     // if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
