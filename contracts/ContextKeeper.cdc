@@ -26,21 +26,21 @@ pub contract ContextKeeper {
     }
 
     // the key is `fromChain`.concat(id) 
-    priv let contexRecorder: {String: Context};
+    priv var contextRecorder: Context?;
 
     init() {
-        self.contexRecorder = {};
+        self.contextRecorder = nil;
     }
 
-    access(account) fun setContext(contextID: String, context: Context) {
-        self.contexRecorder[contextID] = context;
+    access(account) fun setContext(context: Context) {
+        self.contextRecorder = context;
     }
 
-    access(account) fun clearContext(contextID: String) {
-        self.contexRecorder.remove(key: contextID);
+    access(account) fun clearContext() {
+        self.contextRecorder = nil;
     }
     
-    pub fun getContext(contextID: String): Context? {
-        return self.contexRecorder[contextID];
+    pub fun getContext(): Context? {
+        return self.contextRecorder;
     }
 }

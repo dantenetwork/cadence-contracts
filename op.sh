@@ -100,3 +100,6 @@ flow transactions send ./test/transactions/empty.cdc
 
 # query messages to be sent
 flow scripts execute ./scripts/send-recv-message/querySendMessages.cdc 
+
+# query message id to be submit
+flow scripts execute ./scripts/send-recv-message/queryNextSubmitMessage.cdc 0xf8d6e0586b0a20c7

@@ -1,4 +1,5 @@
 import MessageProtocol from "./MessageProtocol.cdc"
+import ContextKeeper from "./ContextKeeper.cdc"
 
 pub contract SentMessageContract{
 
@@ -110,7 +111,14 @@ pub contract SentMessageContract{
             self.sender = sender;
             self.signer = signer;
 
-            let sess = MessageProtocol.Session(oId: SentMessageContract.applyNextSession(), 
+            var sessionID: UInt128 = 0;
+            if let context = ContextKeeper.getContext() {
+                sessionID = context.session.id;
+            } else {
+                sessionID = SentMessageContract.applyNextSession();
+            }
+
+            let sess = MessageProtocol.Session(oId: sessionID, 
                                                 oType: msgToSubmit.callType, 
                                                 oCallback: msgToSubmit.callback, 
                                                 oc: msgToSubmit.commitment, 
