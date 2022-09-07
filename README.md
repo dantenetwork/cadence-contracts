@@ -5,11 +5,9 @@ Protocol stack implemented with cadence that provide some of the basic functions
 Development in branch `Crypto-dev`
 
 ## Version : 0.0.1
-Dante protocol stack are mainly as below: 
-* [SentMessageContract](./contracts/SentMessageContract.cdc)
-* [ReceivedMessageContract](./contracts/ReceivedMessageContract.cdc)
-* [CrossChain](./contracts/CrossChain.cdc)
-* [IdentityVerification](./contracts/IdentityVerification.cdc)
+* [Dante Protocol for Flow](./contracts/)
+* [On-Chain SDK](https://github.com/dantenetwork/flow-sdk)
+* [Test guide](./test/TESTGUIDE.md)
 
 
 ## Contact

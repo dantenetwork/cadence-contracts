@@ -125,6 +125,56 @@ pub contract StarLocker{
         }
 
         pub fun claim(domain: String, id: UInt64, answer: String){
+
+             if self.lockedNFTs.containsKey(domain) {
+                let domainRef: &{UInt64: AnyResource{NonFungibleToken.INFT}} = (&self.lockedNFTs[domain] as! &{UInt64: AnyResource{NonFungibleToken.INFT}}?)!;
+                if (domainRef.containsKey(id)) {
+                    let nft = (&domainRef[id] as &{NonFungibleToken.INFT}?)!;
+                    // Match NFT id
+                    var isMatched = false
+                    for index,element in self.receivedMessages {
+                        if element.getItem(name: "uuid")!.value as? UInt64! == nft.uuid {
+                            isMatched = true
+                            // id matched
+                            let receiver: Address = (element.getItem(name: "receiver")!.value as? MessageProtocol.CDCAddress!).getFlowAddress()!
+                            let hashValue: String = element.getItem(name: "hashValue")!.value as? String!
+                                
+                            let digest = HashAlgorithm.KECCAK_256.hash(answer.utf8)
+
+                            if(String.encodeHex(digest) != hashValue){
+                                panic("digest match failed")
+                            }
+
+                            // Receiver submit random number to claim NFT
+                            if let starDockerRef = StarRealm.getStarDockerFromAddress(addr: receiver) {
+                                let v <- starDockerRef.docking(nft: <- domainRef.remove(key: id)!);
+                                if v != nil {
+                                    panic("Transfer failed when docking!");
+                                } else {
+                                    destroy v;
+                                }
+                            } else {
+                                panic("Star docker does not exist!");
+                            }
+                            
+                            self.receivedMessages.remove(at: index);
+                            break;
+                        }
+                    }
+
+                    if(!isMatched){
+                        panic("uuid is not matched")
+                    }
+                } else {
+                    panic("Invalid NFT id!");
+                }
+            } else {
+                panic("Invalid NFT domain!");
+            }
+        }
+
+/*
+        pub fun claim(domain: String, id: UInt64, answer: String){
             // Match NFT id
             var isMatched = false
             for index,element in self.receivedMessages {
@@ -179,6 +229,7 @@ pub contract StarLocker{
                 panic("star docker does not exist!");
             }
         }
+*/
     }
 
     pub fun createEmptyCalleeVault(): @CalleeVault{
@@ -205,7 +256,6 @@ pub contract StarLocker{
                         actionName: [UInt8],
                         receiver: MessageProtocol.CDCAddress, 
                         hashValue: String){
-
         let NFTResolver <- transferToken as! @AnyResource{MetadataViews.Resolver};
         // let nftView = MetadataViews.getNFTView(id: id, viewResolver: &NFTResolver as &{MetadataViews.Resolver});
         let nftDisplay = MetadataViews.getDisplay(&NFTResolver as & {MetadataViews.Resolver});
@@ -216,6 +266,7 @@ pub contract StarLocker{
 
         let NonToken <- NFTResolver as! @AnyResource{NonFungibleToken.INFT};
         let id: UInt64 = NonToken.id
+        let nft_uuid = NonToken.uuid;
 
         // Get the locker's public account object
         let locker = self.account
@@ -244,6 +295,8 @@ pub contract StarLocker{
 
         let data = MessageProtocol.MessagePayload()
         
+        let uuidItem = MessageProtocol.createMessageItem(name: "uuid", type: MessageProtocol.MsgType.cdcU64, value: nft_uuid)
+        data.addItem(item: uuidItem!);
         let domainItem = MessageProtocol.createMessageItem(name: "domain", type: MessageProtocol.MsgType.cdcString, value: domain)
         data.addItem(item: domainItem!)
         let idItem = MessageProtocol.createMessageItem(name: "id", type: MessageProtocol.MsgType.cdcU64, value: id as UInt64)

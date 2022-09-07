@@ -50,7 +50,11 @@ pub contract SentMessageContract{
         }
 
         // the `oSubmitterAddr` must be the owner of this resource, or else `Acceptor` will receive an invalid submit
-        pub fun submitWithAuth(_ outContent: msgToSubmit, acceptorAddr: Address, alink: String, oSubmitterAddr: Address, slink: String){
+        pub fun submitWithAuth(_ outContent: msgToSubmit, 
+                                acceptorAddr: Address, 
+                                alink: String, 
+                                oSubmitterAddr: Address, 
+                                slink: String): ContextKeeper.Context? {
             // make `set` and `clear` atomic
             self.setHookedContent(outContent);
 
@@ -59,12 +63,14 @@ pub contract SentMessageContract{
             // let linkPath = /public/acceptlink;
             let acceptorLink = pubAcct.getCapability<&{AcceptorFace}>(linkPath!);
             if let acceptorRef = acceptorLink.borrow(){
-                acceptorRef.AcceptContent(submitterAddr: oSubmitterAddr, link: slink);
+                let context = acceptorRef.AcceptContent(submitterAddr: oSubmitterAddr, link: slink);
+                self.clearHookedContent();
+                return context;
             }else{
                 panic("Invalid acceptor!");
             }
 
-            self.clearHookedContent();
+            return nil;
         }
 
         // Implementation of interface `SubmitterFace`
@@ -164,7 +170,7 @@ pub contract SentMessageContract{
     // Acceptor's interface
     pub resource interface AcceptorFace{
         // `oid` is the test field, add after remove
-        access(contract) fun AcceptContent(submitterAddr: Address, link: String);
+        access(contract) fun AcceptContent(submitterAddr: Address, link: String): ContextKeeper.Context?;
     }
 
     // Define sent message vault
@@ -184,7 +190,7 @@ pub contract SentMessageContract{
           * @param submitterAddr - the message submitter. get sender here
           * @param link - the `SubmitterFace` link
           */
-        access(contract) fun AcceptContent(submitterAddr: Address, link: String){
+        access(contract) fun AcceptContent(submitterAddr: Address, link: String): ContextKeeper.Context?{
 
             let pubAcct = getAccount(submitterAddr);
             let linkPath = PublicPath(identifier: link);
@@ -193,15 +199,26 @@ pub contract SentMessageContract{
             if let submittorRef = submittorLink.borrow(){
                 let rst = submittorRef.getHookedContent();
                 
-                self.message.append(SentMessageCore(id: MessageProtocol.getNextMessageID(), 
+                let sentMessage = SentMessageCore(id: MessageProtocol.getNextMessageID(), 
                                                     toChain: rst.toChain, 
                                                     sender: submitterAddr.toBytes(), 
                                                     signer: submitterAddr.toBytes(),
                                                     msgToSubmit: rst
-                                                    ));
+                                                    );
+                
+                self.message.append(sentMessage);
+
+                return ContextKeeper.Context(id: sentMessage.id,
+                                            fromChain: sentMessage.fromChain,
+                                            sender: sentMessage.sender,
+                                            signer: sentMessage.signer,
+                                            sqos: sentMessage.sqos,
+                                            session: sentMessage.session);
             }else{
                 panic("Invalid submitter!");
             }
+
+            return nil;
         }
 
         /**
