@@ -105,14 +105,6 @@ If everything is OK, we will get the following results:
 ![1662279873281](https://user-images.githubusercontent.com/83746881/188304532-1df3bb23-d0af-43c8-b539-915cfbe44259.png)
 
 ## SDK test
-### Prepare
-Note that if you want to use the SDK in `emulator`, do the following steps for preparing.  
-After started the emulator, create an account and transfer some simu-Flow to it for gas as follows:
-```sh
-flow accounts create --key 81262aa27f1630ccf1293300e8e1d9a6ba542dffa796b860d53873867175e9d31bd7b7581d2f200f9c3dfdbc10ae912ff036946981e3d8996a14f186d20e3e2f
-
-# transfer Flow Token
-flow transactions send ./transactions/test/transferFlow.cdc 100.0 0x01cf0e2f2f715450
-```
-As we have set the address `0x01cf0e2f2f715450` as `emulator-Alice` in `flow.json`, directly execute the scripts above works well and we can use account `emulator-Alice` in emulator now.
-
+The detailed SDK document can be found at [flow-sdk-contract](https://github.com/dantenetwork/flow-sdk/tree/main), and we can find two test cases there:  
+* [Example *Greetings* built based on low-level-api](https://github.com/dantenetwork/flow-sdk/tree/main#classic-greetings-case)
+* [Example *Cocomputations* built based on high-level-api](https://github.com/dantenetwork/flow-sdk/tree/main#classic-cooperate-computation-case)
