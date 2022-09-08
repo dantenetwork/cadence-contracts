@@ -7,6 +7,7 @@ Development in branch `Crypto-dev`
 ## Version : 0.0.1
 * [Dante Protocol for Flow](./contracts/)
 * [On-Chain SDK](https://github.com/dantenetwork/flow-sdk)
+* [Omniverse NFT](./omniverseNFT/)
 * [Test guide](./test/TESTGUIDE.md)
 
 
