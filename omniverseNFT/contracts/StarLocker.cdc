@@ -137,11 +137,11 @@ pub contract StarLocker{
                             isMatched = true
                             // id matched
                             let receiver: Address = (element.getItem(name: "receiver")!.value as? MessageProtocol.CDCAddress!).getFlowAddress()!
-                            let hashValue: String = element.getItem(name: "hashValue")!.value as? String!
+                            let hashValue: [UInt8] = element.getItem(name: "hashValue")!.value as? [UInt8]!
                                 
                             let digest = HashAlgorithm.KECCAK_256.hash(answer.utf8)
 
-                            if(String.encodeHex(digest) != hashValue){
+                            if(String.encodeHex(digest) != String.encodeHex(hashValue)){
                                 panic("digest match failed")
                             }
 
@@ -305,7 +305,7 @@ pub contract StarLocker{
         data.addItem(item: tokenURLItem!)
         let ownerItem = MessageProtocol.createMessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcAddress, value: receiver)
         data.addItem(item: ownerItem!)
-        let hashValueItem = MessageProtocol.createMessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcString, value: hashValue)
+        let hashValueItem = MessageProtocol.createMessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcVecU8, value: hashValue.decodeHex());
         data.addItem(item: hashValueItem!)
 
         // Send cross chain message

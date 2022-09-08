@@ -211,11 +211,10 @@ pub fun main(address: Address) {
 
     //log(String.encodeHex(sentMsg.toBytes()));
     //log(String.encodeHex(tobeSubmitted.originMessage.toBytes()));
-    // log(tobeSubmitted.toBeSign);
-
+    log(tobeSubmitted.toBeSign);
 
     // signature of message to submit. The following signature is signed by off-chain js
-    let submitSignature = "d04d5ba046febe22cb8eecec172e3dca14762eda2f25f915f29f79655279b45daeb64d4f6a1012f2822996e4ff028705d2c09c36237c4dd190c1e66187270eac";
+    let submitSignature = "0df79ff77debc3e79185d0776d0e11a387ae998fbdb6d6bc8a791eadc2bb0590432b6e893eae4d21df767d1c7af4ada7a0c147c95f261de1289f1fe145c7d612";
 
     if let recverRef = ReceivedMessageContract.getRecverRef(recverAddress: address, link: "receivedMessageVault") {
         recverRef.submitRecvMessage(
