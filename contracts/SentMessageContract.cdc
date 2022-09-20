@@ -118,10 +118,17 @@ pub contract SentMessageContract{
             self.signer = signer;
 
             var sessionID: UInt128 = 0;
+            /*
             if let context = ContextKeeper.getContext() {
                 sessionID = context.session.id;
             } else {
                 sessionID = SentMessageContract.applyNextSession();
+            }
+            */
+            if let context = ContextKeeper.getContext() {
+                sessionID = context.id;
+            } else {
+                sessionID = id;
             }
 
             let sess = MessageProtocol.Session(oId: sessionID, 
