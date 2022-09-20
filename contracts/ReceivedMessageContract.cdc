@@ -306,14 +306,18 @@ pub contract ReceivedMessageContract{
                     if (nil == pubLink)
                     {
                         self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                        panic("invalid `link` path!");
+                        self.increaseCompleteID(fromChain: recvMsg.fromChain, recvID: recvMsg.id);
+                        return;
+                        //panic("invalid `link` path!");
                     }
 
                     // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
                     let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
                     if (nil == calleeRef){
                         self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                        panic("invalid callee address or `link`!");
+                        self.increaseCompleteID(fromChain: recvMsg.fromChain, recvID: recvMsg.id);
+                        return;
+                        //panic("invalid callee address or `link`!");
                     }
 
                     // TODO: concrete invocations need to be move out to a special cache, 
@@ -333,6 +337,9 @@ pub contract ReceivedMessageContract{
                     //     self.completedID[recvMsg.fromChain] = recvMsg.id;
                     // }
 
+                    self.increaseCompleteID(fromChain: recvMsg.fromChain, recvID: recvMsg.id);
+                    
+                    /*
                     if let cplID = ReceivedMessageContract.completedID[recvMsg.fromChain] {
                         if (cplID < recvMsg.id) {
                             ReceivedMessageContract.completedID[recvMsg.fromChain] = recvMsg.id;
@@ -340,7 +347,18 @@ pub contract ReceivedMessageContract{
                     } else {
                         ReceivedMessageContract.completedID[recvMsg.fromChain] = recvMsg.id;
                     }
+                    */
                 }
+            }
+        }
+
+        priv fun increaseCompleteID(fromChain: String, recvID: UInt128) {
+            if let cplID = ReceivedMessageContract.completedID[fromChain] {
+                if (cplID < recvID) {
+                    ReceivedMessageContract.completedID[fromChain] = recvID;
+                }
+            } else {
+                ReceivedMessageContract.completedID[fromChain] = recvID;
             }
         }
  
