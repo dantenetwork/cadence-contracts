@@ -1,4 +1,4 @@
-# Introduction
+# Test Guide
 
 This document provides a test guide of Dante Protocol Stack along with an Omniverse NFT infrastructure based on Dante. The tests include the following parts:
 * [Algorithm test](#algorithm-test) provides an intuitive way to understand how the underlying algoritms work of Dante.
