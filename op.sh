@@ -112,3 +112,9 @@ flow scripts execute ./scripts/send-recv-message/queryNextSubmitMessage.cdc 0x86
 flow transactions send ./transactions/send-recv-message/clearSentData.cdc 23 -n testnet --signer testnet-Eason
 
 flow transactions send ./transactions/send-recv-message/setMsgID.cdc 0 -n testnet --signer testnet-Eason
+
+# query locked NFT
+flow scripts execute ./omniverseNFT/scripts/getLocked.cdc -n testnet
+
+# query NFTs to be claimed
+flow scripts execute ./omniverseNFT/scripts/getClaimMsg.cdc -n testnet

@@ -136,7 +136,8 @@ pub contract StarLocker{
                         if element.getItem(name: "uuid")!.value as? UInt64! == nft.uuid {
                             isMatched = true
                             // id matched
-                            let receiver: Address = (element.getItem(name: "receiver")!.value as? MessageProtocol.CDCAddress!).getFlowAddress()!
+                            let rawRecver = MessageProtocol.CDCAddress(addr: (element.getItem(name: "receiver")!.value as? [UInt8])!, t: 4);
+                            let receiver: Address = rawRecver.getFlowAddress()!;
                             let hashValue: [UInt8] = element.getItem(name: "hashValue")!.value as? [UInt8]!
                                 
                             let digest = HashAlgorithm.KECCAK_256.hash(answer.utf8)
