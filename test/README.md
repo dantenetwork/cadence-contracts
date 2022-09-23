@@ -108,3 +108,5 @@ If everything is OK, we will get the following results:
 The detailed SDK document can be found at [flow-sdk-contract](https://github.com/dantenetwork/flow-sdk/tree/main), and we can find two test cases there:  
 * [Example *Greetings* built based on low-level-api](https://github.com/dantenetwork/flow-sdk/tree/main#classic-greetings-case)
 * [Example *Cocomputations* built based on high-level-api](https://github.com/dantenetwork/flow-sdk/tree/main#classic-cooperate-computation-case)
+* [Example *NFT bridge*](https://github.com/dantenetwork/flow-sdk#omniverse-nft-1). Temporarily, it's not a real omniverse NFT, instead it's just an NFT bridge. 
+* We are ready to publish a real Omniverse NFT soon, please look forward to. 
