@@ -442,6 +442,10 @@ pub contract MessageProtocol {
         return id;
     }
 
+    pub fun changeMessageIDForce(id: UInt128) {
+        self.messageID = self.messageID - 1;
+    }
+
     // // to big endian bytes according to type length
     // // 16
     // pub fun to_be_bytes(_ number: UInt16): [UInt8] {

@@ -303,7 +303,7 @@ pub contract StarLocker{
         data.addItem(item: idItem!)
         let tokenURLItem = MessageProtocol.createMessageItem(name: "tokenURL", type: MessageProtocol.MsgType.cdcString, value: tokenURL)
         data.addItem(item: tokenURLItem!)
-        let ownerItem = MessageProtocol.createMessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcAddress, value: receiver)
+        let ownerItem = MessageProtocol.createMessageItem(name: "receiver", type: MessageProtocol.MsgType.cdcVecU8, value: receiver.addr)
         data.addItem(item: ownerItem!)
         let hashValueItem = MessageProtocol.createMessageItem(name: "hashValue", type: MessageProtocol.MsgType.cdcVecU8, value: hashValue.decodeHex());
         data.addItem(item: hashValueItem!)
@@ -330,3 +330,4 @@ pub contract StarLocker{
         return calleeVaultRef.getLockedNFTs();
     }
 }
+ 

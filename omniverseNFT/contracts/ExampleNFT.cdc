@@ -314,4 +314,34 @@ pub contract ExampleNFT: NonFungibleToken {
         let cpRef = pubAcct.getCapability<&{ExampleNFTCollectionPublic}>(self.CollectionPublicPath).borrow()!;
         return cpRef;
     }
+
+    pub fun mintNFT(
+            recipient: &{NonFungibleToken.CollectionPublic},
+            description: String,
+            thumbnail: String,
+            royalties: [MetadataViews.Royalty]
+    ) {
+        let metadata: {String: AnyStruct} = {}
+        let currentBlock = getCurrentBlock()
+        metadata["mintedBlock"] = currentBlock.height
+        metadata["mintedTime"] = currentBlock.timestamp
+        metadata["minter"] = recipient.owner!.address
+
+        // this piece of metadata will be used to show embedding rarity into a trait
+        metadata["foo"] = "bar"
+
+        // create a new NFT
+        var newNFT <- create NFT(
+            id: ExampleNFT.totalSupply,
+            description: description,
+            thumbnail: thumbnail,
+            royalties: royalties,
+            metadata: metadata,
+        )
+
+        // deposit it in the recipient's account using their reference
+        recipient.deposit(token: <-newNFT)
+
+        ExampleNFT.totalSupply = ExampleNFT.totalSupply + UInt64(1)
+    }
 }

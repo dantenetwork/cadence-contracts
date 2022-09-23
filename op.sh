@@ -102,9 +102,13 @@ flow transactions send ./test/transactions/empty.cdc
 flow scripts execute ./scripts/send-recv-message/querySendMessages.cdc 
 
 # query sent message by id
-flow scripts execute ./scripts/send-recv-message/querySendMessageByID.cdc -n testnet 
+flow scripts execute ./scripts/send-recv-message/querySendMessageByID.cdc <id> -n testnet 
 
 # query message id to be submit
 flow scripts execute ./scripts/send-recv-message/queryNextSubmitMessage.cdc 0xf8d6e0586b0a20c7
 
 flow scripts execute ./scripts/send-recv-message/queryNextSubmitMessage.cdc 0x86fc6f40cd9f9c66 -n testnet
+
+flow transactions send ./transactions/send-recv-message/clearSentData.cdc 23 -n testnet --signer testnet-Eason
+
+flow transactions send ./transactions/send-recv-message/setMsgID.cdc 0 -n testnet --signer testnet-Eason

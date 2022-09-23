@@ -228,6 +228,20 @@ pub contract SentMessageContract{
             return nil;
         }
 
+        pub fun clearSentMessage(id: UInt128) {
+            var removeIdx = -1;
+            for idx, ele in self.message {
+                if ele.id == id {
+                    removeIdx = idx;
+                    break;
+                }
+            }
+
+            if removeIdx >= 0 {
+                self.message.remove(at: removeIdx);
+            }
+        }
+
         /**
           * Query sent cross chain messages
           */
