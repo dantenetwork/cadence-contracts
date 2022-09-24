@@ -1,5 +1,6 @@
 import MessageProtocol from "./MessageProtocol.cdc"
 import ContextKeeper from "./ContextKeeper.cdc"
+import MessageRecorder from "MessageRecorder.cdc"
 
 pub contract SentMessageContract{
 
@@ -169,7 +170,7 @@ pub contract SentMessageContract{
 
         pub fun getAllMessages():[SentMessageCore];
         
-        pub fun getMessageById(messageId: UInt128): SentMessageCore?;
+        pub fun getMessageById(chain: String, messageId: UInt128): SentMessageCore?;
 
         pub fun isOnline(): Bool;
     }
@@ -206,7 +207,7 @@ pub contract SentMessageContract{
             if let submittorRef = submittorLink.borrow(){
                 let rst = submittorRef.getHookedContent();
                 
-                let sentMessage = SentMessageCore(id: MessageProtocol.getNextMessageID(), 
+                let sentMessage = SentMessageCore(id: MessageRecorder.getNextMessageID(chain: rst.toChain), 
                                                     toChain: rst.toChain, 
                                                     sender: submitterAddr.toBytes(), 
                                                     signer: submitterAddr.toBytes(),
@@ -253,9 +254,9 @@ pub contract SentMessageContract{
           * Query sent cross chain messages by id
           * @param messageId - message id
           */
-        pub fun getMessageById(messageId: UInt128): SentMessageCore?{
+        pub fun getMessageById(chain: String, messageId: UInt128): SentMessageCore?{
             for ele in self.message {
-                if ele.id == messageId {
+                if (ele.id == messageId) && (ele.toChain == chain) {
                     return ele;
                 }
             }
@@ -318,3 +319,4 @@ pub contract SentMessageContract{
         return id;
     }
 }
+ 

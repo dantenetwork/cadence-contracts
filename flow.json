@@ -12,6 +12,7 @@
     }
   },
   "contracts": {
+    "MessageRecorder":"./contracts/MessageRecorder.cdc",
     "MessageProtocol":"./contracts/MessageProtocol.cdc",
     "IdentityVerification":"./contracts/IdentityVerification.cdc",
     "SentMessageContract": "./contracts/SentMessageContract.cdc",
@@ -94,6 +95,7 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "MessageRecorder",
         "MessageProtocol",
         "IdentityVerification",
         "SentMessageContract",
@@ -111,6 +113,7 @@
     },
     "testnet": {
       "testnet-Eason": [
+        "MessageRecorder",
         "MessageProtocol",
         "IdentityVerification",
         "SentMessageContract",

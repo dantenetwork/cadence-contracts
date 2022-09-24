@@ -9,10 +9,10 @@ import SettlementContract from "../../contracts/Settlement.cdc";
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Query message to be sent
-pub fun querySendMessageByID(messageID: UInt128): SentMessageContract.SentMessageCore? {
+pub fun querySendMessageByID(chain: String, messageID: UInt128): SentMessageContract.SentMessageCore? {
     for sendKey in CrossChain.registeredSendAccounts.keys {
         if let senderRef = SentMessageContract.getSenderRef(senderAddress: sendKey, link: CrossChain.registeredSendAccounts[sendKey]!) {
-            if let messageInstance = senderRef.getMessageById(messageId: messageID) {
+            if let messageInstance = senderRef.getMessageById(chain: chain, messageId: messageID) {
                 return messageInstance;
             }
         }
@@ -170,7 +170,7 @@ pub fun main(address: Address) {
     log(StarLocker.getLockedNFTs());
     log("----------------------------------------------------------------")
     
-    let sentMsg = querySendMessageByID(messageID: 1)!;
+    let sentMsg = querySendMessageByID(chain: "Nika", messageID: 1)!;
     //log(SentMessageContract.QueryMessage(msgSender: address, link: "sentMessageVault"));
     //log(sentMsg);
 
@@ -214,7 +214,7 @@ pub fun main(address: Address) {
     log(tobeSubmitted.toBeSign);
 
     // signature of message to submit. The following signature is signed by off-chain js
-    let submitSignature = "0df79ff77debc3e79185d0776d0e11a387ae998fbdb6d6bc8a791eadc2bb0590432b6e893eae4d21df767d1c7af4ada7a0c147c95f261de1289f1fe145c7d612";
+    let submitSignature = "e214c2b7b8b492442d48484e616a34ed3bb267715149e365f1d1be05d3e190def0b41952f34cdf2b2f79d4f989dcf55b57f41f7694e3cac140a9d0ed5bf3af7d";
 
     if let recverRef = ReceivedMessageContract.getRecverRef(recverAddress: address, link: "receivedMessageVault") {
         recverRef.submitRecvMessage(
@@ -239,4 +239,5 @@ pub fun main(address: Address) {
     StarLocker.claimNFT(domain: ExampleNFT.domainName, id: 3, answer: answer);
     log("After claiming out, the NFTs the operator has are: ")
     log(examplePublicRef.getIDs());
+
 }
