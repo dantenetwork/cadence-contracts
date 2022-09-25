@@ -105,7 +105,7 @@ flow scripts execute ./scripts/send-recv-message/querySendMessages.cdc
 flow scripts execute ./scripts/send-recv-message/querySendMessageByID.cdc "<chain>" <id> -n testnet 
 
 # query message id to be submit
-flow scripts execute ./scripts/send-recv-message/queryNextSubmitMessage.cdc 0xf8d6e0586b0a20c7
+flow scripts execute ./scripts/send-recv-message/queryNextSubmitMessage.cdc 0xc133efc4b43676a0
 
 flow scripts execute ./scripts/send-recv-message/queryNextSubmitMessage.cdc 0x86fc6f40cd9f9c66 -n testnet
 
