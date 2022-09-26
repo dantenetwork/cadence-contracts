@@ -118,3 +118,10 @@ flow scripts execute ./omniverseNFT/scripts/getLocked.cdc -n testnet
 
 # query NFTs to be claimed
 flow scripts execute ./omniverseNFT/scripts/getClaimMsg.cdc -n testnet
+
+# Send message data management
+flow scripts execute ./scripts/test/messageRecorderTest.cdc -n testnet
+
+flow scripts execute ./scripts/send-recv-message/currentSentMessageID.cdc "RINKEBY" -n testnet
+
+flow transactions send ./transactions/send-recv-message/setSentIDForcely.cdc 'RINKEBY' 28 -n testnet --signer testnet-account
