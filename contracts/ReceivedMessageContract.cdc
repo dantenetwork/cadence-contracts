@@ -193,6 +193,7 @@ pub contract ReceivedMessageContract{
 
     // define resource to stores received cross chain message 
     pub resource ReceivedMessageVault: ReceivedMessageInterface{
+        // key is `fromChain`
         pub let message: {String: [ReceivedMessageCache]};
         pub let executableCount: Int;
         // pub var completedID: {String: UInt128};   
@@ -252,19 +253,31 @@ pub contract ReceivedMessageContract{
                     }
                 }
                 
+                // received a new message
                 if (!found) {
+                    /*
                     var completedID: UInt128 = 0;
                     if let cplID = ReceivedMessageContract.completedID[recvMsg.fromChain] {
                         completedID = cplID;
                     } else {
                         ReceivedMessageContract.completedID[recvMsg.fromChain] = 0;
                     }
+                    */
 
-                    if (recvMsg.id > completedID) {
+                    var maxRecvedID: UInt128 = 0;
+                    if let recvID = ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] {
+                        maxRecvedID = recvID;
+                    } else {
+                        ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] = 0;
+                    }
+
+                    if (recvMsg.id == (maxRecvedID + 1)) {
                         // TODO: this strategy need to be checked!
                         let mcache = ReceivedMessageCache(id: recvMsg.id);
                         mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
                         caches.append(mcache);
+
+                        ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] = recvMsg.id;
 
                         cacheIdx = caches.length - 1;
                     } else {
@@ -273,17 +286,29 @@ pub contract ReceivedMessageContract{
                 }
 
             } else {
+                /*
                 var completedID: UInt128 = 0;
                 if let cplID = ReceivedMessageContract.completedID[recvMsg.fromChain] {
                     completedID = cplID;
                 } else {
                     ReceivedMessageContract.completedID[recvMsg.fromChain] = 0;
                 }
+                */
 
-                if recvMsg.id > completedID {
+                var maxRecvedID: UInt128 = 0;
+                if let recvID = ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] {
+                    maxRecvedID = recvID;
+                } else {
+                    ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] = 0;
+                }
+
+                if recvMsg.id  == (maxRecvedID + 1) {
                     let mcache = ReceivedMessageCache(id: recvMsg.id);
                     mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
                     self.message[recvMsg.fromChain] = [mcache];
+
+                    ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] = recvMsg.id;
+
                     cacheIdx = 0;
                 } else {
                     panic("Invalid `recvMsg` ID!");
@@ -338,16 +363,6 @@ pub contract ReceivedMessageContract{
                     // }
 
                     self.increaseCompleteID(fromChain: recvMsg.fromChain, recvID: recvMsg.id);
-                    
-                    /*
-                    if let cplID = ReceivedMessageContract.completedID[recvMsg.fromChain] {
-                        if (cplID < recvMsg.id) {
-                            ReceivedMessageContract.completedID[recvMsg.fromChain] = recvMsg.id;
-                        }
-                    } else {
-                        ReceivedMessageContract.completedID[recvMsg.fromChain] = recvMsg.id;
-                    }
-                    */
                 }
             }
         }
@@ -367,7 +382,7 @@ pub contract ReceivedMessageContract{
         }
 
         pub fun getNextMessageID(submitterAddr: Address): {String: UInt128} {
-            let nextIDs = ReceivedMessageContract.completedID;
+            let nextIDs = ReceivedMessageContract.maxRecvedID;
 
             for key in nextIDs.keys {
                 nextIDs[key] = nextIDs[key]! + 1;
@@ -465,28 +480,6 @@ pub contract ReceivedMessageContract{
 
             return recvMsgCore;
         }
-
-        /**
-          * Called from `messageVerify` to get the credibilities of validators to take weighted aggregation verification of messages
-          */
-        // pub fun getValidatorCredibility(){
-        //     // TODO
-        // }
-
-        /**
-          * Called from `messageVerify`. Update validator credibility by node behaviors after message verification.
-          */
-        // pub fun updateValidatorCredibility(){
-        //     // TODO
-        // }
-
-        /**
-          * Set the value of the credibility of the newly added validator
-          * @param initValue - init value of credibility
-          */
-        // pub fun setInitialCredibility(initValue: Int){
-        //     // TODO
-        // }
     }
 
     // Temporarily, verification threshold is setted to be 0.7 when contract deployed
@@ -495,10 +488,13 @@ pub contract ReceivedMessageContract{
     pub let vfThreshold: UFix64;
 
     access(contract) let completedID: {String: UInt128}; 
+    
+    access(contract) let maxRecvedID: {String: UInt128};
 
     init() {
         self.vfThreshold = 0.7;
         self.completedID = {};
+        self.maxRecvedID = {};
     }
 
     // Create recource to store received message
@@ -518,32 +514,18 @@ pub contract ReceivedMessageContract{
       return self.completedID;
     }
 
+    pub fun queryMaxRecvedID(): {String: UInt128} {
+        return self.maxRecvedID;
+    }
+
     pub fun getRecverRef(recverAddress: Address, link: String): &{ReceivedMessageContract.ReceivedMessageInterface}? {
         let pubLink = PublicPath(identifier: link);
         let recver = getAccount(recverAddress).getCapability<&{ReceivedMessageContract.ReceivedMessageInterface}>(pubLink!);
         return recver.borrow();
     }
 
+    //////////////////////////////////////////////////////////////////////
     // Temporary test
-    pub fun testSettlementCall() {
-        SettlementContract.workingNodesTrail(honest: [], evil: [], exception: {});
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-     /**
-       * The interface of the register for off-chain routers
-       * the common sign-verification mechanism or authority call-back submittion mechanis
-       */
-    //  pub fun registerRouter(){
-    //     // TODO
-    //  }
-
-    //  /**
-    //    * The interface of the unregister for off-chain routers
-    //    */
-    //  pub fun unregisterRouter(){
-
-    //  }
 }
 
  

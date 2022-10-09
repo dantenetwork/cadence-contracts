@@ -214,6 +214,7 @@ pub fun main(address: Address) {
     log(tobeSubmitted.toBeSign);
 
     // signature of message to submit. The following signature is signed by off-chain js
+    // different uuid make the signature below different, so restart the emulator before running this test
     let submitSignature = "e214c2b7b8b492442d48484e616a34ed3bb267715149e365f1d1be05d3e190def0b41952f34cdf2b2f79d4f989dcf55b57f41f7694e3cac140a9d0ed5bf3af7d";
 
     if let recverRef = ReceivedMessageContract.getRecverRef(recverAddress: address, link: "receivedMessageVault") {
