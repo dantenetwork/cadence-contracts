@@ -23,7 +23,11 @@ pub contract MessageRecorder {
     }
 
     pub fun getID(chain: String): UInt128 {
-        return self.messageIDs[chain] ?? 1;
+        if let id_out = self.messageIDs[chain] {
+            return id_out - 1;
+        } else {
+            return 0;
+        }
     }
 
     // for test
