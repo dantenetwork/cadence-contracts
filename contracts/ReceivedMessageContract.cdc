@@ -15,6 +15,14 @@ pub contract ReceivedMessageContract{
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
         pub fun isOnline(): Bool;
+
+        // Execution
+        pub fun trigger();
+        pub fun isExecutable(): Bool;
+        pub fun getExecutions(): [ReceivedMessageCore];
+
+        // history
+        pub fun getHistory(): {String: [ReceivedMessageCache]};
     }
     
     pub resource interface Callee {
@@ -199,6 +207,9 @@ pub contract ReceivedMessageContract{
         // pub var completedID: {String: UInt128};   
         priv var online: Bool;
         priv var defaultCopyCount: Int;
+        
+        pub let execCache: [ReceivedMessageCore];
+        pub let historyStorage: {String: [ReceivedMessageCache]};
         // TODO: context
 
         init(){
@@ -207,6 +218,9 @@ pub contract ReceivedMessageContract{
             //self.completedID = {};
             self.online = true;
             self.defaultCopyCount = 1; // TODO defaultCopyCount = 1, debug only
+
+            self.execCache = [];
+            self.historyStorage = {};
         }
 
         /**
@@ -317,52 +331,18 @@ pub contract ReceivedMessageContract{
 
             if (cacheIdx >= 0) {
                 if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
-                    // TODO: do verification
-                    let msgVerified = self.messageVerify(messageCache: self.message[recvMsg.fromChain]![cacheIdx]);
+                    // Move the message to `execCache` 
+                    let msgCache = self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                    self.addHistory(fromChain: recvMsg.fromChain, msgCache: msgCache);
+                    
+                    // do verification
+                    let msgVerified = self.messageVerify(messageCache: msgCache);
                     
                     if msgVerified == nil {
                         return;
                     }
 
-                    let msgContent = msgVerified!.content;
-
-                    // TODO: call destination
-                    let pubLink = PublicPath(identifier: msgContent.link);
-                    if (nil == pubLink)
-                    {
-                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                        self.increaseCompleteID(fromChain: recvMsg.fromChain, recvID: recvMsg.id);
-                        return;
-                        //panic("invalid `link` path!");
-                    }
-
-                    // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
-                    let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
-                    if (nil == calleeRef){
-                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                        self.increaseCompleteID(fromChain: recvMsg.fromChain, recvID: recvMsg.id);
-                        return;
-                        //panic("invalid callee address or `link`!");
-                    }
-
-                    // TODO: concrete invocations need to be move out to a special cache, 
-                    // and be invocated by off-chain nodes
-                    // let contextID = msgVerified!.fromChain.concat(msgVerified!.id.toString());
-                    ContextKeeper.setContext(context: ContextKeeper.Context(id: msgVerified!.id,
-                                                                            fromChain: msgVerified!.fromChain,
-                                                                            sender: msgVerified!.sender,
-                                                                            signer: msgVerified!.signer,
-                                                                            sqos: msgVerified!.sqos,
-                                                                            session: msgVerified!.session));
-                    calleeRef!.callMe(data: msgContent.data);
-                    ContextKeeper.clearContext();
-
-                    self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                    // if (self.completedID[recvMsg.fromChain]! < recvMsg.id) {
-                    //     self.completedID[recvMsg.fromChain] = recvMsg.id;
-                    // }
-
-                    self.increaseCompleteID(fromChain: recvMsg.fromChain, recvID: recvMsg.id);
+                    self.execCache.append(msgVerified!);
                 }
             }
         }
@@ -422,11 +402,10 @@ pub contract ReceivedMessageContract{
             }
         }
 
-        // Move to an independent cdc
         /**
-          * Make sure that every message saved in ReceivedMessageArray is consistent
+          * Do verification for one message including many copies
           * @param messageId - message id
-          */
+        **/
         pub fun messageVerify(messageCache: ReceivedMessageCache): ReceivedMessageCore? {
             var honest: [Address] = [];
             var evil: [Address] = [];
@@ -479,6 +458,76 @@ pub contract ReceivedMessageContract{
             }
 
             return recvMsgCore;
+        }
+
+        /**
+          * Trigger the execution in the head
+        **/
+        pub fun trigger() {
+            if self.isExecutable() {
+                let msgVerified = self.execCache.removeFirst();
+                
+                // TODO: Move out
+                let msgContent = msgVerified!.content;
+
+                // TODO: call destination
+                let pubLink = PublicPath(identifier: msgContent.link);
+                if (nil == pubLink)
+                {
+                    self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
+                    return;
+                    //panic("invalid `link` path!");
+                }
+
+                // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+                let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
+                if (nil == calleeRef){
+                    self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
+                    return;
+                    //panic("invalid callee address or `link`!");
+                }
+
+                // TODO: concrete invocations need to be move out to a special cache, 
+                // and be invocated by off-chain nodes
+                // let contextID = msgVerified!.fromChain.concat(msgVerified!.id.toString());
+                ContextKeeper.setContext(context: ContextKeeper.Context(id: msgVerified!.id,
+                                                                        fromChain: msgVerified!.fromChain,
+                                                                        sender: msgVerified!.sender,
+                                                                        signer: msgVerified!.signer,
+                                                                        sqos: msgVerified!.sqos,
+                                                                        session: msgVerified!.session));
+                calleeRef!.callMe(data: msgContent.data);
+                ContextKeeper.clearContext();
+
+                self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
+            }
+        }
+
+        // check if there are executions to be triggered
+        pub fun isExecutable(): Bool {
+            return self.execCache.length > 0;
+        }
+
+        // get all executions to be triggered
+        pub fun getExecutions(): [ReceivedMessageCore] {
+            return self.execCache;
+        }
+
+        /**
+          * add received message copies to history storage
+          * @param fromChain - the source chain of the message
+          * @param msgCache - one message with its copies
+        **/
+        priv fun addHistory(fromChain: String, msgCache: ReceivedMessageCache) {
+            if let chainCacheRef: &[ReceivedMessageCache] = (&self.historyStorage[fromChain] as &[ReceivedMessageCache]?) {
+                chainCacheRef.append(msgCache);
+            } else {
+                self.historyStorage[fromChain] = [msgCache];
+            }
+        }
+
+        pub fun getHistory(): {String: [ReceivedMessageCache]} {
+            return self.historyStorage;
         }
     }
 

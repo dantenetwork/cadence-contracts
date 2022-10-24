@@ -125,3 +125,10 @@ flow scripts execute ./scripts/test/messageRecorderTest.cdc -n testnet
 flow scripts execute ./scripts/send-recv-message/currentSentMessageID.cdc "RINKEBY" -n testnet
 
 flow transactions send ./transactions/send-recv-message/setSentIDForcely.cdc 'RINKEBY' 28 -n testnet --signer testnet-account
+
+# Execution
+flow scripts execute ./scripts/send-recv-message/queryExecutions.cdc
+
+flow transactions send ./transactions/send-recv-message/trigger.cdc 
+
+flow scripts execute ./scripts/send-recv-message/queryHistory.cdc
