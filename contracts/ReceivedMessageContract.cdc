@@ -14,6 +14,10 @@ pub contract ReceivedMessageContract{
 
         pub fun submitRecvMessage(recvMsg: ReceivedMessageCore, 
                                   pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
+
+        pub fun submitAbandoned(msgID: UInt128, fromChain: String,  
+                                pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
+
         pub fun isOnline(): Bool;
 
         // Execution
@@ -64,7 +68,7 @@ pub contract ReceivedMessageContract{
         pub let sqos: MessageProtocol.SQoS;
         pub let content: Content; // message content
         pub let session: MessageProtocol.Session;
-        pub let messageHash: String; // message hash value
+        pub var messageHash: String; // message hash value
 
         init(id: UInt128, fromChain: String, sender: [UInt8], signer: [UInt8], sqos: MessageProtocol.SQoS, 
             resourceAccount: Address, link: String, data: MessageProtocol.MessagePayload,
@@ -122,6 +126,10 @@ pub contract ReceivedMessageContract{
             raw_data = raw_data.concat(self.session.toBytes());
 
             return raw_data;
+        }
+
+        access(contract) fun setAbandoned() {
+            self.messageHash = "00";
         }
     }
 
@@ -251,6 +259,10 @@ pub contract ReceivedMessageContract{
             //    return;
             //}
 
+            self._submitRecvMessage(recvMsg: recvMsg, pubAddr: pubAddr);
+        }
+
+        priv fun _submitRecvMessage(recvMsg: ReceivedMessageCore, pubAddr: Address) {
             var cacheIdx: Int = -1;
             
             if (self.message.containsKey(recvMsg.fromChain)) {
@@ -269,14 +281,6 @@ pub contract ReceivedMessageContract{
                 
                 // received a new message
                 if (!found) {
-                    /*
-                    var completedID: UInt128 = 0;
-                    if let cplID = ReceivedMessageContract.completedID[recvMsg.fromChain] {
-                        completedID = cplID;
-                    } else {
-                        ReceivedMessageContract.completedID[recvMsg.fromChain] = 0;
-                    }
-                    */
 
                     var maxRecvedID: UInt128 = 0;
                     if let recvID = ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] {
@@ -300,15 +304,6 @@ pub contract ReceivedMessageContract{
                 }
 
             } else {
-                /*
-                var completedID: UInt128 = 0;
-                if let cplID = ReceivedMessageContract.completedID[recvMsg.fromChain] {
-                    completedID = cplID;
-                } else {
-                    ReceivedMessageContract.completedID[recvMsg.fromChain] = 0;
-                }
-                */
-
                 var maxRecvedID: UInt128 = 0;
                 if let recvID = ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] {
                     maxRecvedID = recvID;
@@ -529,6 +524,61 @@ pub contract ReceivedMessageContract{
         pub fun getHistory(): {String: [ReceivedMessageCache]} {
             return self.historyStorage;
         }
+
+        /*
+         * when submitting or executing messages, abnormal situations may happen. 
+         * As we cannot directly process exceptions on-chain, we need a mechanism for off-chain routers to submit error things
+         *
+         * This need to wait all selected routers submitted the error 
+        */
+        pub fun submitAbandoned(msgID: UInt128, fromChain: String, 
+                                pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]) {
+
+            // Verify the submitter
+            if (!SettlementContract.isSelected(recvAddr: self.owner!.address, router: pubAddr)) {
+                panic("Invalid Validator. Unregistered or Currently not Selected.")
+            }
+
+            ///////////////////////////////////////////////////////////////////////////
+            // judge validation of the message
+            var maxRecvedID: UInt128 = 0;
+            if let recvID = ReceivedMessageContract.maxRecvedID[fromChain] {
+                maxRecvedID = recvID;
+            } else {
+                ReceivedMessageContract.maxRecvedID[fromChain] = 0;
+            }
+            ///////////////////////////////////////////////////////////////////////////
+
+            let rawData = MessageProtocol.to_be_bytes_u128(msgID).concat(fromChain.utf8);
+
+            // Verify the signature
+            if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
+                                              signatureAlgorithm: signatureAlgorithm,
+                                              rawData: rawData,
+                                              signature: signature,
+                                              hashAlgorithm: HashAlgorithm.SHA3_256)) {
+                panic("Signature verification failed!");
+            } 
+
+            let recvMsg = ReceivedMessageCore(id: msgID, fromChain: fromChain, sender: [], signer: [], sqos: MessageProtocol.SQoS(), 
+                                                resourceAccount: 0x00, link: "", data: MessageProtocol.MessagePayload(),
+                                                session: MessageProtocol.Session(oId: msgID, oType: 0, oCallback: nil, oc: nil, oa: nil));
+            
+            recvMsg.setAbandoned();
+
+            var isExecutable = false;
+            // check if it's in `execCache`
+            for idx, ele in self.execCache {
+                if (ele.id == msgID) && (ele.fromChain == fromChain) {
+                    isExecutable = true;
+                    break;
+                }
+            }
+
+            if !isExecutable {
+                self._submitRecvMessage(recvMsg: recvMsg, pubAddr: pubAddr);
+            }
+        }
     }
 
     // Temporarily, verification threshold is setted to be 0.7 when contract deployed
@@ -575,6 +625,9 @@ pub contract ReceivedMessageContract{
 
     //////////////////////////////////////////////////////////////////////
     // Temporary test
+    pub fun testPanic() {
+        panic("Something error!");
+    }
 }
 
  
