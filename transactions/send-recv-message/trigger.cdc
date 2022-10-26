@@ -1,7 +1,7 @@
 import ReceivedMessageContract from "../../contracts/ReceivedMessageContract.cdc"
 import CrossChain from "../../contracts/CrossChain.cdc"
 
-transaction(){
+transaction(recver: Address, msgID: UInt128, fromChain: String){
     let signer: AuthAccount;
 
     prepare(signer: AuthAccount){
@@ -9,12 +9,10 @@ transaction(){
     }
 
     execute {
-        for recvKey in CrossChain.registeredRecvAccounts.keys {
-            if let recverRef = ReceivedMessageContract.getRecverRef(recverAddress: recvKey, link: CrossChain.registeredRecvAccounts[recvKey]!) {
-                if recverRef.isExecutable() {
-                    recverRef.trigger();
-                    break;
-                }
+        if let recverRef = ReceivedMessageContract.getRecverRef(recverAddress: recver, link: CrossChain.registeredRecvAccounts[recvKey]!) {
+            if recverRef.isExecutable() {
+                recverRef.trigger(msgID: msgID, fromChain: fromChain);
+                break;
             }
         }
     }

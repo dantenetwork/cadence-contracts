@@ -21,9 +21,10 @@ pub contract ReceivedMessageContract{
         pub fun isOnline(): Bool;
 
         // Execution
-        pub fun trigger();
+        pub fun trigger(msgID: UInt128, fromChain: String);
         pub fun isExecutable(): Bool;
-        pub fun getExecutions(): [ReceivedMessageCore];
+        pub fun getExecutions(): [ExecData];
+        pub fun getAbandonedExecs(): [ExecData];
 
         // history
         pub fun getHistory(): {String: [ReceivedMessageCache]};
@@ -129,7 +130,7 @@ pub contract ReceivedMessageContract{
         }
 
         access(contract) fun setAbandoned() {
-            self.messageHash = "00";
+            self.messageHash = ReceivedMessageContract.emptyHash;
         }
     }
 
@@ -207,6 +208,20 @@ pub contract ReceivedMessageContract{
         }
     }
 
+    pub struct ExecData {
+        pub let verifiedMessage: ReceivedMessageCore;
+        pub let abandonApply: [Address];
+
+        init(verifiedMessage: ReceivedMessageCore) {
+            self.verifiedMessage = verifiedMessage;
+            self.abandonApply = [];
+        }
+
+        pub fun applyAbandon(_ addr: Address) {
+            self.abandonApply.append(addr);
+        }
+    }
+
     // define resource to stores received cross chain message 
     pub resource ReceivedMessageVault: ReceivedMessageInterface{
         // key is `fromChain`
@@ -216,7 +231,9 @@ pub contract ReceivedMessageContract{
         priv var online: Bool;
         priv var defaultCopyCount: Int;
         
-        pub let execCache: [ReceivedMessageCore];
+        pub let execCache: [ExecData];
+        pub let execAbandon: [ExecData];
+
         pub let historyStorage: {String: [ReceivedMessageCache]};
         // TODO: context
 
@@ -228,6 +245,8 @@ pub contract ReceivedMessageContract{
             self.defaultCopyCount = 1; // TODO defaultCopyCount = 1, debug only
 
             self.execCache = [];
+            self.execAbandon = [];
+
             self.historyStorage = {};
         }
 
@@ -337,7 +356,7 @@ pub contract ReceivedMessageContract{
                         return;
                     }
 
-                    self.execCache.append(msgVerified!);
+                    self.execCache.append(ExecData(verifiedMessage: msgVerified!));
                 }
             }
         }
@@ -458,9 +477,31 @@ pub contract ReceivedMessageContract{
         /**
           * Trigger the execution in the head
         **/
-        pub fun trigger() {
+        pub fun trigger(msgID: UInt128, fromChain: String) {
             if self.isExecutable() {
-                let msgVerified = self.execCache.removeFirst();
+                var triggerIdx = 0;
+                var fetchMessage: ReceivedMessageCore? = nil;
+                while triggerIdx < self.execCache.length {
+                    if (self.execCache[triggerIdx].verifiedMessage.id == msgID) && 
+                        (self.execCache[triggerIdx].verifiedMessage.fromChain == fromChain) {
+
+                        fetchMessage = self.execCache.remove(at: triggerIdx).verifiedMessage;
+                        break;
+                    }
+                    
+                    triggerIdx = triggerIdx + 1;
+                }
+
+                if fetchMessage == nil {
+                    return;
+                }
+                
+                let msgVerified = fetchMessage!;
+
+                if msgVerified.messageHash == ReceivedMessageContract.emptyHash {
+                    // the verified message is abandoned
+                    return;
+                }
                 
                 // TODO: Move out
                 let msgContent = msgVerified!.content;
@@ -504,8 +545,13 @@ pub contract ReceivedMessageContract{
         }
 
         // get all executions to be triggered
-        pub fun getExecutions(): [ReceivedMessageCore] {
+        pub fun getExecutions(): [ExecData] {
             return self.execCache;
+        }
+
+        // get all abandoned executions
+        pub fun getAbandonedExecs(): [ExecData] {
+            return self.execAbandon;
         }
 
         /**
@@ -539,16 +585,6 @@ pub contract ReceivedMessageContract{
                 panic("Invalid Validator. Unregistered or Currently not Selected.")
             }
 
-            ///////////////////////////////////////////////////////////////////////////
-            // judge validation of the message
-            var maxRecvedID: UInt128 = 0;
-            if let recvID = ReceivedMessageContract.maxRecvedID[fromChain] {
-                maxRecvedID = recvID;
-            } else {
-                ReceivedMessageContract.maxRecvedID[fromChain] = 0;
-            }
-            ///////////////////////////////////////////////////////////////////////////
-
             let rawData = MessageProtocol.to_be_bytes_u128(msgID).concat(fromChain.utf8);
 
             // Verify the signature
@@ -560,22 +596,33 @@ pub contract ReceivedMessageContract{
                 panic("Signature verification failed!");
             } 
 
-            let recvMsg = ReceivedMessageCore(id: msgID, fromChain: fromChain, sender: [], signer: [], sqos: MessageProtocol.SQoS(), 
-                                                resourceAccount: 0x00, link: "", data: MessageProtocol.MessagePayload(),
-                                                session: MessageProtocol.Session(oId: msgID, oType: 0, oCallback: nil, oc: nil, oa: nil));
-            
-            recvMsg.setAbandoned();
-
             var isExecutable = false;
+            var toBeRemove = -1;
             // check if it's in `execCache`
             for idx, ele in self.execCache {
-                if (ele.id == msgID) && (ele.fromChain == fromChain) {
+                if (ele.verifiedMessage.id == msgID) && (ele.verifiedMessage.fromChain == fromChain) {
                     isExecutable = true;
+
+                    self.execCache[idx].applyAbandon(pubAddr);
+                    if self.execCache[idx].abandonApply.length >= self.defaultCopyCount {
+                        toBeRemove = idx;
+                    }
+
                     break;
                 }
             }
 
+            if toBeRemove >= 0 {
+                self.execAbandon.append(self.execCache.remove(at: toBeRemove));
+            }
+
             if !isExecutable {
+                let recvMsg = ReceivedMessageCore(id: msgID, fromChain: fromChain, sender: [], signer: [], sqos: MessageProtocol.SQoS(), 
+                                                resourceAccount: 0x00, link: "", data: MessageProtocol.MessagePayload(),
+                                                session: MessageProtocol.Session(oId: msgID, oType: 0, oCallback: nil, oc: nil, oa: nil));
+            
+                recvMsg.setAbandoned();
+
                 self._submitRecvMessage(recvMsg: recvMsg, pubAddr: pubAddr);
             }
         }
@@ -590,10 +637,14 @@ pub contract ReceivedMessageContract{
     
     access(contract) let maxRecvedID: {String: UInt128};
 
+    access(contract) let emptyHash: String;
+
     init() {
         self.vfThreshold = 0.7;
         self.completedID = {};
         self.maxRecvedID = {};
+
+        self.emptyHash = "00";
     }
 
     // Create recource to store received message
