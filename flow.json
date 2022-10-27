@@ -12,6 +12,7 @@
     }
   },
   "contracts": {
+    "OmniverseInformation": "./contracts/OmniverseInformation.cdc",
     "MessageRecorder":"./contracts/MessageRecorder.cdc",
     "MessageProtocol":"./contracts/MessageProtocol.cdc",
     "IdentityVerification":"./contracts/IdentityVerification.cdc",
@@ -95,6 +96,7 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "OmniverseInformation",
         "MessageRecorder",
         "MessageProtocol",
         "IdentityVerification",
@@ -113,6 +115,7 @@
     },
     "testnet": {
       "testnet-Eason": [
+        "OmniverseInformation",
         "MessageRecorder",
         "MessageProtocol",
         "IdentityVerification",

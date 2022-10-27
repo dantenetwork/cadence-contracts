@@ -1,6 +1,7 @@
 import MessageProtocol from "./MessageProtocol.cdc"
 import ContextKeeper from "./ContextKeeper.cdc"
 import MessageRecorder from "MessageRecorder.cdc"
+import OmniverseInformation from "./OmniverseInformation.cdc"
 
 pub contract SentMessageContract{
 
@@ -22,8 +23,17 @@ pub contract SentMessageContract{
             callType: UInt8, callback: [UInt8]?, commitment: [UInt8]?, answer: [UInt8]?){
             self.toChain = toChain;
             self.sqos = sqos;
+
+            if !OmniverseInformation.judgeValidAddress(chainName: toChain, address: contractName) {
+                panic("invalid `contractName`: length error!");
+            }
             self.contractName = contractName;
+
+            if !OmniverseInformation.judgeValidSelector(chainName: toChain, selector: actionName) {
+                panic("invalid `actionName`: length error!");
+            }
             self.actionName = actionName;
+
             self.data = data;
             self.callType = callType;
             self.callback = callback;
@@ -322,14 +332,14 @@ pub contract SentMessageContract{
     /*
      * Error Processing
     */
-    access(account) fun sendoutErrorNotification(msgID: UInt128, fromChain: String, 
-                                                    submitterRef: &Submitter, acceptor: Address, alink: String, slink: String) {
+    access(account) fun sendoutErrorNotification(msgID: UInt128, toChain: String/*, 
+                                                    submitterRef: &Submitter, acceptor: Address, alink: String, slink: String*/) {
+        let submitterRef = self.account.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter)!;
         
-        
-        let msg = msgToSubmit(toChain: fromChain, 
+        let msg = msgToSubmit(toChain: toChain, 
                                 sqos: MessageProtocol.SQoS(), 
-                                contractName: [], 
-                                actionName: [], 
+                                contractName: OmniverseInformation.getDefaultAddress(chainName: toChain), 
+                                actionName: OmniverseInformation.getDefaultSelector(chainName: toChain), 
                                 data: MessageProtocol.MessagePayload(), 
                                 callType: 104, 
                                 callback: nil, 
@@ -337,7 +347,7 @@ pub contract SentMessageContract{
                                 answer: nil);
         
         ContextKeeper.setContext(context: ContextKeeper.Context(id: msgID,
-                                                                fromChain: fromChain,
+                                                                fromChain: toChain,
                                                                 sender: [],
                                                                 signer: [],
                                                                 sqos: MessageProtocol.SQoS(),
@@ -348,12 +358,11 @@ pub contract SentMessageContract{
                                                                                                 oa: nil)));
 
         submitterRef.submitWithAuth(msg, 
-                                    acceptorAddr: acceptor, 
-                                    alink: alink, 
+                                    acceptorAddr: self.account.address, 
+                                    alink: "sentMessageVault", 
                                     oSubmitterAddr: submitterRef.owner!.address, 
-                                    slink: slink);
+                                    slink: "msgSubmitter");
 
         ContextKeeper.clearContext();
     }
 }
- 

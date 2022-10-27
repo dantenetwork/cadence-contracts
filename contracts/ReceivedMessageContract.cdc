@@ -635,7 +635,13 @@ pub contract ReceivedMessageContract{
         }
 
         priv fun _dropAbandoned(_ msg: ExecData) {
-
+            // let submitterRef = self.owner!.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter)!;
+            SentMessageContract.sendoutErrorNotification(msgID: msg.verifiedMessage.id, 
+                                                        toChain: msg.verifiedMessage.fromChain/*, 
+                                                        submitterRef: submitterRef, 
+                                                        acceptor: self.owner!.address, 
+                                                        alink: "sentMessageVault", 
+                                                        slink: "msgSubmitter"*/);
 
             self.execAbandon.append(msg);
         }
