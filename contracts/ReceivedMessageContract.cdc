@@ -500,6 +500,7 @@ pub contract ReceivedMessageContract{
 
                 if msgVerified.messageHash == ReceivedMessageContract.emptyHash {
                     // the verified message is abandoned
+                    log("Abandoned message!");
                     return;
                 }
                 
