@@ -318,5 +318,42 @@ pub contract SentMessageContract{
 
         return id;
     }
+
+    /*
+     * Error Processing
+    */
+    access(account) fun sendoutErrorNotification(msgID: UInt128, fromChain: String, 
+                                                    submitterRef: &Submitter, acceptor: Address, alink: String, slink: String) {
+        
+        
+        let msg = msgToSubmit(toChain: fromChain, 
+                                sqos: MessageProtocol.SQoS(), 
+                                contractName: [], 
+                                actionName: [], 
+                                data: MessageProtocol.MessagePayload(), 
+                                callType: 104, 
+                                callback: nil, 
+                                commitment: nil, 
+                                answer: nil);
+        
+        ContextKeeper.setContext(context: ContextKeeper.Context(id: msgID,
+                                                                fromChain: fromChain,
+                                                                sender: [],
+                                                                signer: [],
+                                                                sqos: MessageProtocol.SQoS(),
+                                                                session: MessageProtocol.Session(oId: msgID, 
+                                                                                                oType: 0, 
+                                                                                                oCallback: nil, 
+                                                                                                oc: nil, 
+                                                                                                oa: nil)));
+
+        submitterRef.submitWithAuth(msg, 
+                                    acceptorAddr: acceptor, 
+                                    alink: alink, 
+                                    oSubmitterAddr: submitterRef.owner!.address, 
+                                    slink: slink);
+
+        ContextKeeper.clearContext();
+    }
 }
  

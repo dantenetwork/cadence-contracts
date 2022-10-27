@@ -2,6 +2,7 @@ import MessageProtocol from "./MessageProtocol.cdc";
 import IdentityVerification from "./IdentityVerification.cdc";
 import SettlementContract from "./Settlement.cdc";
 import ContextKeeper from "./ContextKeeper.cdc";
+import SentMessageContract from "./SentMessageContract.cdc";
 
 pub contract ReceivedMessageContract{
     
@@ -356,7 +357,12 @@ pub contract ReceivedMessageContract{
                         return;
                     }
 
-                    self.execCache.append(ExecData(verifiedMessage: msgVerified!));
+                    if msgVerified!.messageHash == ReceivedMessageContract.emptyHash {
+                        // This is a message abandoned
+                        self._dropAbandoned(ExecData(verifiedMessage: msgVerified!));
+                    } else {
+                        self.execCache.append(ExecData(verifiedMessage: msgVerified!));
+                    }
                 }
             }
         }
@@ -500,8 +506,8 @@ pub contract ReceivedMessageContract{
 
                 if msgVerified.messageHash == ReceivedMessageContract.emptyHash {
                     // the verified message is abandoned
-                    log("Abandoned message!");
-                    return;
+                    panic("Abandoned message!");
+                    // return;
                 }
                 
                 // TODO: Move out
@@ -614,7 +620,7 @@ pub contract ReceivedMessageContract{
             }
 
             if toBeRemove >= 0 {
-                self.execAbandon.append(self.execCache.remove(at: toBeRemove));
+                self._dropAbandoned(self.execCache.remove(at: toBeRemove));
             }
 
             if !isExecutable {
@@ -626,6 +632,12 @@ pub contract ReceivedMessageContract{
 
                 self._submitRecvMessage(recvMsg: recvMsg, pubAddr: pubAddr);
             }
+        }
+
+        priv fun _dropAbandoned(_ msg: ExecData) {
+
+
+            self.execAbandon.append(msg);
         }
     }
 
