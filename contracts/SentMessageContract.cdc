@@ -14,13 +14,13 @@ pub contract SentMessageContract{
         pub let actionName: [UInt8];
         pub let data: MessageProtocol.MessagePayload;
         pub let callType: UInt8;
-        pub let callback: [UInt8]?;
+        pub let callback: String?;
         pub let commitment: [UInt8]?;
         pub let answer: [UInt8]?;
 
       init(toChain: String, sqos: MessageProtocol.SQoS, 
             contractName: [UInt8], actionName: [UInt8], data: MessageProtocol.MessagePayload,
-            callType: UInt8, callback: [UInt8]?, commitment: [UInt8]?, answer: [UInt8]?){
+            callType: UInt8, callback: String?, commitment: [UInt8]?, answer: [UInt8]?){
             self.toChain = toChain;
             self.sqos = sqos;
 
@@ -142,9 +142,14 @@ pub contract SentMessageContract{
                 sessionID = id;
             }
 
+            var callback: [UInt8]? = nil;
+            if nil != msgToSubmit.callback {
+                callback = msgToSubmit.callback!.utf8;
+            }
+
             let sess = MessageProtocol.Session(oId: sessionID, 
                                                 oType: msgToSubmit.callType, 
-                                                oCallback: msgToSubmit.callback, 
+                                                oCallback: callback, 
                                                 oc: msgToSubmit.commitment, 
                                                 oa: msgToSubmit.answer);
             
@@ -182,6 +187,8 @@ pub contract SentMessageContract{
         
         pub fun getMessageById(chain: String, messageId: UInt128): SentMessageCore?;
 
+        pub fun getCallback(chain_id: String): String?;
+
         pub fun isOnline(): Bool;
     }
 
@@ -197,10 +204,13 @@ pub contract SentMessageContract{
         pub let message: [SentMessageCore];
         priv var online: Bool;
 
+        priv let callbacks: {String: String};
+
         init(){
             self.message = [];
             self.sessionID = 0;
             self.online = true;
+            self.callbacks = {};
         }
 
         /**
@@ -225,6 +235,10 @@ pub contract SentMessageContract{
                                                     );
                 
                 self.message.append(sentMessage);
+
+                if let callback = rst.callback {
+                    self.callbacks[sentMessage.toChain.concat(sentMessage.id.toString())] = callback;
+                }
 
                 return ContextKeeper.Context(id: sentMessage.id,
                                             fromChain: sentMessage.fromChain,
@@ -272,6 +286,10 @@ pub contract SentMessageContract{
             }
 
             return nil;
+        }
+
+        pub fun getCallback(chain_id: String): String? {
+            return self.callbacks[chain_id];
         }
 
         pub fun isOnline(): Bool {
@@ -341,7 +359,7 @@ pub contract SentMessageContract{
                                 contractName: OmniverseInformation.getDefaultAddress(chainName: toChain), 
                                 actionName: OmniverseInformation.getDefaultSelector(chainName: toChain), 
                                 data: MessageProtocol.MessagePayload(), 
-                                callType: 104, 
+                                callType: OmniverseInformation.errorType, 
                                 callback: nil, 
                                 commitment: nil, 
                                 answer: nil);

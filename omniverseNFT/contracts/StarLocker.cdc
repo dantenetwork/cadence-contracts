@@ -1,7 +1,7 @@
 import MessageProtocol from "../../contracts/MessageProtocol.cdc"
 import SentMessageContract from "../../contracts/SentMessageContract.cdc"
 import ReceivedMessageContract from "../../contracts/ReceivedMessageContract.cdc"
-import CrossChain from "../../contracts/CrossChain.cdc"
+import Regestery from "../../contracts/Regestery.cdc"
 
 import MetadataViews from "./MetadataViews.cdc"
 import NonFungibleToken from "./NonFungibleToken.cdc"
@@ -27,7 +27,7 @@ pub contract StarLocker{
         // save message as resource
         self.account.save(<-receivedMessageVault, to: /storage/receivedMessageVault)
         self.account.link<&{ReceivedMessageContract.ReceivedMessageInterface}>(/public/receivedMessageVault, target: /storage/receivedMessageVault)
-        CrossChain.registerRecvAccount(address: self.account.address, link: "receivedMessageVault");
+        Regestery.registerRecvAccount(address: self.account.address, link: "receivedMessageVault");
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // create cross chain sent message resource
@@ -37,7 +37,7 @@ pub contract StarLocker{
         self.account.link<&{SentMessageContract.SentMessageInterface, SentMessageContract.AcceptorFace}>(/public/sentMessageVault, target: /storage/sentMessageVault)
         // add acceptor link
         // self.account.link<&{SentMessageContract.AcceptorFace}>(/public/acceptorFace, target: /storage/sentMessageVault)
-        CrossChain.registerSendAccount(address: self.account.address, link: "sentMessageVault");
+        Regestery.registerSendAccount(address: self.account.address, link: "sentMessageVault");
 
         // add message submitter
         let msgSubmitter <- SentMessageContract.createMessageSubmitter()
@@ -290,7 +290,7 @@ pub contract StarLocker{
         // Message params
         let sqos = MessageProtocol.SQoS()
         let callType: UInt8 = 1
-        let callback: [UInt8] = []
+        let callback: String? = nil
         let commitment: [UInt8] = []
         let answer: [UInt8] = []
 

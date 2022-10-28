@@ -3,6 +3,8 @@ import IdentityVerification from "./IdentityVerification.cdc";
 import SettlementContract from "./Settlement.cdc";
 import ContextKeeper from "./ContextKeeper.cdc";
 import SentMessageContract from "./SentMessageContract.cdc";
+import OmniverseInformation from "./OmniverseInformation.cdc"
+import CrossChain from "./CrossChain.cdc"
 
 pub contract ReceivedMessageContract{
     
@@ -131,7 +133,7 @@ pub contract ReceivedMessageContract{
         }
 
         access(contract) fun setAbandoned() {
-            self.messageHash = ReceivedMessageContract.emptyHash;
+            self.messageHash = OmniverseInformation.emptyHash;
         }
     }
 
@@ -357,7 +359,7 @@ pub contract ReceivedMessageContract{
                         return;
                     }
 
-                    if msgVerified!.messageHash == ReceivedMessageContract.emptyHash {
+                    if msgVerified!.messageHash == OmniverseInformation.emptyHash {
                         // This is a message abandoned
                         self._dropAbandoned(ExecData(verifiedMessage: msgVerified!));
                     } else {
@@ -504,16 +506,23 @@ pub contract ReceivedMessageContract{
                 
                 let msgVerified = fetchMessage!;
 
-                if msgVerified.messageHash == ReceivedMessageContract.emptyHash {
+                if msgVerified.messageHash == OmniverseInformation.emptyHash {
                     // the verified message is abandoned
                     panic("Abandoned message!");
                     // return;
                 }
+
+                // Process Error Message
+                if msgVerified.session.type == OmniverseInformation.errorType {
+                    self._process_error(msgVerified);
+                    self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
+                    return;
+                }
                 
-                // TODO: Move out
+                // Move out
                 let msgContent = msgVerified!.content;
 
-                // TODO: call destination
+                // call destination
                 let pubLink = PublicPath(identifier: msgContent.link);
                 if (nil == pubLink)
                 {
@@ -645,6 +654,54 @@ pub contract ReceivedMessageContract{
 
             self.execAbandon.append(msg);
         }
+
+        priv fun _process_error(_ msg: ReceivedMessageCore) {
+            var fetchSentMessage: SentMessageContract.SentMessageCore? = nil;
+            var callbackLink: String? = nil;
+            for sendKey in CrossChain.registeredSendAccounts.keys {
+                if let senderRef = SentMessageContract.getSenderRef(senderAddress: sendKey, link: CrossChain.registeredSendAccounts[sendKey]!) {
+                    if let messageInstance = senderRef.getMessageById(chain: msg.fromChain, messageId: msg.session.id) {
+                        fetchSentMessage = messageInstance;
+                        if let callback = senderRef.getCallback(chain_id: msg.fromChain.concat(msg.id.toString())) {
+                            callbackLink = callback;
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            if (nil == fetchSentMessage) || (nil == callbackLink) {
+                return;
+            }
+
+            if UInt8(2) == fetchSentMessage!.session.type {
+                // call destination
+                let pubLink = PublicPath(identifier: callbackLink!);
+                if (nil == pubLink) {
+                    return;
+                }
+
+                if let address = MessageProtocol.addressFromBytes(addrBytes: fetchSentMessage!.sender) {
+                    let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
+                    if (nil == calleeRef){
+                        return;
+                    }
+
+                    ContextKeeper.setContext(context: ContextKeeper.Context(id: msg.id,
+                                                                            fromChain: msg.fromChain,
+                                                                            sender: [],
+                                                                            signer: [],
+                                                                            sqos: fetchSentMessage!.sqos,
+                                                                            session: fetchSentMessage!.session));
+                    
+                    let data = OmniverseInformation.createErrorPayload(errorCode: msg.session.type);
+
+                    calleeRef!.callMe(data: data);
+                    ContextKeeper.clearContext();
+                }
+            }
+        }
     }
 
     // Temporarily, verification threshold is setted to be 0.7 when contract deployed
@@ -656,14 +713,10 @@ pub contract ReceivedMessageContract{
     
     access(contract) let maxRecvedID: {String: UInt128};
 
-    access(contract) let emptyHash: String;
-
     init() {
         self.vfThreshold = 0.7;
         self.completedID = {};
         self.maxRecvedID = {};
-
-        self.emptyHash = "00";
     }
 
     // Create recource to store received message

@@ -157,7 +157,7 @@ pub fun main(address: Address) {
     let hashValue = String.encodeHex(HashAlgorithm.KECCAK_256.hash(answer.utf8));
 
     StarLocker.sendoutNFT(transferToken: <-nft2sendout, 
-                                toChain: "Nika",
+                                toChain: "FLOWTEST",
                                 contractName: address.toBytes(),
                                 actionName: actionLink.utf8,
                                 receiver: MessageProtocol.CDCAddress(addr: address.toBytes(), t: 4), 
@@ -170,7 +170,7 @@ pub fun main(address: Address) {
     log(StarLocker.getLockedNFTs());
     log("----------------------------------------------------------------")
     
-    let sentMsg = querySendMessageByID(chain: "Nika", messageID: 1)!;
+    let sentMsg = querySendMessageByID(chain: "FLOWTEST", messageID: 1)!;
     //log(SentMessageContract.QueryMessage(msgSender: address, link: "sentMessageVault"));
     //log(sentMsg);
 
@@ -199,8 +199,8 @@ pub fun main(address: Address) {
     let tobeSubmitted = generateSubmittion(
             id: nextID, 
             fromChain: sentMsg.toChain,
-            sender: "Nika Chain User V".utf8, 
-            signer: "Nika Chain User V".utf8, 
+            sender: "11111111".utf8, 
+            signer: "11111111".utf8, 
             sqos: sentMsg.sqos, 
             resourceAccount: address, 
             link: actionLink, 
@@ -215,7 +215,7 @@ pub fun main(address: Address) {
 
     // signature of message to submit. The following signature is signed by off-chain js
     // different uuid make the signature below different, so restart the emulator before running this test
-    let submitSignature = "e214c2b7b8b492442d48484e616a34ed3bb267715149e365f1d1be05d3e190def0b41952f34cdf2b2f79d4f989dcf55b57f41f7694e3cac140a9d0ed5bf3af7d";
+    let submitSignature = "683acf6214f15afa0336d447a6b5f576aba7ac3b20d892ff674a6ce090b7da3910bb1e2cedcca37313a0ebca083a73efddcafaa85499970d9c62447e398f6fe9";
 
     if let recverRef = ReceivedMessageContract.getRecverRef(recverAddress: address, link: "receivedMessageVault") {
         recverRef.submitRecvMessage(
@@ -224,6 +224,8 @@ pub fun main(address: Address) {
             signatureAlgorithm: SignatureAlgorithm.ECDSA_P256, 
             signature: submitSignature.decodeHex()
         );
+
+        recverRef.trigger(msgID: tobeSubmitted.originMessage.id, fromChain: tobeSubmitted.originMessage.fromChain);
     } else {
         panic("Invalid `resourceAccount` or `link`!");
     }

@@ -315,7 +315,10 @@ pub contract MessageProtocol {
     }
 
     /// Session
-    /// Member@type: 0, C-C(Corss-Chain) call requires call_back; 1, C-C call ignores call_back; 2, C-C call_back;
+    /// Member@type: 0: undefined; 
+    ///              1: message sending/callback out; 
+    ///              2: call out; 
+    ///              104: error message;
     pub struct Session {
         pub let id: UInt128;
         pub let type: UInt8;

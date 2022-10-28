@@ -1,3 +1,5 @@
+import MessageProtocol from "./MessageProtocol.cdc"
+
 pub contract OmniverseInformation {
 
     pub let a4: [UInt8];
@@ -5,11 +7,18 @@ pub contract OmniverseInformation {
     pub let a20: [UInt8];
     pub let a32: [UInt8];
 
+    pub let emptyHash: String; 
+    pub let errorType: UInt8;
+
     init() {
         self.a4 = [0, 0, 0, 0];
         self.a8 = [0, 0, 0, 0, 0, 0, 0, 0];
         self.a20 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         self.a32 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        
+        self.emptyHash = "00";
+        self.errorType = 104;
     }
 
     pub fun getDefaultAddress(chainName: String): [UInt8] {
@@ -42,7 +51,19 @@ pub contract OmniverseInformation {
     }
 
     pub fun judgeValidSelector(chainName: String, selector: [UInt8]): Bool {
-        
+        if ("FLOWTEST" == chainName) || ("FLOWMAIN" == chainName) || ("FLOWEMU" == chainName) {
+            return true;
+        }
+
         return 4 == selector.length;
+    }
+
+    pub fun createErrorPayload(errorCode: UInt8): MessageProtocol.MessagePayload {
+        let data = MessageProtocol.MessagePayload();
+        let item = MessageProtocol.createMessageItem(name: "Error", 
+                                                    type: MessageProtocol.MsgType.cdcU8,
+                                                    value: self.errorType);
+        data.addItem(item: item!);
+        return data;
     }
 }
