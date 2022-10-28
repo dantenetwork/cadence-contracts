@@ -129,6 +129,8 @@ flow transactions send ./transactions/send-recv-message/setSentIDForcely.cdc 'RI
 # Execution
 flow scripts execute ./scripts/send-recv-message/queryExecutions.cdc
 
+flow scripts execute ./scripts/send-recv-message/queryAbandonedExecs.cdc
+
 flow transactions send ./transactions/send-recv-message/trigger.cdc 
 
 flow scripts execute ./scripts/send-recv-message/queryHistory.cdc

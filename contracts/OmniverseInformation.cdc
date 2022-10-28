@@ -16,6 +16,10 @@ pub contract OmniverseInformation {
         if ("FLOWTEST" == chainName) || ("FLOWMAIN" == chainName) || ("FLOWEMU" == chainName) {
             return self.a8;
         } 
+
+        if ("POLKADOT" == chainName) {
+            return self.a32;
+        }
         
         return self.a20;
     }
@@ -23,6 +27,10 @@ pub contract OmniverseInformation {
     pub fun judgeValidAddress(chainName: String, address: [UInt8]): Bool {
         if ("FLOWTEST" == chainName) || ("FLOWMAIN" == chainName) || ("FLOWEMU" == chainName) {
             return 8 == address.length;
+        }
+
+        if ("POLKADOT" == chainName) {
+            return 32 == address.length;
         }
         
         return 20 == address.length;
