@@ -8,7 +8,10 @@ pub contract OmniverseInformation {
     pub let a32: [UInt8];
 
     pub let emptyHash: String; 
-    pub let errorType: UInt8;
+    pub let item_err: String;
+
+    pub let errorType: UInt8;       // local error
+    pub let remoteError: UInt8;
 
     init() {
         self.a4 = [0, 0, 0, 0];
@@ -19,6 +22,8 @@ pub contract OmniverseInformation {
         
         self.emptyHash = "00";
         self.errorType = 104;
+        self.remoteError = 105;
+        self.item_err = "Error";
     }
 
     pub fun getDefaultAddress(chainName: String): [UInt8] {
@@ -60,7 +65,7 @@ pub contract OmniverseInformation {
 
     pub fun createErrorPayload(errorCode: UInt8): MessageProtocol.MessagePayload {
         let data = MessageProtocol.MessagePayload();
-        let item = MessageProtocol.createMessageItem(name: "Error", 
+        let item = MessageProtocol.createMessageItem(name: self.item_err, 
                                                     type: MessageProtocol.MsgType.cdcU8,
                                                     value: self.errorType);
         data.addItem(item: item!);

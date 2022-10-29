@@ -513,11 +513,13 @@ pub contract ReceivedMessageContract{
                 }
 
                 // Process Error Message
-                if msgVerified.session.type == OmniverseInformation.errorType {
-                    self._process_error(msgVerified);
+                if msgVerified.session.type == OmniverseInformation.remoteError {
+                    self._process_remote_error(msgVerified);
                     self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
                     return;
                 }
+
+                // TODU: Think about whether we need to process `callback` situation specially
                 
                 // Move out
                 let msgContent = msgVerified!.content;
@@ -635,7 +637,7 @@ pub contract ReceivedMessageContract{
             if !isExecutable {
                 let recvMsg = ReceivedMessageCore(id: msgID, fromChain: fromChain, sender: [], signer: [], sqos: MessageProtocol.SQoS(), 
                                                 resourceAccount: 0x00, link: "", data: MessageProtocol.MessagePayload(),
-                                                session: MessageProtocol.Session(oId: msgID, oType: 0, oCallback: nil, oc: nil, oa: nil));
+                                                session: MessageProtocol.Session(oId: msgID, oType: OmniverseInformation.errorType, oCallback: nil, oc: nil, oa: nil));
             
                 recvMsg.setAbandoned();
 
@@ -644,6 +646,7 @@ pub contract ReceivedMessageContract{
         }
 
         priv fun _dropAbandoned(_ msg: ExecData) {
+            // self.owner is only a PublicAccount
             // let submitterRef = self.owner!.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter)!;
             SentMessageContract.sendoutErrorNotification(msgID: msg.verifiedMessage.id, 
                                                         toChain: msg.verifiedMessage.fromChain/*, 
@@ -655,51 +658,84 @@ pub contract ReceivedMessageContract{
             self.execAbandon.append(msg);
         }
 
-        priv fun _process_error(_ msg: ReceivedMessageCore) {
+        /*
+         * Concrete implementation for processing received messages
+        */
+        // processing remote call
+        priv fun _process_remote_call(_ msg: ReceivedMessageCore) {
+
+        }
+
+        // processing remote send/call out
+        priv fun _process_remote_normal(_ msg: ReceivedMessageCore) {
+
+        }
+
+        // processing remote callback
+        priv fun _process_remote_back(_ msg: ReceivedMessageCore) {
+
+        }
+
+        // processing remote error
+        priv fun _process_remote_error(_ msg: ReceivedMessageCore) {
             var fetchSentMessage: SentMessageContract.SentMessageCore? = nil;
-            var callbackLink: String? = nil;
             for sendKey in CrossChain.registeredSendAccounts.keys {
                 if let senderRef = SentMessageContract.getSenderRef(senderAddress: sendKey, link: CrossChain.registeredSendAccounts[sendKey]!) {
                     if let messageInstance = senderRef.getMessageById(chain: msg.fromChain, messageId: msg.session.id) {
                         fetchSentMessage = messageInstance;
-                        if let callback = senderRef.getCallback(chain_id: msg.fromChain.concat(msg.id.toString())) {
-                            callbackLink = callback;
-                        }
-
                         break;
                     }
                 }
             }
 
-            if (nil == fetchSentMessage) || (nil == callbackLink) {
+            if (nil == fetchSentMessage) {
+                log("No related message");
+                return;
+            }
+
+            if (msg.session.id != fetchSentMessage!.session.id) {
+                log("Remote Error: Mismatched session id.")
                 return;
             }
 
             if UInt8(2) == fetchSentMessage!.session.type {
+                let cbRecord = SentMessageContract.getCallback(remoteChain: msg.fromChain, sessionID: msg.session.id);
+
+                if (nil == cbRecord) {
+                    log("No related callback function");
+                    return;
+                }
+
                 // call destination
-                let pubLink = PublicPath(identifier: callbackLink!);
+                let pubLink = PublicPath(identifier: cbRecord!.callback);
                 if (nil == pubLink) {
                     return;
                 }
 
-                if let address = MessageProtocol.addressFromBytes(addrBytes: fetchSentMessage!.sender) {
-                    let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
-                    if (nil == calleeRef){
-                        return;
-                    }
-
-                    ContextKeeper.setContext(context: ContextKeeper.Context(id: msg.id,
-                                                                            fromChain: msg.fromChain,
-                                                                            sender: [],
-                                                                            signer: [],
-                                                                            sqos: fetchSentMessage!.sqos,
-                                                                            session: fetchSentMessage!.session));
-                    
-                    let data = OmniverseInformation.createErrorPayload(errorCode: msg.session.type);
-
-                    calleeRef!.callMe(data: data);
-                    ContextKeeper.clearContext();
+                let calleeRef = getAccount(cbRecord!.srcAddr).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
+                if (nil == calleeRef){
+                    return;
                 }
+
+                /*let session = MessageProtocol.Session(oId: msg.session.id, 
+                                                        oType: 105, 
+                                                        oCallback: nil, 
+                                                        oc: nil, 
+                                                        oa: nil);*/
+
+                ContextKeeper.setContext(context: ContextKeeper.Context(id: msg.id,
+                                                                        fromChain: msg.fromChain,
+                                                                        sender: [],
+                                                                        signer: [],
+                                                                        sqos: fetchSentMessage!.sqos,
+                                                                        session: msg.session));
+                
+                let data = OmniverseInformation.createErrorPayload(errorCode: msg.session.type);
+
+                calleeRef!.callMe(data: data);
+                ContextKeeper.clearContext();
+
+                SentMessageContract.deleteCallback(toChain: msg.fromChain, sessionID: msg.session.id);
             }
         }
     }

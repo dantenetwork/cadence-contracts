@@ -7,6 +7,20 @@ pub contract SentMessageContract{
 
     priv var sessionID: UInt128;
 
+    pub struct CallbackRecord {
+        pub let srcMsgID: UInt128;
+        pub let srcAddr: Address;
+        pub let callback: String;
+
+        init(srcMsgID: UInt128, srcAddr: Address, callback: String) {
+            self.srcMsgID = srcMsgID;
+            self.srcAddr = srcAddr;
+            self.callback = callback;
+        }
+    }
+
+    pub let callbacks: {String: CallbackRecord};
+
     pub struct msgToSubmit{
         pub let toChain: String;
         pub let sqos: MessageProtocol.SQoS;
@@ -128,18 +142,12 @@ pub contract SentMessageContract{
             self.sender = sender;
             self.signer = signer;
 
-            var sessionID: UInt128 = 0;
-            /*
-            if let context = ContextKeeper.getContext() {
-                sessionID = context.session.id;
-            } else {
-                sessionID = SentMessageContract.applyNextSession();
-            }
-            */
-            if let context = ContextKeeper.getContext() {
-                sessionID = context.id;
-            } else {
-                sessionID = id;
+            var sessionID: UInt128 = id;
+            
+            if (UInt8(3) == msgToSubmit.type) || (UInt8(105) == msgToSubmit.type) {
+                if let context = ContextKeeper.getContext() {
+                    sessionID = context.id;
+                }
             }
 
             var callback: [UInt8]? = nil;
@@ -187,8 +195,6 @@ pub contract SentMessageContract{
         
         pub fun getMessageById(chain: String, messageId: UInt128): SentMessageCore?;
 
-        pub fun getCallback(chain_id: String): String?;
-
         pub fun isOnline(): Bool;
     }
 
@@ -204,13 +210,10 @@ pub contract SentMessageContract{
         pub let message: [SentMessageCore];
         priv var online: Bool;
 
-        priv let callbacks: {String: String};
-
         init(){
             self.message = [];
             self.sessionID = 0;
             self.online = true;
-            self.callbacks = {};
         }
 
         /**
@@ -236,8 +239,14 @@ pub contract SentMessageContract{
                 
                 self.message.append(sentMessage);
 
-                if let callback = rst.callback {
-                    self.callbacks[sentMessage.toChain.concat(sentMessage.id.toString())] = callback;
+                if UInt8(2) == sentMessage.session.type {
+                    if let callback = rst.callback {
+                        SentMessageContract.addCallback(toChain: sentMessage.toChain, 
+                                                        sessionID: sentMessage.session.id, 
+                                                        cbRecord: SentMessageContract.CallbackRecord(srcMsgID: sentMessage.id, 
+                                                                                                    srcAddr: submitterAddr,
+                                                                                                    callback: callback));
+                    }
                 }
 
                 return ContextKeeper.Context(id: sentMessage.id,
@@ -288,10 +297,6 @@ pub contract SentMessageContract{
             return nil;
         }
 
-        pub fun getCallback(chain_id: String): String? {
-            return self.callbacks[chain_id];
-        }
-
         pub fun isOnline(): Bool {
             return self.online;
         }
@@ -307,6 +312,7 @@ pub contract SentMessageContract{
 
     init() {
         self.sessionID = 0;
+        self.callbacks = {};
     }
 
     // Create recource to store sent message
@@ -359,7 +365,7 @@ pub contract SentMessageContract{
                                 contractName: OmniverseInformation.getDefaultAddress(chainName: toChain), 
                                 actionName: OmniverseInformation.getDefaultSelector(chainName: toChain), 
                                 data: MessageProtocol.MessagePayload(), 
-                                callType: OmniverseInformation.errorType, 
+                                callType: OmniverseInformation.remoteError, 
                                 callback: nil, 
                                 commitment: nil, 
                                 answer: nil);
@@ -382,5 +388,33 @@ pub contract SentMessageContract{
                                     slink: "msgSubmitter");
 
         ContextKeeper.clearContext();
+    }
+
+    /*
+    ** callbacks management
+    */
+    access(account) fun addCallback(toChain: String, sessionID: UInt128, cbRecord: CallbackRecord) {
+        let key = toChain.concat(sessionID.toString());
+        if !self.callbacks.containsKey(key) {
+            self.callbacks[key] = cbRecord;
+        } else {
+            panic("`toChain` and `sessionID` are already exists!");
+        }
+    }
+
+    access(account) fun deleteCallback(toChain: String, sessionID: UInt128) {
+        let key = toChain.concat(sessionID.toString());
+        if self.callbacks.containsKey(key) {
+            self.callbacks.remove(key: key);
+        }
+    }
+
+    pub fun getCallback(remoteChain: String, sessionID: UInt128): CallbackRecord? {
+        let key = remoteChain.concat(sessionID.toString());
+        return self.callbacks[key];
+    }
+
+    pub fun getCallbacks(): {String: CallbackRecord} {
+        return self.callbacks;
     }
 }
