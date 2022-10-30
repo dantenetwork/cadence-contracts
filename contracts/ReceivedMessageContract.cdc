@@ -515,43 +515,15 @@ pub contract ReceivedMessageContract{
                 // Process Error Message
                 if msgVerified.session.type == OmniverseInformation.remoteError {
                     self._process_remote_error(msgVerified);
-                    self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
-                    return;
+                } else if UInt8(3) == msgVerified.session.type {
+                    self._process_remote_back(msgVerified);
+                } else if UInt8(2) == msgVerified.session.type {
+                    self._process_remote_call(msgVerified);
+                } else if UInt8(1) == msgVerified.session.type {
+                    self._process_remote_normal(msgVerified);
+                } else {
+                    panic("Undefined session type: ".concat(msgVerified.session.type.toString()));
                 }
-
-                // TODU: Think about whether we need to process `callback` situation specially
-                
-                // Move out
-                let msgContent = msgVerified!.content;
-
-                // call destination
-                let pubLink = PublicPath(identifier: msgContent.link);
-                if (nil == pubLink)
-                {
-                    self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
-                    return;
-                    //panic("invalid `link` path!");
-                }
-
-                // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
-                let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
-                if (nil == calleeRef){
-                    self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
-                    return;
-                    //panic("invalid callee address or `link`!");
-                }
-
-                // TODO: concrete invocations need to be move out to a special cache, 
-                // and be invocated by off-chain nodes
-                // let contextID = msgVerified!.fromChain.concat(msgVerified!.id.toString());
-                ContextKeeper.setContext(context: ContextKeeper.Context(id: msgVerified!.id,
-                                                                        fromChain: msgVerified!.fromChain,
-                                                                        sender: msgVerified!.sender,
-                                                                        signer: msgVerified!.signer,
-                                                                        sqos: msgVerified!.sqos,
-                                                                        session: msgVerified!.session));
-                calleeRef!.callMe(data: msgContent.data);
-                ContextKeeper.clearContext();
 
                 self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
             }
@@ -663,17 +635,81 @@ pub contract ReceivedMessageContract{
         */
         // processing remote call
         priv fun _process_remote_call(_ msg: ReceivedMessageCore) {
-
+            self._process_remote_normal(msg);
         }
 
         // processing remote send/call out
-        priv fun _process_remote_normal(_ msg: ReceivedMessageCore) {
+        priv fun _process_remote_normal(_ msgVerified: ReceivedMessageCore) {
+            // Move out
+            let msgContent = msgVerified.content;
 
+            // call destination
+            let pubLink = PublicPath(identifier: msgContent.link);
+            if (nil == pubLink)
+            {
+                self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
+                return;
+                //panic("invalid `link` path!");
+            }
+
+            // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
+            let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
+            if (nil == calleeRef){
+                self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
+                return;
+                //panic("invalid callee address or `link`!");
+            }
+
+            // TODO: concrete invocations need to be move out to a special cache, 
+            // and be invocated by off-chain nodes
+            // let contextID = msgVerified.fromChain.concat(msgVerified.id.toString());
+            ContextKeeper.setContext(context: ContextKeeper.Context(id: msgVerified.id,
+                                                                    fromChain: msgVerified.fromChain,
+                                                                    sender: msgVerified.sender,
+                                                                    signer: msgVerified.signer,
+                                                                    sqos: msgVerified.sqos,
+                                                                    session: msgVerified.session));
+            calleeRef!.callMe(data: msgContent.data);
+            ContextKeeper.clearContext();
         }
 
         // processing remote callback
         priv fun _process_remote_back(_ msg: ReceivedMessageCore) {
+            let cbRecord = SentMessageContract.getCallback(remoteChain: msg.fromChain, sessionID: msg.session.id);
 
+            if (nil == cbRecord) {
+                log("No related callback function");
+                return;
+            }
+
+            if (cbRecord!.srcAddr != msg.content.accountAddress) || (cbRecord!.callback != msg.content.link) {
+                log("Callback not matched!");
+                return;
+            }
+
+            // call destination
+            let pubLink = PublicPath(identifier: cbRecord!.callback);
+            if (nil == pubLink) {
+                return;
+            }
+
+            let calleeRef = getAccount(cbRecord!.srcAddr).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
+            if (nil == calleeRef){
+                return;
+            }
+
+            ContextKeeper.setContext(context: ContextKeeper.Context(id: msg.id,
+                                                                    fromChain: msg.fromChain,
+                                                                    sender: msg.sender,
+                                                                    signer: msg.signer,
+                                                                    sqos: msg.sqos,
+                                                                    session: msg.session));
+            
+            calleeRef!.callMe(data: msg.content.data);
+
+            ContextKeeper.clearContext();
+
+            SentMessageContract.deleteCallback(toChain: msg.fromChain, sessionID: msg.session.id);
         }
 
         // processing remote error
@@ -717,12 +753,6 @@ pub contract ReceivedMessageContract{
                     return;
                 }
 
-                /*let session = MessageProtocol.Session(oId: msg.session.id, 
-                                                        oType: 105, 
-                                                        oCallback: nil, 
-                                                        oc: nil, 
-                                                        oa: nil);*/
-
                 ContextKeeper.setContext(context: ContextKeeper.Context(id: msg.id,
                                                                         fromChain: msg.fromChain,
                                                                         sender: [],
@@ -731,8 +761,8 @@ pub contract ReceivedMessageContract{
                                                                         session: msg.session));
                 
                 let data = OmniverseInformation.createErrorPayload(errorCode: msg.session.type);
-
                 calleeRef!.callMe(data: data);
+
                 ContextKeeper.clearContext();
 
                 SentMessageContract.deleteCallback(toChain: msg.fromChain, sessionID: msg.session.id);

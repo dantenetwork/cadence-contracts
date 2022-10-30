@@ -144,7 +144,7 @@ pub contract SentMessageContract{
 
             var sessionID: UInt128 = id;
             
-            if (UInt8(3) == msgToSubmit.type) || (UInt8(105) == msgToSubmit.type) {
+            if (UInt8(3) == msgToSubmit.callType) || (UInt8(105) == msgToSubmit.callType) {
                 if let context = ContextKeeper.getContext() {
                     sessionID = context.id;
                 }
