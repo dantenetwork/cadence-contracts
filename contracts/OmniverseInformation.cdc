@@ -11,7 +11,7 @@ pub contract OmniverseInformation {
     pub let item_err: String;
 
     pub let errorType: UInt8;       // local error
-    pub let remoteError: UInt8;
+    pub let remoteError: UInt8;     // remote invocation error
 
     init() {
         self.a4 = [0, 0, 0, 0];
@@ -67,7 +67,7 @@ pub contract OmniverseInformation {
         let data = MessageProtocol.MessagePayload();
         let item = MessageProtocol.createMessageItem(name: self.item_err, 
                                                     type: MessageProtocol.MsgType.cdcU8,
-                                                    value: self.errorType);
+                                                    value: errorCode);
         data.addItem(item: item!);
         return data;
     }
