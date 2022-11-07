@@ -238,7 +238,9 @@ pub contract ReceivedMessageContract{
         pub let execAbandon: [ExecData];
 
         pub let historyStorage: {String: [ReceivedMessageCache]};
-        // TODO: context
+        
+        // SQoS
+        priv var sqos: MessageProtocol.SQoS?;
 
         init(){
             self.message = {};
@@ -251,6 +253,8 @@ pub contract ReceivedMessageContract{
             self.execAbandon = [];
 
             self.historyStorage = {};
+
+            self.sqos = nil;
         }
 
         /**
@@ -767,6 +771,14 @@ pub contract ReceivedMessageContract{
 
                 SentMessageContract.deleteCallback(toChain: msg.fromChain, sessionID: msg.session.id);
             }
+        }
+
+        pub fun setSQoS(sqos: MessageProtocol.SQoS) { 
+            self.sqos = sqos;
+        }
+
+        pub fun getSQoS(): MessageProtocol.SQoS? {
+            return self.sqos;
         }
     }
 

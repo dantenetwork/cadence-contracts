@@ -312,6 +312,16 @@ pub contract MessageProtocol {
         pub fun addItem(item: SQoSItem) {
             self.sqosItems.append(item);
         }
+
+        pub fun checkItem(type: SQoSType): Bool {
+            for ele in self.sqosItems {
+                if ele.t == type.rawValue {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     /// Session
