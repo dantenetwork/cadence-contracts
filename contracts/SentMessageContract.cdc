@@ -364,7 +364,7 @@ pub contract SentMessageContract{
                                 sqos: MessageProtocol.SQoS(), 
                                 contractName: OmniverseInformation.getDefaultAddress(chainName: toChain), 
                                 actionName: OmniverseInformation.getDefaultSelector(chainName: toChain), 
-                                data: MessageProtocol.MessagePayload(), 
+                                data: OmniverseInformation.createErrorPayload(errorCode: OmniverseInformation.remoteError), 
                                 callType: OmniverseInformation.remoteError, 
                                 callback: nil, 
                                 commitment: nil, 

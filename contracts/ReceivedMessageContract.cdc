@@ -764,8 +764,8 @@ pub contract ReceivedMessageContract{
                                                                         sqos: fetchSentMessage!.sqos,
                                                                         session: msg.session));
                 
-                let data = OmniverseInformation.createErrorPayload(errorCode: msg.session.type);
-                calleeRef!.callMe(data: data);
+                // let data = OmniverseInformation.createErrorPayload(errorCode: msg.session.type);
+                calleeRef!.callMe(data: msg.content.data);
 
                 ContextKeeper.clearContext();
 
