@@ -315,7 +315,7 @@ pub contract ReceivedMessageContract{
                         ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] = 0;
                     }
 
-                    if (recvMsg.id == (maxRecvedID + 1)) {
+                    if (recvMsg.id <= (maxRecvedID + 1)) {
                         // TODO: this strategy need to be checked!
                         let mcache = ReceivedMessageCache(id: recvMsg.id);
                         mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
@@ -337,7 +337,7 @@ pub contract ReceivedMessageContract{
                     ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] = 0;
                 }
 
-                if recvMsg.id  == (maxRecvedID + 1) {
+                if recvMsg.id  <= (maxRecvedID + 1) {
                     let mcache = ReceivedMessageCache(id: recvMsg.id);
                     mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
                     self.message[recvMsg.fromChain] = [mcache];
