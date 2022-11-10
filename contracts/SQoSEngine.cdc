@@ -31,11 +31,11 @@ pub contract SQoSEngine {
 
     pub struct HRRecord {
         pub let hdData: HiddenData;
-        pub var rvData: RevealData?;
+        // pub var rvData: RevealData?;
 
         init(hdData: HiddenData) {
             self.hdData = hdData;
-            self.rvData = nil;
+            // self.rvData = nil;
         }
     }
     
