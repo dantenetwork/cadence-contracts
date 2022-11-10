@@ -5,6 +5,7 @@ import ContextKeeper from "./ContextKeeper.cdc";
 import SentMessageContract from "./SentMessageContract.cdc";
 import OmniverseInformation from "./OmniverseInformation.cdc"
 import CrossChain from "./CrossChain.cdc"
+import SQoSEngine from "./SQoSEngine.cdc"
 
 pub contract ReceivedMessageContract{
     
@@ -241,6 +242,7 @@ pub contract ReceivedMessageContract{
         
         // SQoS
         priv var sqos: MessageProtocol.SQoS?;
+        priv var hrHandle: @SQoSEngine.HiddenReveal?;
 
         init(){
             self.message = {};
@@ -255,6 +257,11 @@ pub contract ReceivedMessageContract{
             self.historyStorage = {};
 
             self.sqos = nil;
+            self.hrHandle <- nil;
+        }
+
+        access(contract) destroy() {
+            destroy self.hrHandle;
         }
 
         /**
@@ -270,6 +277,12 @@ pub contract ReceivedMessageContract{
             // Verify the submitter
             if (!SettlementContract.isSelected(recvAddr: self.owner!.address, router: pubAddr)) {
                 panic("Invalid Validator. Unregistered or Currently not Selected.")
+            }
+
+            if let sqos = self.sqos {
+                if sqos.checkItem(type: MessageProtocol.SQoSType.Reveal) {
+                    panic("Need submission with `submitHidden` and `submitReveal`");
+                }
             }
 
             // Verify the signature
@@ -571,6 +584,57 @@ pub contract ReceivedMessageContract{
          *
          * This need to wait all selected routers submitted the error 
         */
+        pub fun submitHidden(hidden: SQoSEngine.HiddenData, 
+                            pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]) {
+            // Verify the submitter
+            if (!SettlementContract.isSelected(recvAddr: self.owner!.address, router: pubAddr)) {
+                panic("Invalid Validator. Unregistered or Currently not Selected.")
+            }
+
+            let rawData = hidden.rawCMT.decodeHex();
+
+            // Verify the signature
+            if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
+                                              signatureAlgorithm: signatureAlgorithm,
+                                              rawData: rawData,
+                                              signature: signature,
+                                              hashAlgorithm: HashAlgorithm.SHA3_256)) {
+                panic("Signature verification failed!");
+            } 
+
+            (&self.hrHandle as &SQoSEngine.HiddenReveal?)!.submitHidden(submitter: pubAddr, hidden: hidden);
+        }
+
+        pub fun submitReveal(recvMsg: ReceivedMessageCore, 
+                                pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8], randNumber: UInt32) {
+            // Verify the submitter
+            if (!SettlementContract.isSelected(recvAddr: self.owner!.address, router: pubAddr)) {
+                panic("Invalid Validator. Unregistered or Currently not Selected.")
+            }
+
+            // Verify the signature
+            if (!IdentityVerification.basicVerify(pubAddr: pubAddr, 
+                                              signatureAlgorithm: signatureAlgorithm,
+                                              rawData: recvMsg.messageHash.decodeHex(),
+                                              signature: signature,
+                                              hashAlgorithm: HashAlgorithm.SHA3_256)) {
+                panic("Signature verification failed!");
+            } 
+
+            if (&self.hrHandle as &SQoSEngine.HiddenReveal?)!.submitReveal(submitter: pubAddr, 
+                                        fromChain: recvMsg.fromChain, 
+                                        msgID: recvMsg.id, 
+                                        rvData: SQoSEngine.RevealData(messageHash: recvMsg.messageHash, randNumber: randNumber)) {
+                self._submitRecvMessage(recvMsg: recvMsg, pubAddr: pubAddr);
+            }
+        }
+
+        /*
+         * when submitting or executing messages, abnormal situations may happen. 
+         * As we cannot directly process exceptions on-chain, we need a mechanism for off-chain routers to submit error things
+         *
+         * This need to wait all selected routers submitted the error 
+        */
         pub fun submitAbandoned(msgID: UInt128, fromChain: String, 
                                 pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]) {
 
@@ -775,6 +839,11 @@ pub contract ReceivedMessageContract{
 
         pub fun setSQoS(sqos: MessageProtocol.SQoS) { 
             self.sqos = sqos;
+
+            // create hidden reveal handle
+            if self.sqos!.checkItem(type: MessageProtocol.SQoSType.Reveal) {
+                self.hrHandle <-! SQoSEngine.createHiddenReveal(defaultCopyCount: self.defaultCopyCount);
+            }
         }
 
         pub fun getSQoS(): MessageProtocol.SQoS? {
