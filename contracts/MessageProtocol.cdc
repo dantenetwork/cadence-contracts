@@ -313,14 +313,14 @@ pub contract MessageProtocol {
             self.sqosItems.append(item);
         }
 
-        pub fun checkItem(type: SQoSType): Bool {
-            for ele in self.sqosItems {
+        pub fun checkItem(type: SQoSType): Int? {
+            for idx, ele in self.sqosItems {
                 if ele.t == type.rawValue {
-                    return true;
+                    return idx;
                 }
             }
 
-            return false;
+            return nil;
         }
     }
 
@@ -535,3 +535,4 @@ pub contract MessageProtocol {
         return output;
     }
 }
+ 

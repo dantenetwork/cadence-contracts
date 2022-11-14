@@ -32,6 +32,7 @@ pub contract ReceivedMessageContract{
 
         // history
         pub fun getHistory(): {String: [ReceivedMessageCache]};
+        pub fun getEvilHistory(): {String: [ReceivedMessageCache]};
     }
     
     pub resource interface Callee {
@@ -166,7 +167,7 @@ pub contract ReceivedMessageContract{
 
     // Define received message array
     pub struct ReceivedMessageCache{
-        pub let msgInstance: {String: messageCopy};
+        pub var msgInstance: {String: messageCopy};
         pub let msgID: UInt128;
         priv var msgCount: Int;
 
@@ -210,19 +211,69 @@ pub contract ReceivedMessageContract{
 
             return false;
         }
+
+        pub fun clearInstance() {
+            self.msgInstance = {};
+            self.msgCount = 0;
+        }
+    }
+
+    pub struct VerifiedMessage {
+        pub let messageCore: ReceivedMessageCore;
+        pub let submitters: [Address];
+
+        init(verified: ReceivedMessageCore, submitters: [Address]) {
+            self.messageCore = verified;
+            self.submitters = submitters;
+        }
     }
 
     pub struct ExecData {
-        pub let verifiedMessage: ReceivedMessageCore;
+        pub let verifiedMessage: VerifiedMessage;
         pub let abandonApply: [Address];
 
-        init(verifiedMessage: ReceivedMessageCore) {
+        /////////////////////////////////////////////////////
+        // optimistic
+        priv var execTime: UFix64;
+        pub var challenged: Bool;
+        pub let challengers: [Address];
+
+        init(verifiedMessage: VerifiedMessage) {
             self.verifiedMessage = verifiedMessage;
             self.abandonApply = [];
+            self.execTime = getCurrentBlock().timestamp;
+            self.challenged = true;
+            self.challengers = [];
         }
 
         pub fun applyAbandon(_ addr: Address) {
             self.abandonApply.append(addr);
+        }
+
+        /////////////////////////////////////////////////////
+        // optimistic
+        pub fun setExecTime(et: UFix64) {
+            self.execTime = et;
+            self.challenged = false;
+        }
+
+        pub fun makeChallenge(_ addr: Address) {
+            if self.execTime >= getCurrentBlock().timestamp {
+                if !self.challengers.contains(addr) {
+                    self.challengers.append(addr);
+                }
+            }
+        }
+
+        // -1: challengers win, reject message; 0: still waiting; 1: submitters win, accept message;
+        pub fun challengeSettle(): Int {
+            if self.execTime > getCurrentBlock().timestamp {
+                return 0;
+            } else {
+                // TODO: settlement of optimistic
+
+                return 1;
+            }
         }
     }
 
@@ -239,6 +290,8 @@ pub contract ReceivedMessageContract{
         pub let execAbandon: [ExecData];
 
         pub let historyStorage: {String: [ReceivedMessageCache]};
+
+        pub let evilHistory: {String: [ReceivedMessageCache]};
         
         // SQoS
         priv var sqos: MessageProtocol.SQoS?;
@@ -255,6 +308,7 @@ pub contract ReceivedMessageContract{
             self.execAbandon = [];
 
             self.historyStorage = {};
+            self.evilHistory = {};
 
             self.sqos = nil;
             self.hrHandle <- nil;
@@ -280,7 +334,7 @@ pub contract ReceivedMessageContract{
             }
 
             if let sqos = self.sqos {
-                if sqos.checkItem(type: MessageProtocol.SQoSType.Reveal) {
+                if sqos.checkItem(type: MessageProtocol.SQoSType.Reveal) != nil {
                     panic("Need submission with `submitHidden` and `submitReveal`");
                 }
             }
@@ -328,7 +382,7 @@ pub contract ReceivedMessageContract{
                         ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] = 0;
                     }
 
-                    if (recvMsg.id <= (maxRecvedID + 1)) {
+                    if (recvMsg.id == (maxRecvedID + 1)) {
                         // TODO: this strategy need to be checked!
                         let mcache = ReceivedMessageCache(id: recvMsg.id);
                         mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
@@ -350,7 +404,7 @@ pub contract ReceivedMessageContract{
                     ReceivedMessageContract.maxRecvedID[recvMsg.fromChain] = 0;
                 }
 
-                if recvMsg.id  <= (maxRecvedID + 1) {
+                if recvMsg.id  == (maxRecvedID + 1) {
                     let mcache = ReceivedMessageCache(id: recvMsg.id);
                     mcache.insert(receivedMessageCore: recvMsg, pubAddr: pubAddr);
                     self.message[recvMsg.fromChain] = [mcache];
@@ -366,22 +420,60 @@ pub contract ReceivedMessageContract{
             if (cacheIdx >= 0) {
                 if (self.message[recvMsg.fromChain]![cacheIdx].getMessageCount() >= self.defaultCopyCount) {
                     // Move the message to `execCache` 
-                    let msgCache = self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
-                    self.addHistory(fromChain: recvMsg.fromChain, msgCache: msgCache);
+                    let msgCache = self.message[recvMsg.fromChain]![cacheIdx];
+                    //let msgCacheRef = &(self.message[recvMsg.fromChain]![cacheIdx]) as &ReceivedMessageCache;
                     
                     // do verification
                     let msgVerified = self.messageVerify(messageCache: msgCache);
                     
                     if msgVerified == nil {
+                        // TODO: add evil history
+                        //msgCacheRef.clearInstance();
+                        self.message[recvMsg.fromChain]![cacheIdx].clearInstance();
                         return;
                     }
 
+                    let execData = ExecData(verifiedMessage: msgVerified!);
+                    if let sqos = self.sqos {
+                        if let idx = sqos.checkItem(type: MessageProtocol.SQoSType.Challenge) {
+                            let ufNumStr = String.encodeHex(sqos.sqosItems[idx].v);
+                            execData.setExecTime(et: UFix64.fromString(ufNumStr)!);    
+                        }
+                    }
+
+                    // if there is exception, abandoned directly
+                    if msgVerified!.messageCore.messageHash == OmniverseInformation.emptyHash {
+                        // This is a message abandoned
+                        self._dropAbandoned(ExecData(verifiedMessage: msgVerified!));
+                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
+                    } else {
+                        // record this message
+                        self.addHistory(fromChain: recvMsg.fromChain, msgCache: msgCache);
+                        self.execCache.append(ExecData(verifiedMessage: msgVerified!));
+                    }
+
+                    /*
                     if msgVerified!.messageHash == OmniverseInformation.emptyHash {
                         // This is a message abandoned
                         self._dropAbandoned(ExecData(verifiedMessage: msgVerified!));
+                        self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
                     } else {
-                        self.execCache.append(ExecData(verifiedMessage: msgVerified!));
-                    }
+                        var tbChallenge = false;
+                        if let sqos = self.sqos {
+                            if sqos.checkItem(type: MessageProtocol.SQoSType.Challenge) {
+                                tbChallenge = true;
+                            }
+                        }
+
+                        if tbChallenge {
+                            // TODO: make a challenge
+
+                        } else {
+                            // record this message
+                            self.addHistory(fromChain: recvMsg.fromChain, msgCache: msgCache);
+                            self.execCache.append(ExecData(verifiedMessage: msgVerified!));
+                        }
+                    }*/
                 }
             }
         }
@@ -445,14 +537,14 @@ pub contract ReceivedMessageContract{
           * Do verification for one message including many copies
           * @param messageId - message id
         **/
-        pub fun messageVerify(messageCache: ReceivedMessageCache): ReceivedMessageCore? {
+        pub fun messageVerify(messageCache: ReceivedMessageCache): VerifiedMessage? {
             var honest: [Address] = [];
             var evil: [Address] = [];
             var exception: {Address: UFix64} = {};
             
             if messageCache.msgInstance.values.length == 1 {
                 SettlementContract.workingNodesTrail(honest: messageCache.msgInstance.values[0].submitters, evil: [], exception: {});
-                return messageCache.msgInstance.values[0].messageInfo;
+                return VerifiedMessage(verified: messageCache.msgInstance.values[0].messageInfo, submitters: messageCache.msgInstance.values[0].submitters);
             }
             
             var crdSum = 0.0;
@@ -491,26 +583,33 @@ pub contract ReceivedMessageContract{
             // no message copy has enough credibility
             if recvMsgCore == nil {
                 SettlementContract.workingNodesTrail(honest: [], evil: [], exception: exception);
+                return nil;
             } else {
                 evil = exception.keys;
                 SettlementContract.workingNodesTrail(honest: honest, evil: evil, exception: {});
+                return VerifiedMessage(verified: recvMsgCore!, submitters: honest);
             }
-
-            return recvMsgCore;
         }
 
         /**
           * Trigger the execution in the head
         **/
         pub fun trigger(msgID: UInt128, fromChain: String) {
+            // TODO: make challenge
+            
+            /////////////////////////////////////////////////////////////////
             if self.isExecutable() {
                 var triggerIdx = 0;
                 var fetchMessage: ReceivedMessageCore? = nil;
+                let execTime = getCurrentBlock().timestamp;
                 while triggerIdx < self.execCache.length {
-                    if (self.execCache[triggerIdx].verifiedMessage.id == msgID) && 
-                        (self.execCache[triggerIdx].verifiedMessage.fromChain == fromChain) {
+                    self.execCache[triggerIdx].challengeSettle();
 
-                        fetchMessage = self.execCache.remove(at: triggerIdx).verifiedMessage;
+                    if (self.execCache[triggerIdx].verifiedMessage.messageCore.id == msgID) && 
+                        (self.execCache[triggerIdx].verifiedMessage.messageCore.fromChain == fromChain) && 
+                        self.execCache[triggerIdx].challenged {
+
+                        fetchMessage = self.execCache.remove(at: triggerIdx).verifiedMessage.messageCore;
                         break;
                     }
                     
@@ -576,6 +675,18 @@ pub contract ReceivedMessageContract{
 
         pub fun getHistory(): {String: [ReceivedMessageCache]} {
             return self.historyStorage;
+        }
+
+        priv fun addEvilHistory(fromChain: String, msgCache: ReceivedMessageCache) {
+            if let chainCacheRef: &[ReceivedMessageCache] = (&self.evilHistory[fromChain] as &[ReceivedMessageCache]?) {
+                chainCacheRef.append(msgCache);
+            } else {
+                self.evilHistory[fromChain] = [msgCache];
+            }
+        }
+
+        pub fun getEvilHistory(): {String: [ReceivedMessageCache]} {
+            return self.evilHistory;
         }
 
         /*
@@ -658,7 +769,7 @@ pub contract ReceivedMessageContract{
             var toBeRemove = -1;
             // check if it's in `execCache`
             for idx, ele in self.execCache {
-                if (ele.verifiedMessage.id == msgID) && (ele.verifiedMessage.fromChain == fromChain) {
+                if (ele.verifiedMessage.messageCore.id == msgID) && (ele.verifiedMessage.messageCore.fromChain == fromChain) {
                     isExecutable = true;
 
                     self.execCache[idx].applyAbandon(pubAddr);
@@ -688,8 +799,8 @@ pub contract ReceivedMessageContract{
         priv fun _dropAbandoned(_ msg: ExecData) {
             // self.owner is only a PublicAccount
             // let submitterRef = self.owner!.borrow<&SentMessageContract.Submitter>(from: /storage/msgSubmitter)!;
-            SentMessageContract.sendoutErrorNotification(msgID: msg.verifiedMessage.id, 
-                                                        toChain: msg.verifiedMessage.fromChain/*, 
+            SentMessageContract.sendoutErrorNotification(msgID: msg.verifiedMessage.messageCore.id, 
+                                                        toChain: msg.verifiedMessage.messageCore.fromChain/*, 
                                                         submitterRef: submitterRef, 
                                                         acceptor: self.owner!.address, 
                                                         alink: "sentMessageVault", 
@@ -841,7 +952,7 @@ pub contract ReceivedMessageContract{
             self.sqos = sqos;
 
             // create hidden reveal handle
-            if self.sqos!.checkItem(type: MessageProtocol.SQoSType.Reveal) {
+            if self.sqos!.checkItem(type: MessageProtocol.SQoSType.Reveal) != nil {
                 self.hrHandle <-! SQoSEngine.createHiddenReveal(defaultCopyCount: self.defaultCopyCount);
             }
         }

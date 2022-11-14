@@ -90,11 +90,9 @@ pub contract SQoSEngine {
         }
     }
 
-    pub resource Optimistic {
-
-    }
-
     pub fun createHiddenReveal(defaultCopyCount: Int): @HiddenReveal {
         return <- create HiddenReveal(defaultCopyCount: defaultCopyCount);
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
 }

@@ -15,7 +15,15 @@ pub fun main(): [UInt8] {
     destroy rt;
 
     return rstNumber;
-*/
+
     let a: UInt128 = 10;
     return a.toBigEndianBytes();
+*/
+    let preX: UFix64 = 0.12;
+    log(preX.toBigEndianBytes());
+    let xu8 = preX.toBigEndianBytes();
+    //let afterX = UFix64.fromString(String.encodeHex(xu8));
+    let after = UFix64.fromBigEndianBytes(xu8);
+    log(afterX);
+    return xu8;
 }
