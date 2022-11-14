@@ -234,9 +234,11 @@ pub contract ReceivedMessageContract{
 
         /////////////////////////////////////////////////////
         // optimistic
+        // The challenge 
         priv var execTime: UFix64;
         pub var challenged: Bool;
         pub let challengers: [Address];
+        priv var selectedChallengers: [Address];
 
         init(verifiedMessage: VerifiedMessage) {
             self.verifiedMessage = verifiedMessage;
@@ -244,6 +246,7 @@ pub contract ReceivedMessageContract{
             self.execTime = getCurrentBlock().timestamp;
             self.challenged = true;
             self.challengers = [];
+            self.selectedChallengers = [];
         }
 
         pub fun applyAbandon(_ addr: Address) {
@@ -255,11 +258,17 @@ pub contract ReceivedMessageContract{
         pub fun setExecTime(et: UFix64) {
             self.execTime = et;
             self.challenged = false;
+            let cNum: UInt32 = UInt32(UFix64(SettlementContract.getSysValidatorNumber())* 1.5);
+            self.selectedChallengers = SettlementContract.select(tobeSelect: cNum);
+        }
+
+        pub fun getSelectedChallengers(): [Address] {
+            return self.selectedChallengers;
         }
 
         pub fun makeChallenge(_ addr: Address) {
             if self.execTime >= getCurrentBlock().timestamp {
-                if !self.challengers.contains(addr) {
+                if (!self.challengers.contains(addr)) && (self.selectedChallengers.contains(addr)) {
                     self.challengers.append(addr);
                 }
             }
@@ -275,9 +284,28 @@ pub contract ReceivedMessageContract{
                 return 0;
             } else {
                 // TODO: settlement of optimistic
-
-                return 1;
+                let submissionCrd = self._crd_sum(addresses: self.verifiedMessage.submitters);
+                let challengeCrd = self._crd_sum(addresses: self.challengers);
+                if challengeCrd > submissionCrd {
+                    SettlementContract.workingNodesTrail(honest: [], evil: self.verifiedMessage.submitters, exception: {});
+                    return -1;
+                } else {
+                    SettlementContract.workingNodesTrail(honest: [], evil: self.challengers, exception: {});
+                    self.challenged = true;
+                    return 1;
+                }
             }
+        }
+
+        priv fun _crd_sum(addresses: [Address]): UFix64 {
+            var crdSum: UFix64 = 0.0;
+            for ele in addresses {
+                if let crd = SettlementContract.getCredibility(router: ele) {
+                    crdSum = crdSum + crd;
+                }
+            }
+
+            return crdSum;
         }
     }
 
@@ -599,25 +627,21 @@ pub contract ReceivedMessageContract{
           * Trigger the execution in the head
         **/
         pub fun trigger(msgID: UInt128, fromChain: String) {
+            // TODO: make challenge
+            self._challege_settle();
+            /////////////////////////////////////////////////////////////////
             if self.isExecutable() {
                 var triggerIdx = 0;
                 var fetchMessage: ReceivedMessageCore? = nil;
-                let execTime = getCurrentBlock().timestamp;
                 while triggerIdx < self.execCache.length {
-                    // TODO: make challenge
-                    if 1 == self.execCache[triggerIdx].challengeSettle() {
-                        if (self.execCache[triggerIdx].verifiedMessage.messageCore.id == msgID) && 
-                            (self.execCache[triggerIdx].verifiedMessage.messageCore.fromChain == fromChain) {
+                    if (self.execCache[triggerIdx].verifiedMessage.messageCore.id == msgID) && 
+                        (self.execCache[triggerIdx].verifiedMessage.messageCore.fromChain == fromChain) &&
+                        self.execCache[triggerIdx].challenged {
 
-                            fetchMessage = self.execCache.remove(at: triggerIdx).verifiedMessage.messageCore;
-                            // TODU: remove from recv cache to history
-                            break;
-                        }
-                    } else if -1 == self.execCache[triggerIdx].challengeSettle() {
-                        // TODO: clear cache
+                        fetchMessage = self.execCache.remove(at: triggerIdx).verifiedMessage.messageCore;
+                        // TODU: remove from recv cache to history
+                        break;
                     }
-                    /////////////////////////////////////////////////////////////////
-                    
                     
                     triggerIdx = triggerIdx + 1;
                 }
@@ -965,6 +989,60 @@ pub contract ReceivedMessageContract{
 
         pub fun getSQoS(): MessageProtocol.SQoS? {
             return self.sqos;
+        }
+
+        //////////////////////////////////////////////
+        priv fun _query_cache_idx(fromChain: String, msgID: UInt128): Int? {
+            if let msgsInChain = self.message[fromChain] {
+                for idx, ele in msgsInChain {
+                    if ele.msgID == msgID {
+                        return idx;
+                    }
+                }
+            } 
+
+            return nil;
+        }
+
+        // Optimistic
+        priv fun _challege_settle() {
+            var execIdx: Int = 0;
+            let tobeRemove: [Int] = [];
+            while execIdx < self.execCache.length {
+                let rst = self.execCache[execIdx].challengeSettle();
+                
+                if rst == 1 {
+                    if let cacheIdx = self._query_cache_idx(fromChain: self.execCache[execIdx].verifiedMessage.messageCore.fromChain, 
+                                                                msgID: self.execCache[execIdx].verifiedMessage.messageCore.id){
+                        // remove message instance from `self.message[...]` and add to history
+                        let recvCache = self.message[self.execCache[execIdx].verifiedMessage.messageCore.fromChain]!.remove(at: cacheIdx);
+                        self.addHistory(fromChain: self.execCache[execIdx].verifiedMessage.messageCore.fromChain, msgCache: recvCache);                                            
+                    }
+                } else if rst == -1 {
+                    if let cacheIdx = self._query_cache_idx(fromChain: self.execCache[execIdx].verifiedMessage.messageCore.fromChain, 
+                                                                msgID: self.execCache[execIdx].verifiedMessage.messageCore.id){
+                        // clear message instance from `self.message[...]`
+                        self.message[self.execCache[execIdx].verifiedMessage.messageCore.fromChain]![cacheIdx].clearInstance();                                    
+                    }
+                    tobeRemove.append(execIdx);
+                }
+                
+                execIdx = execIdx + 1;
+            }
+
+            for ele in tobeRemove {
+                self.execCache.remove(at: ele);
+            }
+        }
+
+        pub fun makeChallenge(challenger: Address, fromChain: String, msgID: UInt128) {
+            for idx, ele in self.execCache {
+                if (ele.verifiedMessage.messageCore.fromChain == fromChain) &&
+                    (ele.verifiedMessage.messageCore.id == msgID) {
+                    self.execCache[idx].makeChallenge(challenger);
+                    break;    
+                }
+            }
         }
     }
 

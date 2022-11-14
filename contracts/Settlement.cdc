@@ -131,10 +131,14 @@ pub contract SettlementContract {
         return self.routers.values;
     }
 
+    pub fun getSysValidatorNumber(): UInt32 {
+        return self.sys_validatorNumber;
+    }
+
     // Real selection of validators
-    pub fun select(): [Address] {
+    pub fun select(tobeSelect: UInt32): [Address] {
         // TODO: randomly sampling selection according to credibility and staking
-        if UInt32(self.routers.length) <= self.sys_validatorNumber {
+        if UInt32(self.routers.length) <= tobeSelect {
             return self.routers.keys;
         }
 
@@ -158,7 +162,7 @@ pub contract SettlementContract {
 
         // log(itvlRange);
 
-        if UInt32(validValidators.length) <= self.sys_validatorNumber {
+        if UInt32(validValidators.length) <= tobeSelect {
             for ele in validValidators {
                 selected.append(ele.address);
             }
@@ -175,8 +179,8 @@ pub contract SettlementContract {
             crdRatio = self.selectCrdUpper;
         }
 
-        // let crdNumber: UInt32 = UInt32(UFix64(self.sys_validatorNumber) * crdRatio);
-        let crdNumber = self.sys_validatorNumber;
+        // let crdNumber: UInt32 = UInt32(UFix64(tobeSelect) * crdRatio);
+        let crdNumber = tobeSelect;
 
         // select according to credibility
         while UInt32(selected.length) < crdNumber {
@@ -231,13 +235,13 @@ pub contract SettlementContract {
         }
 
         // select randomly
-        while UInt32(selected.length) < self.sys_validatorNumber {
+        while UInt32(selected.length) < tobeSelect {
             let randTwo = self.random2UInt32();
             for randIdx in randTwo {
                 let idx = randIdx % UInt32(validValidators.length);
                 selected.append(validValidators[idx].address);
                 validValidators.remove(at: idx);
-                if UInt32(selected.length) >= self.sys_validatorNumber {
+                if UInt32(selected.length) >= tobeSelect {
                     break;
                 }
             }
@@ -250,12 +254,12 @@ pub contract SettlementContract {
         if self.selectedValidators.containsKey(recvAddr) {
             if (getCurrentBlock().timestamp - self.selectedValidators[recvAddr]!.lastSelectTime) > self.timePeriod {
                 let newView = SelectView();
-                newView.selectedRouters = self.select();
+                newView.selectedRouters = self.select(tobeSelect: self.sys_validatorNumber);
                 self.selectedValidators[recvAddr] = newView;
             }
         } else {
             let newView = SelectView();
-            newView.selectedRouters = self.select();
+            newView.selectedRouters = self.select(tobeSelect: self.sys_validatorNumber);
             self.selectedValidators[recvAddr] = newView;
         }
     }
