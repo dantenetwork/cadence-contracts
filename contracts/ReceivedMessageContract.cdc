@@ -267,6 +267,10 @@ pub contract ReceivedMessageContract{
 
         // -1: challengers win, reject message; 0: still waiting; 1: submitters win, accept message;
         pub fun challengeSettle(): Int {
+            if self.challenged {
+                return 1;
+            }
+            
             if self.execTime > getCurrentBlock().timestamp {
                 return 0;
             } else {
@@ -601,15 +605,19 @@ pub contract ReceivedMessageContract{
                 let execTime = getCurrentBlock().timestamp;
                 while triggerIdx < self.execCache.length {
                     // TODO: make challenge
-                    self.execCache[triggerIdx].challengeSettle();
-                    /////////////////////////////////////////////////////////////////
-                    if (self.execCache[triggerIdx].verifiedMessage.messageCore.id == msgID) && 
-                        (self.execCache[triggerIdx].verifiedMessage.messageCore.fromChain == fromChain) && 
-                        self.execCache[triggerIdx].challenged {
+                    if 1 == self.execCache[triggerIdx].challengeSettle() {
+                        if (self.execCache[triggerIdx].verifiedMessage.messageCore.id == msgID) && 
+                            (self.execCache[triggerIdx].verifiedMessage.messageCore.fromChain == fromChain) {
 
-                        fetchMessage = self.execCache.remove(at: triggerIdx).verifiedMessage.messageCore;
-                        break;
+                            fetchMessage = self.execCache.remove(at: triggerIdx).verifiedMessage.messageCore;
+                            // TODU: remove from recv cache to history
+                            break;
+                        }
+                    } else if -1 == self.execCache[triggerIdx].challengeSettle() {
+                        // TODO: clear cache
                     }
+                    /////////////////////////////////////////////////////////////////
+                    
                     
                     triggerIdx = triggerIdx + 1;
                 }
