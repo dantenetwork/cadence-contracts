@@ -595,16 +595,14 @@ pub contract ReceivedMessageContract{
           * Trigger the execution in the head
         **/
         pub fun trigger(msgID: UInt128, fromChain: String) {
-            // TODO: make challenge
-            
-            /////////////////////////////////////////////////////////////////
             if self.isExecutable() {
                 var triggerIdx = 0;
                 var fetchMessage: ReceivedMessageCore? = nil;
                 let execTime = getCurrentBlock().timestamp;
                 while triggerIdx < self.execCache.length {
+                    // TODO: make challenge
                     self.execCache[triggerIdx].challengeSettle();
-
+                    /////////////////////////////////////////////////////////////////
                     if (self.execCache[triggerIdx].verifiedMessage.messageCore.id == msgID) && 
                         (self.execCache[triggerIdx].verifiedMessage.messageCore.fromChain == fromChain) && 
                         self.execCache[triggerIdx].challenged {
