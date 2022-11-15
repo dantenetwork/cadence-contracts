@@ -534,5 +534,22 @@ pub contract MessageProtocol {
 
         return output;
     }
+
+    // from bytes to...
+    pub fun UInt32_from_be_bytes(bytes: [UInt8]): UInt32 {
+        if bytes.length != 4 {
+            panic("Invalid bytes length!");
+        }
+
+        var u32_out: UInt32 = 0;
+        var idx: UInt32 = 0;
+        while bytes.length > 0 {
+            let x: UInt32 = UInt32(bytes.removeLast());
+            u32_out = u32_out + (x << (idx * UInt32(8)))
+            idx = idx + 1;
+        }
+
+        return u32_out;
+    }
 }
  

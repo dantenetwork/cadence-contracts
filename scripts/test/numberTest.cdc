@@ -1,3 +1,5 @@
+import MessageProtocol from "../../contracts/MessageProtocol.cdc"
+
 pub resource RTest {};
 
 pub fun main(): [UInt8] {
@@ -19,11 +21,11 @@ pub fun main(): [UInt8] {
     let a: UInt128 = 10;
     return a.toBigEndianBytes();
 */
-    let preX: UFix64 = 0.12;
+    let preX: UInt32 = 11223344;
     log(preX.toBigEndianBytes());
     let xu8 = preX.toBigEndianBytes();
     //let afterX = UFix64.fromString(String.encodeHex(xu8));
-    let after = UFix64.fromBigEndianBytes(xu8);
+    let afterX = MessageProtocol.UInt32_from_be_bytes(bytes: xu8);
     log(afterX);
     return xu8;
 }

@@ -468,8 +468,8 @@ pub contract ReceivedMessageContract{
                     let execData = ExecData(verifiedMessage: msgVerified!);
                     if let sqos = self.sqos {
                         if let idx = sqos.checkItem(type: MessageProtocol.SQoSType.Challenge) {
-                            let ufNumStr = String.encodeHex(sqos.sqosItems[idx].v);
-                            execData.setExecTime(et: UFix64.fromString(ufNumStr)!);    
+                            let endTime: UFix64 = getCurrentBlock().timestamp + UFix64(MessageProtocol.UInt32_from_be_bytes(bytes: sqos.sqosItems[idx].v));
+                            execData.setExecTime(et: endTime);    
                         }
                     }
 
