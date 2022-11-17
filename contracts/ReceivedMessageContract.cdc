@@ -1035,7 +1035,19 @@ pub contract ReceivedMessageContract{
             }
         }
 
-        pub fun makeChallenge(challenger: Address, fromChain: String, msgID: UInt128) {
+        pub fun makeChallenge(challenger: Address, fromChain: String, msgID: UInt128, 
+                                signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]) {
+            let rawData = MessageProtocol.to_be_bytes_u128(msgID).concat(fromChain.utf8);
+
+            // Verify the signature
+            if (!IdentityVerification.basicVerify(pubAddr: challenger, 
+                                              signatureAlgorithm: signatureAlgorithm,
+                                              rawData: rawData,
+                                              signature: signature,
+                                              hashAlgorithm: HashAlgorithm.SHA3_256)) {
+                panic("Signature verification failed!");
+            } 
+            
             for idx, ele in self.execCache {
                 if (ele.verifiedMessage.messageCore.fromChain == fromChain) &&
                     (ele.verifiedMessage.messageCore.id == msgID) {
