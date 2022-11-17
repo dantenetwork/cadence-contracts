@@ -1,4 +1,5 @@
 import ReceivedMessageContract from "../../contracts/ReceivedMessageContract.cdc"
+import MessageProtocol from "../../contracts/MessageProtocol.cdc";
 
 transaction(id: UInt128, 
             fromChain: String,

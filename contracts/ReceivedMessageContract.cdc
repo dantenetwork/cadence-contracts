@@ -33,6 +33,9 @@ pub contract ReceivedMessageContract{
         // history
         pub fun getHistory(): {String: [ReceivedMessageCache]};
         pub fun getEvilHistory(): {String: [ReceivedMessageCache]};
+
+        // SQoS
+        pub fun getSQoS(): MessageProtocol.SQoS?;
     }
     
     pub resource interface Callee {

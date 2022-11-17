@@ -134,3 +134,8 @@ flow scripts execute ./scripts/send-recv-message/queryAbandonedExecs.cdc
 flow transactions send ./transactions/send-recv-message/trigger.cdc 
 
 flow scripts execute ./scripts/send-recv-message/queryHistory.cdc
+
+# SQoS
+flow transactions send ./transactions/SQoS/setSQoS.cdc 
+
+flow scripts execute ./scripts/SQoS/getSQoS.cdc 0xf8d6e0586b0a20c7
