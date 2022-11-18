@@ -36,6 +36,8 @@ pub contract ReceivedMessageContract{
 
         // SQoS
         pub fun getSQoS(): MessageProtocol.SQoS?;
+        pub fun makeChallenge(challenger: Address, fromChain: String, msgID: UInt128, 
+                                signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
     }
     
     pub resource interface Callee {
@@ -270,19 +272,26 @@ pub contract ReceivedMessageContract{
         }
 
         pub fun makeChallenge(_ addr: Address) {
+            //log(".................prepare adding challenger: ".concat(addr.toString()));
             if self.execTime >= getCurrentBlock().timestamp {
-                if (!self.challengers.contains(addr)) && (self.selectedChallengers.contains(addr)) {
+                // TODO: Remember to check the `selectedChallengers`
+                //log(".................adding challenger: ".concat(addr.toString()));
+                if (!self.challengers.contains(addr))/* && (self.selectedChallengers.contains(addr))*/ {
                     self.challengers.append(addr);
+                    //log(".................added challenger: ".concat(addr.toString()));
                 }
             }
         }
 
         // -1: challengers win, reject message; 0: still waiting; 1: submitters win, accept message;
         pub fun challengeSettle(): Int {
+            log(self.execTime.toString());
+            log(getCurrentBlock().timestamp.toString());
+            
             if self.challenged {
                 return 1;
             }
-            
+
             if self.execTime > getCurrentBlock().timestamp {
                 return 0;
             } else {
@@ -470,21 +479,25 @@ pub contract ReceivedMessageContract{
 
                     let execData = ExecData(verifiedMessage: msgVerified!);
                     if let sqos = self.sqos {
+                        //log("Setting SQoS.......");
                         if let idx = sqos.checkItem(type: MessageProtocol.SQoSType.Challenge) {
+                            //log("Optimistic.......");
+                            log(getCurrentBlock().timestamp.toString());
                             let endTime: UFix64 = getCurrentBlock().timestamp + UFix64(MessageProtocol.UInt32_from_be_bytes(bytes: sqos.sqosItems[idx].v));
-                            execData.setExecTime(et: endTime);    
+                            execData.setExecTime(et: endTime);
+                            //log(endTime.toString());    
                         }
                     }
 
                     // if there is exception, abandoned directly
                     if msgVerified!.messageCore.messageHash == OmniverseInformation.emptyHash {
                         // This is a message abandoned
-                        self._dropAbandoned(ExecData(verifiedMessage: msgVerified!));
+                        self._dropAbandoned(execData);
                         self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
                     } else {
                         // record this message
                         self.addHistory(fromChain: recvMsg.fromChain, msgCache: msgCache);
-                        self.execCache.append(ExecData(verifiedMessage: msgVerified!));
+                        self.execCache.append(execData);
                     }
 
                     /*
@@ -1025,7 +1038,8 @@ pub contract ReceivedMessageContract{
                     if let cacheIdx = self._query_cache_idx(fromChain: self.execCache[execIdx].verifiedMessage.messageCore.fromChain, 
                                                                 msgID: self.execCache[execIdx].verifiedMessage.messageCore.id){
                         // clear message instance from `self.message[...]`
-                        self.message[self.execCache[execIdx].verifiedMessage.messageCore.fromChain]![cacheIdx].clearInstance();                                    
+                        self.message[self.execCache[execIdx].verifiedMessage.messageCore.fromChain]![cacheIdx].clearInstance();
+                        log(".....................Clearing message instances.................");                                    
                     }
                     tobeRemove.append(execIdx);
                 }

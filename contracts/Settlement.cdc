@@ -282,6 +282,10 @@ pub contract SettlementContract {
         return nil;
     }
 
+    pub fun getValidatorInfor(): {Address: Validator}{
+        return self.routers;
+    }
+
     // Update working routers' credibility 
     access(account) fun workingNodesTrail(honest: [Address], evil: [Address], exception: {Address: UFix64}) {
         // honest
