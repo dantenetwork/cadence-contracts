@@ -76,6 +76,9 @@ flow transactions send ./transactions/registerRouter.cdc "87c457bf6311cd01a90874
 
 flow scripts execute ./scripts/crypto-dev/signatureVerify.cdc 
 
+# Hashing
+
+
 # Routers
 flow scripts execute ./scripts/getRouters.cdc 
 

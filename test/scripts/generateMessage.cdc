@@ -26,7 +26,12 @@ pub fun main(): [UInt8] {
                                                         msgToSubmit: msgToSubmit);
     // log(sentMessage);
     // return "Polkadot".utf8;
+    log(String.encodeHex(HashAlgorithm.KECCAK_256.hash(sentMessage.toBytes())));
+    log(String.encodeHex(HashAlgorithm.SHA2_256.hash(sentMessage.toBytes())));
+    log(String.encodeHex(HashAlgorithm.SHA3_256.hash(sentMessage.toBytes())));
+
     return "SUI_TESTNET".utf8;
     // return String.encodeHex(sentMessage.toBytes());
     // return sentMessage.toBytes();
 }
+ 
