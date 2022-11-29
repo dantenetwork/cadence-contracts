@@ -341,6 +341,8 @@ pub contract ReceivedMessageContract{
         priv var sqos: MessageProtocol.SQoS?;
         priv var hrHandle: @SQoSEngine.HiddenReveal?;
 
+        priv var vfThreshold: UFix64;
+
         init(){
             self.message = {};
             self.executableCount = 10;
@@ -356,6 +358,8 @@ pub contract ReceivedMessageContract{
 
             self.sqos = nil;
             self.hrHandle <- nil;
+
+            self.vfThreshold = ReceivedMessageContract.vfThreshold;
         }
 
         access(contract) destroy() {
@@ -617,7 +621,7 @@ pub contract ReceivedMessageContract{
                     
                     log("Message copy hash: ".concat(msgCopyRef.messageInfo.messageHash).concat(". Credibility: ").concat(msgCopyRef.credibility.toString()));
 
-                    if msgCopyRef.credibility >= ReceivedMessageContract.vfThreshold {
+                    if msgCopyRef.credibility >= self.vfThreshold {
                         recvMsgCore = msgCopyRef.messageInfo;
                         honest = msgCopyRef.submitters;
                     } else {
@@ -1000,6 +1004,11 @@ pub contract ReceivedMessageContract{
             // create hidden reveal handle
             if self.sqos!.checkItem(type: MessageProtocol.SQoSType.Reveal) != nil {
                 self.hrHandle <-! SQoSEngine.createHiddenReveal(defaultCopyCount: self.defaultCopyCount);
+            }
+
+            // threshold
+            if let idx = sqos.checkItem(type: MessageProtocol.SQoSType.Threshold) {
+                self.vfThreshold = UFix64(MessageProtocol.UInt32_from_be_bytes(bytes: sqos.sqosItems[idx].v)) / 100.0;
             }
         }
 
