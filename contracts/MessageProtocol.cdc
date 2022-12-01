@@ -322,6 +322,31 @@ pub contract MessageProtocol {
 
             return nil;
         }
+
+        pub fun updateItem(item: SQoSItem) {
+            var found = false;
+
+            for idx, ele in self.sqosItems {
+                if ele.t == item.t {
+                    self.sqosItems[idx] = item;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                self.sqosItems.append(item);
+            }
+        }
+
+        pub fun deleteItem(type: SQoSType) {
+            for idx, ele in self.sqosItems {
+                if ele.t == type.rawValue {
+                    self.sqosItems.remove(at: idx);
+                    return;
+                }
+            }
+        }
     }
 
     /// Session

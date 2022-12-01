@@ -747,6 +747,13 @@ pub contract ReceivedMessageContract{
         */
         pub fun submitHidden(hidden: SQoSEngine.HiddenData, 
                             pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]) {
+            
+            /*if let sqos = self.sqos {
+                if sqos.checkItem(type: MessageProtocol.SQoSType.Reveal) == nil {
+                    panic("No `Hidden & Reveal` SQoS item!");
+                }
+            }*/
+            
             // Verify the submitter
             if (!SettlementContract.isSelected(recvAddr: self.owner!.address, router: pubAddr)) {
                 panic("Invalid Validator. Unregistered or Currently not Selected.")
@@ -1009,6 +1016,46 @@ pub contract ReceivedMessageContract{
             // threshold
             if let idx = sqos.checkItem(type: MessageProtocol.SQoSType.Threshold) {
                 self.vfThreshold = UFix64(MessageProtocol.UInt32_from_be_bytes(bytes: sqos.sqosItems[idx].v)) / 100.0;
+            }
+        }
+
+        pub fun addSQoSItem(item: MessageProtocol.SQoSItem) {
+            if let sqosRef: &MessageProtocol.SQoS = &self.sqos as &MessageProtocol.SQoS? {
+                sqosRef.updateItem(item: item);
+            } else {
+                let sqos = MessageProtocol.SQoS();
+                sqos.addItem(item: item);
+                self.setSQoS(sqos: sqos);
+            }
+
+            // create hidden reveal handle
+            if item.t == MessageProtocol.SQoSType.Reveal.rawValue {
+                if self.hrHandle == nil {
+                    self.hrHandle <-! SQoSEngine.createHiddenReveal(defaultCopyCount: self.defaultCopyCount);
+                }
+            }
+
+            // threshold
+            if item.t == MessageProtocol.SQoSType.Threshold.rawValue {
+                self.vfThreshold = UFix64(MessageProtocol.UInt32_from_be_bytes(bytes: item.v)) / 100.0;
+            }
+        }
+
+        pub fun deleteSQoSItem(type: MessageProtocol.SQoSType) {
+            if let sqosRef: &MessageProtocol.SQoS = &self.sqos as &MessageProtocol.SQoS? {
+                sqosRef.deleteItem(type: type);
+            }
+
+            // hidden reveal
+            if type == MessageProtocol.SQoSType.Reveal {
+                var temp: @SQoSEngine.HiddenReveal? <- nil;
+                temp <-> self.hrHandle;
+                destroy temp;
+            }
+
+            // threshold
+            if type == MessageProtocol.SQoSType.Threshold {
+                self.vfThreshold = ReceivedMessageContract.vfThreshold;
             }
         }
 
