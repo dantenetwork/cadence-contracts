@@ -147,3 +147,8 @@ flow scripts execute ./scripts/send-recv-message/queryHistory.cdc
 flow transactions send ./transactions/SQoS/setOptimistic.cdc 
 
 flow scripts execute ./scripts/SQoS/getSQoS.cdc 0xf8d6e0586b0a20c7
+
+## hidden records
+flow scripts execute ./scripts/crypto-dev/GenerateHidden.cdc 0x179b6b1cb6755e31 '11223344' 5432
+
+flow scripts execute ./scripts/send-recv-message/queryHiddenRecords.cdc 0x01cf0e2f2f715450

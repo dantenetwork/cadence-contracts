@@ -85,6 +85,10 @@ pub contract SQoSEngine {
             return false;
         }
 
+        pub fun getHiddenRecords(): {String: {Address: HRRecord}} {
+            return self.hrRecord;
+        }
+
         access(account) fun setDefaultCopyCount(defaultCopyCount: Int) {
             self.defaultCopyCount = defaultCopyCount;
         }

@@ -22,6 +22,12 @@ pub contract ReceivedMessageContract{
         pub fun submitAbandoned(msgID: UInt128, fromChain: String,  
                                 pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
 
+        pub fun submitHidden(hidden: SQoSEngine.HiddenData, 
+                            pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]);
+        
+        pub fun submitReveal(recvMsg: ReceivedMessageCore, 
+                                pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8], randNumber: UInt32);
+
         pub fun isOnline(): Bool;
 
         // Execution
@@ -771,6 +777,10 @@ pub contract ReceivedMessageContract{
             } 
 
             (&self.hrHandle as &SQoSEngine.HiddenReveal?)!.submitHidden(submitter: pubAddr, hidden: hidden);
+        }
+
+        pub fun getHiddenRecords(): {String: {Address: SQoSEngine.HRRecord}} {
+            return (&self.hrHandle as &SQoSEngine.HiddenReveal?)!.getHiddenRecords();
         }
 
         pub fun submitReveal(recvMsg: ReceivedMessageCore, 

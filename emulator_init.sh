@@ -16,7 +16,7 @@ flow transactions send ./transactions/test/transferFlow.cdc 100.0 0x179b6b1cb675
 # SQoS (optional)
 ## set sqos
 ### Optimistic
-flow transactions send ./transactions/SQoS/setOptimistic.cdc 
+# flow transactions send ./transactions/SQoS/setOptimistic.cdc 
 
 ## get sqos
-flow scripts execute ./scripts/SQoS/getSQoS.cdc 0xf8d6e0586b0a20c7
+# flow scripts execute ./scripts/SQoS/getSQoS.cdc 0xf8d6e0586b0a20c7
