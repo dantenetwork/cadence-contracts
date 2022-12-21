@@ -28,7 +28,8 @@
 	  "MetadataViews": "./omniverseNFT/contracts/MetadataViews.cdc",
     "ExampleNFT": "./omniverseNFT/contracts/ExampleNFT.cdc",
 	  "StarRealm": "./omniverseNFT/contracts/StarRealm.cdc",
-    "StarLocker": "./omniverseNFT/contracts/StarLocker.cdc"
+    "StarLocker": "./omniverseNFT/contracts/StarLocker.cdc",
+    "StarToken": "./omniverseSwap/contracts/StarToken.cdc"
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
@@ -119,7 +120,8 @@
         "MetadataViews",
         "StarRealm",
         "StarLocker",
-        "ExampleNFT"
+        "ExampleNFT",
+        "StarToken"
       ]
     },
     "testnet": {
