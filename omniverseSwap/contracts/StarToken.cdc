@@ -45,6 +45,7 @@ pub contract StarToken: FungibleToken {
     }
 
     access(account) fun mintVault(amount: UFix64): @Vault {
+        self.totalSupply = self.totalSupply + amount;
         return <- create Vault(balance: amount);
     }
 }

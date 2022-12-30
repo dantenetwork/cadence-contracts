@@ -65,6 +65,16 @@ pub contract StarBazaar {
             return <- liquidity!;
         }
 
+        pub fun getXAmount(): UFix64 {
+            let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
+            return XRef.balance;
+        }
+
+        pub fun getYAmount(): UFix64 {
+            let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
+            return YRef.balance;
+        }
+
         destroy () {
             destroy self.tokenX;
             destroy self.tokenY;
@@ -74,18 +84,54 @@ pub contract StarBazaar {
 
     pub resource DEXPool {
         pub let poolType: String;
+        pub var tokenX: @FungibleToken.Vault?;
+        pub var tokenY: @FungibleToken.Vault?;
+        
+        priv var price: UFix64;
+        priv var liquidity: UFix64;
 
         init(poolType: String) {
             self.poolType = poolType;
+
+            self.tokenX <- nil;
+            self.tokenY <- nil;
+
+            self.price = 0.0;
+            self.liquidity = 0.0;
+        }
+
+        destroy () {
+            destroy self.tokenX;
+            destroy self.tokenY;
         }
         
         
-        pub fun depositLiquidity(){
+        pub fun depositLiquidity(pool: @PoolVault): @PoolVault?{
+            if (pool.getXAmount() == 0.0) || (pool.getYAmount() == 0.0) {
+                return <- pool;
+            }
+            
+            if sefl.liquidity > 0.0 {
+
+            } else {
+                
+
+                self.tokenX <- pool.extractTokenX();
+                self.tokenY <- pool.extractTokenY();
+            }
+        }
+
+        pub fun withdrawLiquidity(liquidity: UFix64): @PoolVault? {
 
         }
 
-        pub fun withdrawLiquidity() {
+        pub fun isReady(): Bool {
+            return self.liquidity > 0.0;
+        }
 
+        pub fun liquidityValidation(dX: UFix64, dY: UFix64): Bool {
+            let newPrice = (self.tokenY.balance + dY) / (self.tokenX.balance + dX);
+            return ((self.price - 0.001) <= newPrice) && (newPrice <= (self.price + 0.001));
         }
     }
 
