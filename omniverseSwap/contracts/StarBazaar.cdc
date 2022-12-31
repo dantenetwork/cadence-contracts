@@ -79,7 +79,18 @@ pub contract StarBazaar {
             destroy self.tokenX;
             destroy self.tokenY;
         }
+    }
 
+    pub struct DLiquidity {
+        pub let dX: UFix64;
+        pub let dY: UFix64;
+        pub let positive: Bool;
+
+        init(dX: UFix64, dY: UFix64, positive: Bool) {
+            self.dX = dX;
+            self.dY = dY;
+            self.positive = positive;
+        }
     }
 
     pub resource DEXPool {
@@ -111,18 +122,28 @@ pub contract StarBazaar {
                 return <- pool;
             }
             
-            if sefl.liquidity > 0.0 {
-
+            if self.liquidity > 0.0 {
+                if self.liquidityValidation(dX: pool.getXAmount(), dY: pool.getYAmount()) {
+                    let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
+                    let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
+                    XRef.deposit(from: <- pool.extractTokenX());
+                    YRef.deposit(from: <- pool.extractTokenY());
+                    self._recalc();
+                } else {
+                    return <- pool;
+                }
             } else {
-                
-
-                self.tokenX <- pool.extractTokenX();
-                self.tokenY <- pool.extractTokenY();
+                self.tokenX <-! pool.extractTokenX();
+                self.tokenY <-! pool.extractTokenY();
+                self._recalc();
             }
+
+            destroy  pool;
+            return nil;
         }
 
-        pub fun withdrawLiquidity(liquidity: UFix64): @PoolVault? {
-
+        pub fun withdrawLiquidity(liquidity: Fix64): @PoolVault? {
+            return nil;
         }
 
         pub fun isReady(): Bool {
@@ -130,8 +151,19 @@ pub contract StarBazaar {
         }
 
         pub fun liquidityValidation(dX: UFix64, dY: UFix64): Bool {
-            let newPrice = (self.tokenY.balance + dY) / (self.tokenX.balance + dX);
+            let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
+            let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
+
+            let newPrice = (YRef.balance + dY) / (XRef.balance + dX);
             return ((self.price - 0.001) <= newPrice) && (newPrice <= (self.price + 0.001));
+        }
+
+        priv fun _recalc() {
+            let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
+            let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
+
+            self.price =  YRef.balance / XRef.balance;
+            self.liquidity = YRef.balance * XRef.balance;
         }
     }
 
@@ -144,6 +176,10 @@ pub contract StarBazaar {
     pub fun createDEXPool(poolType: String): @DEXPool {
         return <- create DEXPool(poolType: poolType);
     }
+
+    // pub fun dXdY_l(x: Fix64, y: Fix64, l: Fix64): DLiquidity {
+    //     let dx = 
+    // }
 
     // Test functions
     pub fun testStarDust(dust: @StarDust) {
