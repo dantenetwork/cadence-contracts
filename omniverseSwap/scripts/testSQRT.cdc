@@ -23,7 +23,7 @@
 // based on `Taylor's formula`
 pub fun sqrt2(d: UFix64): UFix64 {
     var y = d;
-    if (y > 4.0) {
+    if (y >= 4.0) {
         var z = y;
         var x = y / 2.0;
         while (x < z) {
