@@ -123,9 +123,9 @@ pub contract StarBazaar {
             }
             
             if self.liquidity > 0.0 {
-                if self.liquidityValidation(dX: pool.getXAmount(), dY: pool.getYAmount()) {
-                    let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
-                    let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
+                let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
+                let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
+                if StarBazaar.liquidityValidation(dX: pool.getXAmount(), dY: pool.getYAmount(), positive: true, tokenX: XRef.balance, tokenY: YRef.balance) {
                     XRef.deposit(from: <- pool.extractTokenX());
                     YRef.deposit(from: <- pool.extractTokenY());
                     self._recalc();
@@ -150,13 +150,13 @@ pub contract StarBazaar {
             return self.liquidity > 0.0;
         }
 
-        pub fun liquidityValidation(dX: UFix64, dY: UFix64): Bool {
-            let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
-            let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
+        // pub fun liquidityValidation(dX: UFix64, dY: UFix64): Bool {
+        //     let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
+        //     let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
 
-            let newPrice = (YRef.balance + dY) / (XRef.balance + dX);
-            return ((self.price - 0.001) <= newPrice) && (newPrice <= (self.price + 0.001));
-        }
+        //     let newPrice = (YRef.balance + dY) / (XRef.balance + dX);
+        //     return ((self.price - 0.001) <= newPrice) && (newPrice <= (self.price + 0.001));
+        // }
 
         priv fun _recalc() {
             let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
@@ -177,9 +177,77 @@ pub contract StarBazaar {
         return <- create DEXPool(poolType: poolType);
     }
 
-    // pub fun dXdY_l(x: Fix64, y: Fix64, l: Fix64): DLiquidity {
-    //     let dx = 
-    // }
+    // based on `Taylor's formula`
+    pub fun sqrt2(d: UFix64): UFix64 {
+        var y = d;
+        if (y >= 4.0) {
+            var z = y;
+            var x = y / 2.0;
+            while (x < z) {
+                z = x;
+                // The same as `x = x + (y - x * x) / (2 * x);`
+                x = (y / x + x) / 2.0;
+            }
+
+            return z;
+        } else if (y != 0.0) {
+            return self.sqrt3(d: y);
+        } else {
+            return 0.0;
+        }
+    }
+
+    // based on `Taylor's formula`
+    pub fun sqrt3(d: UFix64): UFix64 {
+        if (d >= 4.0) || (d == 0.0) {
+            panic("sqrt3 only available for `0.0 < d < 4.0`");
+        }
+        var x = d / 2.0;
+        var differ = Fix64(x * x) - Fix64(d);
+        var precision: Fix64 = 0.0001;
+        while (differ < -precision) || (differ > precision) {
+            // x = x + (d - x * x) / (2.0 * x);
+            x = (d / x + x) / 2.0;
+            differ = Fix64(x * x) - Fix64(d);
+        }
+
+        return x;
+    }
+
+    pub fun dXdY_l(x: UFix64, y: UFix64, dL2: UFix64, positive: Bool): DLiquidity {
+        let L2 = x * y;
+        let y_x = y / x;
+        let x_y = x / y;
+        
+        if positive {
+            let newL = L2 + dL2;
+            let y_add_dy = self.sqrt2(d: y_x * newL);
+            let x_add_dx = self.sqrt2(d: x_y * newL);
+            return DLiquidity(dX: x_add_dx - x, dY: y_add_dy - y, positive: positive);
+        } else {
+            let newL = L2 - dL2;
+            let y_sub_dy = self.sqrt2(d: y_x * newL);
+            let x_sub_dx = self.sqrt2(d: x_y * newL);
+            return DLiquidity(dX: x - x_sub_dx, dY: y - y_sub_dy, positive:positive);
+        }
+    }
+
+    // `positive` 
+    pub fun liquidityValidation(dX: UFix64, dY: UFix64, positive: Bool, tokenX: UFix64, tokenY: UFix64): Bool {
+        var newX: UFix64 = 0.0;
+        var newY: UFix64 = 0.0;
+        if positive {
+            newX = tokenX + dX;
+            newY = tokenY + dY;
+        } else {
+            newX = tokenX - dX;
+            newY = tokenY - dY;
+        }
+
+        let price = tokenY / tokenX;
+        let newPrice = newY / newX;
+        return ((price - 0.001) <= newPrice) && (newPrice <= (price + 0.001));
+    }
 
     // Test functions
     pub fun testStarDust(dust: @StarDust) {
