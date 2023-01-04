@@ -23,6 +23,13 @@ async function solve_O_AMM_from_Y(y, b, C) {
     return x;
 }
 
+// `token={t_name: .. , t_value: ..}`
+async function solve_O_AMM(token, b, C) {
+    var other = nerdamer.solveEquations(['a=x*y/(((x+y)/2)^2)', 'a*(-(x**2+y**2)+b*(x+y)) + 2*(1-a)*C=2*x*y', `${token.t_name}=${token.t_value}`, `b=${b}`, `C=${C}`]);
+    // console.log(x)
+    return other;
+}
+
 async function get_price(x, y, b, C) {
     // Note that there must not be any `spaces`
     const expr = '(x*y/(((x+y)/2)^2))*(-(x**2+y**2)+b*(x+y))+2*(1-(x*y/(((x+y)/2)^2)))*C-2*x*y';
@@ -50,6 +57,33 @@ function get_result(symbol, rsts) {
             return rsts[idx][1];
         }
     }
+}
+
+// @inToken: {t_name: .., dx: .., x: ..}
+// @b, @C and the balance of the @input token need to be achieved on-chain
+// return: swap out token, [`balance before swap`, `swap out amount`]
+async function swap(inToken, b, C) {
+    const y_src = await solve_O_AMM({t_name: inToken.t_name, t_value: inToken.x}, b, C);
+    let y = get_result('y', y_src);
+
+    const y_after = await solve_O_AMM({t_name: inToken.t_name, t_value: inToken.x + inToken.dx}, b, C);
+    const dy = y - get_result('y', y_after);
+    return [y, dy];
+}
+
+async function test_swap() {
+    let x = 10;
+    let y = 20;
+
+    let C = x * y;
+    let b = 2 * Math.sqrt(C);
+
+    const x_in = 5;
+    const dx = 1;
+    let y_out = await swap({t_name: 'x', x: x_in, dx: dx}, b, C);
+
+    // console.log(y_out);
+    console.log(`in:  x: ${x_in.toFixed(2)}, dx: ${dx.toFixed(2)}\nout: y: ${y_out[0].toFixed(2)}, dy: ${y_out[1].toFixed(2)}`);
 }
 
 async function test_price() {
@@ -82,4 +116,5 @@ async function test_s_o_amm() {
 
 
 // await test_s_o_amm();
-await test_price();
+// await test_price();
+await test_swap();
