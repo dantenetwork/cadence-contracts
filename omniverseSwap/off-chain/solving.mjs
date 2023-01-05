@@ -72,18 +72,67 @@ async function swap(inToken, b, C) {
 }
 
 async function test_swap() {
-    let x = 10;
-    let y = 20;
+    let x = 10000;
+    let y = 20000;
 
     let C = x * y;
     let b = 2 * Math.sqrt(C);
 
-    const x_in = 5;
-    const dx = 1;
+    const x_in = 10100;
+    const dx = 100;
     let y_out = await swap({t_name: 'x', x: x_in, dx: dx}, b, C);
 
     // console.log(y_out);
-    console.log(`in:  x: ${x_in.toFixed(2)}, dx: ${dx.toFixed(2)}\nout: y: ${y_out[0].toFixed(2)}, dy: ${y_out[1].toFixed(2)}`);
+    console.log(`in:  x: ${x_in.toFixed(4)}, dx: ${dx.toFixed(4)}\nout: y: ${y_out[0].toFixed(4)}, dy: ${y_out[1].toFixed(4)}`);
+
+    // const y_to_validate = await solve_O_AMM({t_name: 'x', t_value: x_in}, b, C);
+    // const y_to_v = get_result('y', y_to_validate);
+    console.log(await validate(dx * 10000, x_in, y_out[1] * 10000, y_out[0], b, C));
+}
+
+async function validate(dx, x, dy, y, b, C) {
+    const precise = 10000;
+    const in_t_amount = x * precise + dx;
+    // console.log(await solve_O_AMM({t_name: 'x', t_value: in_t_amount}, b, C))
+    const out_t_amount = y * precise - dy;
+    console.log(out_t_amount);
+    
+    let m = in_t_amount * out_t_amount;
+    let s = in_t_amount + out_t_amount;
+
+    let coe = 10000;
+
+    let a = 4 * m * coe / (s * s);
+    console.log(s * s);
+
+    let ms = m * s;
+
+    console.log(dx, x, dy, y, m, s, a, b, C);
+
+    // let l = ms + a * 2 * s * ms / coe + C * s * a / coe;
+    // console.log(l);
+    // let r = a * ms / coe + a * 2 * b * ms / coe + C * s;
+    // console.log(r);
+
+    const p2 = precise * precise;
+
+    let l = 2 * m / p2 + a * (in_t_amount * in_t_amount + out_t_amount * out_t_amount) / (coe * p2) + 2 * a * C / coe;
+    console.log(l);
+    let r = a * b * s / (coe * precise) + 2 * C;
+    console.log(r);
+
+    let delta = 0;
+    if (l > r) {
+        delta = l - r;
+    } else if (r > l) {
+        delta = r - l;
+    }
+
+    if (delta < coe) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 async function test_price() {
