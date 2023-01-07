@@ -16,7 +16,7 @@ pub contract StarBazaar {
             destroy self.liquidity;
         }
 
-        pub fun extractLiquidity(): @StarToken.Vault {
+        priv fun extractLiquidity(): @StarToken.Vault {
             let liquidity: @StarToken.Vault? <- self.liquidity <- nil;
             return <- liquidity!;
         }
@@ -41,6 +41,11 @@ pub contract StarBazaar {
             let starToken <- myLQref.withdraw(amount: amount);
             let dust <- create StarDust(liquidity: <- starToken, poolType: self.poolType);
             return <- dust;
+        }
+
+        pub fun getStarTokenAmount(): UFix64 {
+            let myLQref: &StarToken.Vault = (&self.liquidity as &StarToken.Vault?)!;
+            return myLQref.balance;
         }
     }
 
@@ -116,34 +121,54 @@ pub contract StarBazaar {
             destroy self.tokenY;
         }
         
-        
-        pub fun depositLiquidity(pool: @PoolVault): @PoolVault?{
+        pub fun depositLiquidity(pool: @PoolVault): @StarDust?{
             if (pool.getXAmount() == 0.0) || (pool.getYAmount() == 0.0) {
-                return <- pool;
+                panic("Empty input `pool`.");
             }
+
+            var d_lq: UFix64 = 0.0;
             
             if self.liquidity > 0.0 {
                 let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
                 let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
-                if StarBazaar.liquidityValidation(dX: pool.getXAmount(), dY: pool.getYAmount(), positive: true, tokenX: XRef.balance, tokenY: YRef.balance) {
+                if let dl = StarBazaar.liquidityValidation(dX: pool.getXAmount(), dY: pool.getYAmount(), positive: true, tokenX: XRef.balance, tokenY: YRef.balance) {
                     XRef.deposit(from: <- pool.extractTokenX());
                     YRef.deposit(from: <- pool.extractTokenY());
                     self._recalc();
+
+                    d_lq = dl;
                 } else {
-                    return <- pool;
+                    panic("Invalid input `pool`.");
                 }
             } else {
+                d_lq = pool.getXAmount() * pool.getYAmount();
+
                 self.tokenX <-! pool.extractTokenX();
                 self.tokenY <-! pool.extractTokenY();
                 self._recalc();
             }
 
             destroy  pool;
-            return nil;
+            return <- StarBazaar.createStarDust(amount: d_lq, poolType: self.poolType);
         }
 
-        pub fun withdrawLiquidity(liquidity: Fix64): @PoolVault? {
-            return nil;
+        pub fun withdrawLiquidity(starDust: @StarDust): @PoolVault? {
+            if self.liquidity > 0.0 {
+                let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
+                let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
+
+                let dl = StarBazaar.dXdY_l(x: XRef.balance, y: YRef.balance, dL2: starDust.getStarTokenAmount(), positive: false);
+                let dx <- XRef.withdraw(amount: dl.dX);
+                let dy <- YRef.withdraw(amount: dl.dY);
+
+                destroy  starDust;
+                return <- create PoolVault(tokenX: <- dx, tokenY: <- dy, poolType: self.poolType);
+            } else {    
+                panic("Not enough liquidity!");
+            }
+            
+            panic("Why here?????");
+            // return nil;
         }
 
         pub fun isReady(): Bool {
@@ -233,7 +258,7 @@ pub contract StarBazaar {
     }
 
     // `positive` 
-    pub fun liquidityValidation(dX: UFix64, dY: UFix64, positive: Bool, tokenX: UFix64, tokenY: UFix64): Bool {
+    pub fun liquidityValidation(dX: UFix64, dY: UFix64, positive: Bool, tokenX: UFix64, tokenY: UFix64): UFix64? {
         var newX: UFix64 = 0.0;
         var newY: UFix64 = 0.0;
         if positive {
@@ -246,7 +271,15 @@ pub contract StarBazaar {
 
         let price = tokenY / tokenX;
         let newPrice = newY / newX;
-        return ((price - 0.001) <= newPrice) && (newPrice <= (price + 0.001));
+        if ((price - 0.001) <= newPrice) && (newPrice <= (price + 0.001)) {
+            if positive {
+                return newX * newY - tokenX * tokenY;
+            } else {
+                return tokenX * tokenY - newX * newY;
+            }
+        } else {
+            return nil;
+        }
     }
 
     // Test functions
