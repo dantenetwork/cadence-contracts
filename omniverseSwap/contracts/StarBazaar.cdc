@@ -171,6 +171,28 @@ pub contract StarBazaar {
             // return nil;
         }
 
+        pub fun swap(in_token: @FungibleToken.Vault): @FungibleToken.Vault? {
+            if self.isReady() {
+                let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
+                let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
+
+                if in_token.isInstance(XRef.getType()) {
+                    let out_amount = YRef.balance * in_token.balance / (XRef.balance + in_token.balance);
+                    XRef.deposit(from: <- in_token);
+                    return <- YRef.withdraw(amount: out_amount);
+
+                } else if in_token.isInstance(YRef.getType()) {
+                    let out_amount = XRef.balance * in_token.balance / (YRef.balance + in_token.balance);
+                    YRef.deposit(from: <- in_token);
+                    return <- XRef.withdraw(amount: out_amount);
+                } else {
+                    panic("Invalid input token type!");
+                }
+            }
+
+            panic("Empty liquidity!");
+        }
+
         pub fun isReady(): Bool {
             return self.liquidity > 0.0;
         }
