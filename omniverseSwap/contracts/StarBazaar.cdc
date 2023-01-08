@@ -2,6 +2,8 @@ import StarToken from "./StarToken.cdc";
 import FungibleToken from "../../omniverseNFT/contracts/utility/FungibleToken.cdc";
 
 pub contract StarBazaar {
+    /////////////////////////////////////////////////////////////////////
+    /// StarDust
     pub resource StarDust {
         // `liquidity` can be used for get `Δx` and `Δy` when depositing to or withdrawing from the pool
         pub var liquidity: @StarToken.Vault?;
@@ -49,6 +51,8 @@ pub contract StarBazaar {
         }
     }
 
+    /////////////////////////////////////////////////////////////////////
+    /// PoolVault
     pub resource PoolVault {
         pub var tokenX: @FungibleToken.Vault?;
         pub var tokenY: @FungibleToken.Vault?;
@@ -98,6 +102,8 @@ pub contract StarBazaar {
         }
     }
 
+    /////////////////////////////////////////////////////////////////////
+    /// DEXPool
     pub resource DEXPool {
         pub let poolType: String;
         pub var tokenX: @FungibleToken.Vault?;
@@ -304,6 +310,11 @@ pub contract StarBazaar {
         }
     }
 
+    /////////////////////////////////////////////////////////////////////
+    /// StarBazaar
+
+
+    /////////////////////////////////////////////////////////////////////
     // Test functions
     pub fun testStarDust(dust: @StarDust) {
         // The below is invalid as `StarDust::liquidity` is just `pub var` but not `pub(set) var`
