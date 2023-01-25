@@ -159,7 +159,7 @@ pub contract StarBazaar {
         }
 
         pub fun withdrawLiquidity(starDust: @StarDust): @PoolVault? {
-            if self.liquidity > 0.0 {
+            if self.liquidity > starDust.getStarTokenAmount() {
                 let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
                 let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
 
