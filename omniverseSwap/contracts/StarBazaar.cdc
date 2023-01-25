@@ -127,7 +127,7 @@ pub contract StarBazaar {
             destroy self.tokenY;
         }
         
-        pub fun depositLiquidity(pool: @PoolVault): @StarDust?{
+        pub fun depositLiquidity(pool: @PoolVault): @StarDust{
             if (pool.getXAmount() == 0.0) || (pool.getYAmount() == 0.0) {
                 panic("Empty input `pool`.");
             }
@@ -158,7 +158,7 @@ pub contract StarBazaar {
             return <- StarBazaar.createStarDust(amount: d_lq, poolType: self.poolType);
         }
 
-        pub fun withdrawLiquidity(starDust: @StarDust): @PoolVault? {
+        pub fun withdrawLiquidity(starDust: @StarDust): @PoolVault {
             if self.liquidity > starDust.getStarTokenAmount() {
                 let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
                 let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
@@ -168,6 +168,7 @@ pub contract StarBazaar {
                 let dy <- YRef.withdraw(amount: dl.dY);
 
                 destroy  starDust;
+                self._recalc();
                 return <- create PoolVault(tokenX: <- dx, tokenY: <- dy, poolType: self.poolType);
             } else {    
                 panic("Not enough liquidity!");
@@ -177,7 +178,7 @@ pub contract StarBazaar {
             // return nil;
         }
 
-        pub fun swap(in_token: @FungibleToken.Vault): @FungibleToken.Vault? {
+        pub fun swap(in_token: @FungibleToken.Vault): @FungibleToken.Vault {
             if self.isReady() {
                 let XRef = (&self.tokenX as &FungibleToken.Vault?)!;
                 let YRef = (&self.tokenY as &FungibleToken.Vault?)!;
@@ -185,12 +186,16 @@ pub contract StarBazaar {
                 if in_token.isInstance(XRef.getType()) {
                     let out_amount = YRef.balance * in_token.balance / (XRef.balance + in_token.balance);
                     XRef.deposit(from: <- in_token);
-                    return <- YRef.withdraw(amount: out_amount);
+                    let YOut <- YRef.withdraw(amount: out_amount);
+                    self._recalc();
+                    return <- YOut;
 
                 } else if in_token.isInstance(YRef.getType()) {
                     let out_amount = XRef.balance * in_token.balance / (YRef.balance + in_token.balance);
                     YRef.deposit(from: <- in_token);
-                    return <- XRef.withdraw(amount: out_amount);
+                    let XOut <- XRef.withdraw(amount: out_amount);
+                    self._recalc();
+                    return <- XOut;
                 } else {
                     panic("Invalid input token type!");
                 }
@@ -201,6 +206,18 @@ pub contract StarBazaar {
 
         pub fun isReady(): Bool {
             return self.liquidity > 0.0;
+        }
+
+        pub fun getLiquidity(): UFix64 {
+            return self.liquidity;
+        }
+
+        pub fun getPriceY_X(): UFix64 {
+            return self.price;
+        } 
+
+        pub fun getPriceX_Y(): UFix64 {
+            return 1.0 / self.price;
         }
 
         // pub fun liquidityValidation(dX: UFix64, dY: UFix64): Bool {
@@ -228,6 +245,14 @@ pub contract StarBazaar {
 
     pub fun createDEXPool(poolType: String): @DEXPool {
         return <- create DEXPool(poolType: poolType);
+    }
+
+    pub fun createPoolVault(tokenX: @FungibleToken.Vault, tokenY: @FungibleToken.Vault, poolType: String): @PoolVault {
+        if (tokenX.balance == 0.0) || (tokenY.balance == 0.0) {
+            panic("Invalid input token amounts!");
+        }
+
+        return <- create PoolVault(tokenX: <-tokenX, tokenY: <-tokenY, poolType: poolType);
     }
 
     // based on `Taylor's formula`
