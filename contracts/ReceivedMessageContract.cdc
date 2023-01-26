@@ -746,10 +746,8 @@ pub contract ReceivedMessageContract{
         }
 
         /*
-         * when submitting or executing messages, abnormal situations may happen. 
-         * As we cannot directly process exceptions on-chain, we need a mechanism for off-chain routers to submit error things
-         *
-         * This need to wait all selected routers submitted the error 
+         * This is used for SQoS `Hidden & Reveal`
+         * A hidden message will be submitted before the plain text, and the values of the hidden are different from different submitters even if the real contents are the same
         */
         pub fun submitHidden(hidden: SQoSEngine.HiddenData, 
                             pubAddr: Address, signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]) {
