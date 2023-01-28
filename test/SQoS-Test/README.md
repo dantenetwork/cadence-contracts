@@ -24,6 +24,8 @@ As a result, we have made out a powerful simulator to help us complete the test.
 - Clone the repo
 
     ```sh
+    cd ..
+    # clone
     git clone git@github.com:dantenetwork/flow-sdk.git -b SQoS
     ```
 
@@ -43,6 +45,8 @@ As a result, we have made out a powerful simulator to help us complete the test.
 - Clone the repo from GitHub
 
     ```sh
+    cd ..
+    # clone
     git clone git@github.com:dantenetwork/flow-off-chain.git -b SQoS
     ```
 
@@ -59,3 +63,7 @@ As a result, we have made out a powerful simulator to help us complete the test.
 - [Error Rollback](./error-rollback.md)
 - [hidden reveal](./hidden-reveal.md)
 - [challenge](./challenge.md)
+
+### Simplest Situation
+
+***Note that suppose we have put the repos `/cadence-contracts`, `/flow-sdk`, and `/flow-off-chain` in the same directory.***  
