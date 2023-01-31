@@ -3,6 +3,12 @@
 this test guide is specific to the functions of the `SQoS`. As the workflow of the `SQoS` is a bit complex, we need some special tools for testing.  
 As a result, we have made out a powerful simulator to help us complete the test.  
 
+## Start the emulator
+
+```sh
+flow emulator --verbose
+```
+
 ## Install Dante Protocol for Flow
 
 - Clone the repo
@@ -19,7 +25,7 @@ As a result, we have made out a powerful simulator to help us complete the test.
     ./emulator_init.sh
     ```
 
-## Install Dante SDK for Flow
+## Install Test Cases Developed Based on Dante SDK for Flow
 
 - Clone the repo
 

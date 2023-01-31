@@ -68,4 +68,30 @@ After an error message is confirmed, that is, there are enough routers submittin
         - Unlike [normal result](./README.md#L171), which has a valid value of the `result`. Here there is an `err` code `105` without any valid `result`, which means an error happens when making a computation request from the `Requester` on Flow.
         - The session of the request in this case is `1`, which could be found both in the message with id `1` sent out from the `Requester` on flow and the remote error message received by the `Requester` on Flow. We have provided the details of the [Context](https://github.com/dantenetwork/flow-sdk/blob/SQoS/exampleApp/computation/contracts/Cocomputation.cdc#L50) guaranteed by [session mechanism](https://github.com/dantenetwork/flow-sdk/tree/SQoS#high-level-api).  
     
+#### **An error happens when a remote invocation from POLKADOT is being submitted to any receiver on Flow**
 
+- Go to the directory `flow-off-chain`
+
+    ```sh
+    cd ../../../flow-off-chain
+    ```
+
+- Simulate an error happening when submitting a message to any receiver on Flow
+
+    ```sh
+    node sqosSimulator.mjs --simu-abandoned POLKADOT
+    ```
+
+    - `POLKADOT` is where the message sent from
+    - A `SEALED` will be found if succeded
+- Check the newest message sent from the underlying `Dante Protocol` on Flow
+
+    ```sh
+    node sqosSimulator.mjs --check
+    ```
+
+    - The result similar to the following will be found  
+
+        ![img](./imgs/submit-error-to-flow.png)  
+
+        - There will be a `remote error` message sent back to `POLKADOT` from Flow  

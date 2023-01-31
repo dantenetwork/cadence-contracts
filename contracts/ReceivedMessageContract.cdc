@@ -506,7 +506,7 @@ pub contract ReceivedMessageContract{
                         self.message[recvMsg.fromChain]!.remove(at: cacheIdx);
                     } else {
                         // record this message
-                        self.addHistory(fromChain: recvMsg.fromChain, msgCache: msgCache);
+                        // self.addHistory(fromChain: recvMsg.fromChain, msgCache: msgCache);
                         self.execCache.append(execData);
                     }
 
@@ -891,17 +891,17 @@ pub contract ReceivedMessageContract{
             let pubLink = PublicPath(identifier: msgContent.link);
             if (nil == pubLink)
             {
-                self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
-                return;
-                //panic("invalid `link` path!");
+                // self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
+                // return;
+                panic("invalid `link` path!");
             }
 
             // let calleeRef = getAccount(address).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow() ?? panic("invalid sender address or `link`!");
             let calleeRef = getAccount(msgContent.accountAddress).getCapability<&{ReceivedMessageContract.Callee}>(pubLink!).borrow();
             if (nil == calleeRef){
-                self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
-                return;
-                //panic("invalid callee address or `link`!");
+                // self.increaseCompleteID(fromChain: msgVerified.fromChain, recvID: msgVerified.id);
+                // return;
+                panic("invalid callee address or `link`!");
             }
 
             // TODO: concrete invocations need to be move out to a special cache, 
