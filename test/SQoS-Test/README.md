@@ -58,8 +58,8 @@ As a result, we have made out a powerful simulator to help us complete the test.
     npm install
     ```
 
-## Testing Index
-### Prepare
+## Testing
+### **Prepare**
 
 - Make sure to be in the directory `flow-off-chain`
 - Register router:  
@@ -92,7 +92,7 @@ As a result, we have made out a powerful simulator to help us complete the test.
     cd ../flow-off-chain
     ```
 
-### Simplest Situation
+### **Simplest Situation**
 
 - ***Note that suppose we have put the repos `/cadence-contracts`, `/flow-sdk`, and `/flow-off-chain` in the same directory.***  
 - ***Note that all the underlying mechanisms related to cross-chain recource/smart contract invocations are guaranteed by Dante Protocol, and you can find how to use the SDK to interact with Dante [here](https://github.com/dantenetwork/flow-sdk/blob/SQoS/exampleApp/computation/contracts/Cocomputation.cdc).***
@@ -170,7 +170,7 @@ The `Simplest Situation` is the basic situation without any special SQoS being s
 
 This is the normal situation, and next, we will test the situations if errors happen and when SQoS items `hidden & reveal` or `challenge` is set.
 
-### SQoS Testing
+### **SQoS Testing Index**
 
 ***Note that do the `Error Rollback` test first before doing the others.***
 
