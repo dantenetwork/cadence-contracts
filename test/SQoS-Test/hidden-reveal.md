@@ -129,4 +129,8 @@ We simulate sending a computation request from POLKADOT to the `ComputationServe
 
     ![img](./imgs/reveal-results.png)  
 
+## Index
 
+- [Root](./README.md)
+- [Error Rollback](./error-rollback.md)
+- [challenge](./challenge.md)

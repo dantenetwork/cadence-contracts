@@ -179,3 +179,9 @@ The SQoS item `Challenge` is easy to understand, and the only difference compare
     ![img](./imgs/only-previous-result.png)  
 
     - There's only a result related to the **previous request** just the previous [*Time up without any challenge happens*](#time-up-without-any-challenge-happens) did.  
+
+## Index
+
+- [Root](./README.md)
+- [Error Rollback](./error-rollback.md)
+- [hidden reveal](./hidden-reveal.md)

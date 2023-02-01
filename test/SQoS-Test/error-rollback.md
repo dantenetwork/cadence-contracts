@@ -95,3 +95,10 @@ After an error message is confirmed, that is, there are enough routers submittin
         ![img](./imgs/submit-error-to-flow.png)  
 
         - There will be a `remote error` message sent back to `POLKADOT` from Flow  
+
+## Index
+
+- [Root](./README.md)
+- [hidden reveal](./hidden-reveal.md)
+- [challenge](./challenge.md)
+
