@@ -146,6 +146,8 @@ flow scripts execute ./scripts/send-recv-message/queryHistory.cdc
 # SQoS
 flow transactions send ./transactions/SQoS/setOptimistic.cdc 
 
+flow transactions send ./transactions/SQoS/setThreshold.cdc 8000
+
 flow scripts execute ./scripts/SQoS/getSQoS.cdc 0xf8d6e0586b0a20c7
 
 ## hidden records

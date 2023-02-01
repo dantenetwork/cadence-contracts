@@ -183,3 +183,31 @@ This is the normal situation, and next, we will test the situations if errors ha
 - [Error Rollback](./error-rollback.md)
 - [hidden reveal](./hidden-reveal.md)
 - [challenge](./challenge.md)
+
+### **Other SQoS Item**
+#### **verification threshold**
+
+The threshole of the SQoS is very simple. A message could be submitted by many routers, and the verification of a message is an aggregation of the credibilities of the submitters, which has beed already made out in the first milestone. The `threshold` just determines the value of [passing credibility](../../contracts/ReceivedMessageContract.cdc#L630).
+
+- Go to the directory `cadence-contracts`  
+- Set SQoS item `Threshold`
+    
+    ```sh
+    flow transactions send ./transactions/SQoS/setThreshold.cdc 8000
+    ```
+
+- Check the SQoS item
+
+    ```sh
+    flow scripts execute ./scripts/SQoS/getSQoS.cdc 0xf8d6e0586b0a20c7
+    ```
+
+    ![img](./imgs/threshold.png)  
+
+    - The `v: [0,0,31,64]` means `8000`, which is 4-byte array transformed from `8000` by `toBigEndianBytes`
+    - In addition, we have provide a tool to [transform big-endian-bytes to a number](../../contracts/MessageProtocol.cdc#L564)
+
+#### **Authority context**
+
+The SQoS item `Authority context` is much more simpler, which has already beed made out in milestone 1 too.  
+Acutally, this SQoS item is default, and there's no need to set again. It's just the [session context](https://github.com/dantenetwork/flow-sdk/tree/SQoS#high-level-api).  
