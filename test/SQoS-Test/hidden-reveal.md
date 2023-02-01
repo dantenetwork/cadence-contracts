@@ -18,6 +18,7 @@ The submitting process is divided into two steps:
 
 ### **Test Guide**
 
+#### **Make a new environment**
 - To test `Hidden & Reveal` functions better, it is recommended to restart the emulator and re-install the environment. Because there will be no history messages in the output to interupt checking the results. 
     - [Restart the emulator](./README.md#start-the-emulator)
     - [Install Dante Protocol for Flow](./README.md#install-dante-protocol-for-flow)
@@ -128,4 +129,4 @@ We simulate sending a computation request from POLKADOT to the `ComputationServe
 
     ![img](./imgs/reveal-results.png)  
 
-    
+

@@ -291,14 +291,14 @@ pub contract ReceivedMessageContract{
 
         // -1: challengers win, reject message; 0: still waiting; 1: submitters win, accept message;
         pub fun challengeSettle(): Int {
-            log(self.execTime.toString());
-            log(getCurrentBlock().timestamp.toString());
-            
+            log("Time to be execute: ".concat(self.execTime.toString()));
+            let currentTime = getCurrentBlock().timestamp;
+            log("Current time: ".concat(currentTime.toString()));
             if self.challenged {
                 return 1;
             }
 
-            if self.execTime > getCurrentBlock().timestamp {
+            if self.execTime > currentTime {
                 return 0;
             } else {
                 // TODO: settlement of optimistic
@@ -491,11 +491,11 @@ pub contract ReceivedMessageContract{
                     if let sqos = self.sqos {
                         //log("Setting SQoS.......");
                         if let idx = sqos.checkItem(type: MessageProtocol.SQoSType.Challenge) {
-                            //log("Optimistic.......");
+                            log("Optimistic.......");
                             log(getCurrentBlock().timestamp.toString());
                             let endTime: UFix64 = getCurrentBlock().timestamp + UFix64(MessageProtocol.UInt32_from_be_bytes(bytes: sqos.sqosItems[idx].v));
                             execData.setExecTime(et: endTime);
-                            //log(endTime.toString());    
+                            log(endTime.toString());    
                         }
                     }
 
