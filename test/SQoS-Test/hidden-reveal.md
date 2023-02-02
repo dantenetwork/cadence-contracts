@@ -13,8 +13,9 @@ With the help of “Hidden & Reveal”, routers that do not actively do evil wil
 
 The submitting process is divided into two steps:  
 
-- [submitHidden](../../contracts/ReceivedMessageContract.cdc#L752)
-- [submitReveal](../../contracts/ReceivedMessageContract.cdc#L784)
+- Before submitting the plaintext of the remote message, routers need to [submitHidden](../../contracts/ReceivedMessageContract.cdc#L752) first.  
+- After enough routers submitted `hidden commitments`, they can [submitReveal](../../contracts/ReceivedMessageContract.cdc#L784) to upload the `plaintext`.  
+- The `plaintext` will be verified according to the related `hidden commitments` by [SQoSEngine.HiddenReveal](../../contracts/SQoSEngine.cdc#L42).  
 
 ### **Test Guide**
 
@@ -134,3 +135,4 @@ We simulate sending a computation request from POLKADOT to the `ComputationServe
 - [Root](./README.md)
 - [Error Rollback](./error-rollback.md)
 - [challenge](./challenge.md)
+ 
